@@ -19,7 +19,7 @@
        </div>
      </aside>
 
-   Modifiers: .hw-sidebar--noir (near-black theme) · .hw-sidebar--drawer (mobile)
+   Modifier: .hw-sidebar--drawer (mobile drawer with close + profile header)
    ========================================================================== */
 
 .hw-sidebar {
@@ -40,9 +40,6 @@
   font-family: var(--hw-font-body, system-ui, sans-serif);
 }
 .hw-sidebar * { box-sizing: border-box; }
-
-/* Theme — near-black */
-.hw-sidebar--noir { --_bg: #0D0D0D; --_divider: rgba(255, 255, 255, 0.08); }
 
 /* ----------------------------------------------------------------- Header */
 .hw-sidebar__header {

@@ -20,12 +20,19 @@
   .frame { height: 560px; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.12); display: flex; }
   .frame.tall { height: 640px; }
   a { -webkit-tap-highlight-color: transparent; }
+  @media (max-width: 560px) {
+    .page { padding: 24px 14px 72px; }
+    .stage { gap: 22px; }
+    .demo { width: 100%; }
+    .frame, .frame.tall { width: 100%; height: auto; min-height: 460px; }
+    .frame .hw-sidebar { width: 100%; }
+  }
 </style>
 </head>
 <body>
 <div class="page">
   <h1 class="hw-heading-l">Sidebar Navigation</h1>
-  <p class="lead hw-text-l">One component, six Figma variants — Customer &amp; Vendor roles, active/hover states, dark-green &amp; noir themes, plus the mobile drawer with profile header.</p>
+  <p class="lead hw-text-l">One component — Customer &amp; Vendor roles on desktop and mobile, with active/hover states and the mobile drawer's profile header.</p>
 
   <div class="stage">
 
@@ -76,31 +83,9 @@
       </div>
     </div>
 
-    <!-- 3. Desktop · Customer · noir -->
+    <!-- 3. Mobile drawer · Customer -->
     <div class="demo">
-      <span class="cap">Desktop · Noir theme<small>near-black surface</small></span>
-      <div class="frame">
-        <aside class="hw-sidebar hw-sidebar--noir">
-          <div class="hw-sidebar__header">
-            <img class="hw-sidebar__logo" src="../assets/logo/wordmark-light.svg" alt="Handiwork">
-            <hr class="hw-sidebar__divider">
-          </div>
-          <nav class="hw-sidebar__nav">
-            <a class="hw-nav-item is-active" href="#"><hw-icon name="home" variant="filled" size="14"></hw-icon><span>Home</span></a>
-            <a class="hw-nav-item" href="#"><hw-icon name="clipboard" variant="filled" size="14"></hw-icon><span>My Jobs</span></a>
-            <a class="hw-nav-item" href="#"><hw-icon name="comment-dots" variant="filled" size="14"></hw-icon><span>Messages</span></a>
-            <a class="hw-nav-item" href="#"><hw-icon name="headphones" variant="filled" size="14"></hw-icon><span>Help &amp; Support</span></a>
-          </nav>
-          <div class="hw-sidebar__footer">
-            <a class="hw-nav-item hw-nav-item--logout" href="#"><hw-icon name="arrow-right-from-bracket" variant="filled" size="14"></hw-icon><span>Log Out</span></a>
-          </div>
-        </aside>
-      </div>
-    </div>
-
-    <!-- 4. Mobile drawer · Customer · with profile -->
-    <div class="demo">
-      <span class="cap">Mobile drawer<small>close · profile · nav · logout</small></span>
+      <span class="cap">Mobile · Customer<small>drawer + profile</small></span>
       <div class="frame tall">
         <aside class="hw-sidebar hw-sidebar--drawer">
           <button class="hw-sidebar__close" aria-label="Close menu">
@@ -122,6 +107,44 @@
           <nav class="hw-sidebar__nav">
             <a class="hw-nav-item is-active" href="#"><hw-icon name="home" variant="filled" size="14"></hw-icon><span>Home</span></a>
             <a class="hw-nav-item" href="#"><hw-icon name="clipboard" variant="filled" size="14"></hw-icon><span>My Jobs</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="comment-dots" variant="filled" size="14"></hw-icon><span>Messages</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="headphones" variant="filled" size="14"></hw-icon><span>Help &amp; Support</span></a>
+          </nav>
+          <div class="hw-sidebar__footer">
+            <a class="hw-nav-item hw-nav-item--logout" href="#"><hw-icon name="arrow-right-from-bracket" variant="filled" size="14"></hw-icon><span>Log Out</span></a>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- 4. Mobile drawer · Vendor -->
+    <div class="demo">
+      <span class="cap">Mobile · Vendor<small>drawer + profile</small></span>
+      <div class="frame tall">
+        <aside class="hw-sidebar hw-sidebar--drawer">
+          <button class="hw-sidebar__close" aria-label="Close menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+          <div class="hw-sidebar__profile">
+            <div class="hw-avatar">VD</div>
+            <div class="hw-profile__row">
+              <div class="hw-profile__info">
+                <p class="hw-profile__name">Veek Design</p>
+                <p class="hw-profile__email">myemail@email.com</p>
+              </div>
+              <button class="hw-profile__chevron" aria-label="View profile">
+                <hw-icon name="angle-right" variant="filled" size="20"></hw-icon>
+              </button>
+            </div>
+            <hr class="hw-sidebar__divider">
+          </div>
+          <nav class="hw-sidebar__nav">
+            <a class="hw-nav-item is-active" href="#"><hw-icon name="home" variant="filled" size="14"></hw-icon><span>Home</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="address-card" variant="filled" size="14"></hw-icon><span>My Services</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="clipboard" variant="filled" size="14"></hw-icon><span>My Orders</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="comment-dots" variant="filled" size="14"></hw-icon><span>Messages</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="star-half" variant="filled" size="14"></hw-icon><span>My Reviews</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="chart-line" variant="filled" size="14"></hw-icon><span>Analytics</span></a>
             <a class="hw-nav-item" href="#"><hw-icon name="headphones" variant="filled" size="14"></hw-icon><span>Help &amp; Support</span></a>
           </nav>
           <div class="hw-sidebar__footer">

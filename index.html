@@ -104,6 +104,39 @@
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--hw-content-primary); color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 50; }
   .toast.show { opacity: 1; }
   footer { max-width: 1120px; margin: 0 auto; padding: 24px; color: var(--hw-content-tertiary); font-size: 12px; }
+
+  /* ---------------- Responsive ---------------- */
+  @media (max-width: 860px) {
+    .appbar__inner { padding: 10px 16px; gap: 10px; }
+    .tabs { margin-left: 0; width: 100%; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; padding-bottom: 2px; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { flex: 0 0 auto; }
+    .wrap { padding: 24px 16px 80px; }
+    .hero { padding: 28px; border-radius: 16px; gap: 20px; }
+    .hero__logo { height: 34px; }
+    .stats { grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); }
+  }
+  @media (max-width: 560px) {
+    .appbar__logo { height: 22px; }
+    .wrap { padding: 20px 14px 72px; }
+    .sec-head { gap: 10px; }
+    .sec-head h2 { font-size: 21px; }
+    .sec-badge { width: 30px; height: 30px; }
+    .hero { padding: 22px; }
+    .hero__logo { height: 28px; }
+    .hero p { font-size: 14px; }
+    .btn { width: 100%; justify-content: center; }
+    .swatches { grid-template-columns: repeat(auto-fill, minmax(108px,1fr)); }
+    .icongrid { grid-template-columns: repeat(auto-fill, minmax(72px,1fr)); }
+    .icontools .icount { margin-left: 0; width: 100%; }
+    .illgrid { grid-template-columns: repeat(auto-fill, minmax(116px,1fr)); }
+    .assetgrid { grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); }
+    .type-row .tag { flex-basis: 100%; }
+    .cmp { width: 100%; }
+    .cmp .frame, .cmp .frame.tall { height: auto; min-height: 440px; width: 100%; }
+    .cmp .hw-sidebar { width: 100%; }
+  }
 </style>
 </head>
 <body>
@@ -376,18 +409,19 @@ function toast(m){ var el=document.getElementById('toast'); el.textContent=m; el
   var customer = [['home','Home',true],['clipboard','My Jobs'],['comment-dots','Messages'],['headphones','Help & Support']];
   var vendor = [['home','Home',true],['address-card','My Services'],['clipboard','My Orders'],['comment-dots','Messages'],['star-half','My Reviews'],['chart-line','Analytics'],['headphones','Help & Support']];
   function nav(list){ return '<nav class="hw-sidebar__nav">'+list.map(function(x){return item(x[0],x[1],x[2]);}).join('')+'</nav>'; }
+  function drawer(initials, name, email, list){
+    return '<button class="hw-sidebar__close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'+
+      '<div class="hw-sidebar__profile"><div class="hw-avatar">'+initials+'</div>'+
+      '<div class="hw-profile__row"><div class="hw-profile__info"><p class="hw-profile__name">'+name+'</p><p class="hw-profile__email">'+email+'</p></div>'+
+      '<button class="hw-profile__chevron" aria-label="Profile"><hw-icon name="angle-right" variant="filled" size="20"></hw-icon></button></div>'+
+      '<hr class="hw-sidebar__divider"></div>'+ nav(list)+footer();
+  }
 
   var demos = [
-    { cap:'Desktop · Customer', sub:'dark-green theme', cls:'', tall:false, body: header()+nav(customer)+footer() },
+    { cap:'Desktop · Customer', sub:'4 items', cls:'', tall:false, body: header()+nav(customer)+footer() },
     { cap:'Desktop · Vendor', sub:'7 items', cls:'', tall:false, body: header()+nav(vendor)+footer() },
-    { cap:'Desktop · Noir', sub:'near-black theme', cls:'hw-sidebar--noir', tall:false, body: header()+nav(customer)+footer() },
-    { cap:'Mobile drawer', sub:'close · profile · nav', cls:'hw-sidebar--drawer', tall:true, body:
-        '<button class="hw-sidebar__close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'+
-        '<div class="hw-sidebar__profile"><div class="hw-avatar">VD</div>'+
-        '<div class="hw-profile__row"><div class="hw-profile__info"><p class="hw-profile__name">Veek Design</p><p class="hw-profile__email">myemail@email.com</p></div>'+
-        '<button class="hw-profile__chevron" aria-label="Profile"><hw-icon name="angle-right" variant="filled" size="20"></hw-icon></button></div>'+
-        '<hr class="hw-sidebar__divider"></div>'+
-        nav([['home','Home',true],['clipboard','My Jobs'],['headphones','Help & Support']])+footer() }
+    { cap:'Mobile · Customer', sub:'drawer + profile', cls:'hw-sidebar--drawer', tall:true, body: drawer('VD','Veek Design','myemail@email.com', customer) },
+    { cap:'Mobile · Vendor', sub:'drawer + profile', cls:'hw-sidebar--drawer', tall:true, body: drawer('VD','Veek Design','myemail@email.com', vendor) }
   ];
   document.getElementById('cmp-stage').innerHTML = demos.map(function(d){
     return '<div class="cmp"><span class="cap">'+d.cap+'<small>'+d.sub+'</small></span>'+
