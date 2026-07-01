@@ -140,6 +140,13 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
 - **Roles:** Customer (Home, My Jobs, Messages, Help & Support) and Vendor (adds My Services, My Orders, My Reviews, Analytics) — just change the nav items.
 - Live demo of every variant: `components/sidebar.html`.
 
+## Deploying
+
+- **Live:** https://handiworkv1.vercel.app
+- **Repo:** https://github.com/veek000/handiwork (GitHub ↔ Vercel connected)
+- Every `git push` to `master` **auto-deploys** to production. Branches get preview URLs.
+- Manual deploy (if ever needed): `vercel --prod` from the project root.
+
 ## Progress log
 
 - **Icons** — Copied the 641-icon Abiswase set (filled/hollow/duo), recolored
