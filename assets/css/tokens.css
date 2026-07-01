@@ -1,0 +1,144 @@
+/* ==========================================================================
+   Handiwork — Design Tokens
+   Source of truth: Figma "Handiwork" file (nodes 39:800 colors, 39:1000 type)
+   All variables are prefixed --hw-. Values mirror the Figma variables 1:1
+   unless noted "inferred".
+   ========================================================================== */
+
+:root {
+  /* ---------------------------------------------------------------- BRAND */
+  --hw-primary:          #50C878;   /* Brand Primary/Color  (emerald)     */
+  --hw-primary-dark:     #001A13;   /* Brand Primary/Color Dark           */
+  --hw-primary-light:    #DFF1E1;   /* Brand Primary/Light                */
+
+  --hw-secondary:        #FFC300;   /* Brand Secondary/color (gold)       */
+  --hw-secondary-dark:   #816207;   /* Brand Secondary/Dark Color         */
+  --hw-secondary-light:  #FFECB3;   /* Brand Secondary/Light Color        */
+
+  /* ------------------------------------------------------------- NEUTRALS */
+  --hw-white:  #FFFFFF;
+  --hw-black:  #000000;
+  --hw-gray-100: #F8F9FA;
+  --hw-gray-200: #E9ECEF;
+  --hw-gray-300: #E0E0E0;
+  --hw-gray-400: #BDBDBD;
+  --hw-gray-500: #9E9E9E;
+  --hw-gray-600: #757575;
+  --hw-gray-700: #616161;
+  --hw-gray-800: #424242;
+  --hw-gray-900: #212121;
+
+  /* ------------------------------------------------------ CONTENT / TEXT */
+  --hw-content-primary:   #212121;  /* Content/Primary   — headings/body  */
+  --hw-content-secondary: #424242;  /* Content/Secondary                  */
+  --hw-content-tertiary:  #757575;  /* Content/Tertiary  — muted          */
+  --hw-heading-title:     #152536;  /* Heading/Title Color                */
+  --hw-body-text:         #6B7176;  /* Body Text Color                    */
+  --hw-text-tertiary:     #666666;  /* Text/Tertiary                      */
+  --hw-dark:              #343A40;  /* Dark                               */
+  --hw-border-subtle:     #E5E5E5;  /* Border/Subtle                      */
+
+  /* ------------------------------------------------------------ SEMANTIC */
+  --hw-success: #198754;   /* Green/500  */
+  --hw-warning: #FFC107;   /* Yellow/500 */
+  --hw-danger:  #DC3545;   /* Red/500    */
+  --hw-info:    #0DCAF0;   /* Cyan/500   */
+
+  /* --------------------------------------------------- EXTENDED PALETTES */
+  /* Blue */
+  --hw-blue-100: #CFE2FF; --hw-blue-200: #9EC5FE; --hw-blue-300: #6EA8FE; /* 300 inferred */
+  --hw-blue-400: #3D8BFD; --hw-blue-500: #0D6EFD; --hw-blue-600: #0A58CA;
+  --hw-blue-700: #084298; --hw-blue-800: #052C65; --hw-blue-900: #031633;
+  /* Indigo */
+  --hw-indigo-100: #E0CFFC; --hw-indigo-200: #C29FFA; --hw-indigo-300: #A370F7;
+  --hw-indigo-400: #8540F5; --hw-indigo-500: #6610F2; --hw-indigo-600: #520DC2;
+  --hw-indigo-700: #3D0A91; --hw-indigo-800: #290661; --hw-indigo-900: #140330;
+  /* Purple */
+  --hw-purple-100: #E2D9F3; --hw-purple-200: #C5B3E6; --hw-purple-300: #A98EDA;
+  --hw-purple-400: #8C68CD; --hw-purple-500: #6F42C1; --hw-purple-600: #59359A;
+  --hw-purple-700: #432874; --hw-purple-800: #2C1A4D; --hw-purple-900: #160D27;
+  /* Pink */
+  --hw-pink-100: #F7D6E6; --hw-pink-200: #EFADCE; --hw-pink-300: #E685B5;
+  --hw-pink-400: #DE5C9D; --hw-pink-500: #D63384; --hw-pink-600: #AB296A;
+  --hw-pink-700: #801F4F; --hw-pink-800: #561435; --hw-pink-900: #2B0A1A;
+  /* Red */
+  --hw-red-100: #F8D7DA; --hw-red-200: #F1AEB5; --hw-red-300: #EA868F;
+  --hw-red-400: #E35D6A; --hw-red-500: #DC3545; --hw-red-600: #B02A37;
+  --hw-red-700: #842029; --hw-red-800: #58151C; --hw-red-900: #2C0B0E;
+  /* Orange */
+  --hw-orange-100: #FFE5D0; --hw-orange-200: #FECBA1; --hw-orange-300: #FEB272;
+  --hw-orange-400: #FD9843; --hw-orange-500: #FD7E14; --hw-orange-600: #CA6510;
+  --hw-orange-700: #984C0C; --hw-orange-800: #653208; --hw-orange-900: #331904;
+  /* Yellow */
+  --hw-yellow-100: #FFF3CD; --hw-yellow-200: #FFE69C; --hw-yellow-300: #FFDA6A;
+  --hw-yellow-400: #FFCD39; --hw-yellow-500: #FFC107; --hw-yellow-600: #CC9A06;
+  --hw-yellow-700: #997404; --hw-yellow-800: #664D03; --hw-yellow-900: #332701;
+  /* Green */
+  --hw-green-100: #D1E7DD; --hw-green-200: #A3CFBB; --hw-green-300: #75B798;
+  --hw-green-400: #479F76; --hw-green-500: #198754; --hw-green-600: #146C43;
+  --hw-green-700: #0F5132; --hw-green-800: #0A3622; --hw-green-900: #051B11;
+  /* Teal */
+  --hw-teal-100: #D2F4EA; --hw-teal-200: #A6E9D5; --hw-teal-300: #79DFC1;
+  --hw-teal-400: #4DD4AC; --hw-teal-500: #20C997; --hw-teal-600: #1AA179;
+  --hw-teal-700: #13795B; --hw-teal-800: #0D503C; --hw-teal-900: #06281E;
+  /* Cyan */
+  --hw-cyan-100: #CFF4FC; --hw-cyan-200: #9EEAF9; --hw-cyan-300: #6EDFF6;
+  --hw-cyan-400: #3DD5F3; --hw-cyan-500: #0DCAF0; --hw-cyan-600: #0AA2C0;
+  --hw-cyan-700: #087990; --hw-cyan-800: #055160; --hw-cyan-900: #032830;
+
+  /* ==================================================================== */
+  /*  TYPOGRAPHY                                                           */
+  /* ==================================================================== */
+
+  /* Families */
+  --hw-font-heading: "Changa One", system-ui, -apple-system, sans-serif;
+  --hw-font-body:    "Manrope", system-ui, -apple-system, sans-serif;
+
+  /* Weights */
+  --hw-weight-regular: 400;
+  --hw-weight-bold:    700;
+
+  /* Font sizes (Figma "Size/*" scale) */
+  --hw-size-xs:   10px;
+  --hw-size-s:    12px;
+  --hw-size-m:    14px;
+  --hw-size-l:    16px;
+  --hw-size-2xl:  20px;
+  --hw-size-3xl:  24px;
+  --hw-size-4xl:  28px;
+  --hw-size-5xl:  32px;
+  --hw-size-6xl:  40px;
+  --hw-size-7xl:  48px;
+  --hw-size-8xl:  56px;
+  --hw-size-9xl:  64px;
+  --hw-size-10xl: 72px;
+
+  /* Line heights (Figma "Line Height/*" scale) */
+  --hw-lh-xs:   14px;
+  --hw-lh-s:    16px;
+  --hw-lh-m:    20px;
+  --hw-lh-l:    24px;
+  --hw-lh-2xl:  28px;
+  --hw-lh-3xl:  32px;
+  --hw-lh-4xl:  36px;
+  --hw-lh-5xl:  40px;
+  --hw-lh-6xl:  48px;
+  --hw-lh-7xl:  56px;
+  --hw-lh-8xl:  64px;
+  --hw-lh-9xl:  72px;
+  --hw-lh-10xl: 80px;
+
+  /* Letter spacing (Figma "Letter Spacing/*") */
+  --hw-ls-none: 0;
+  --hw-ls-s:    -0.5px;
+  --hw-ls-xs:   -1px;
+
+  /* ==================================================================== */
+  /*  SPACING (partial — only values exposed in Figma)                    */
+  /* ==================================================================== */
+  --hw-space-m:   12px;   /* Space/M  */
+  --hw-space-l:   16px;   /* Space/L  */
+  --hw-space-2xl: 32px;   /* Space/2XL */
+  --hw-space-4xl: 48px;   /* Space/4XL */
+  --hw-border-width-s: 1px; /* Border Width/S */
+}

@@ -1,0 +1,203 @@
+/* ==========================================================================
+   Handiwork — Sidebar Navigation
+   Depends on tokens.css (colors/fonts) and hw-icons.js (<hw-icon>).
+   Figma: Desktop Sidebar Menu (432:9739), Mobile Sidebar Menu (602:18512),
+   Nav lists (432:9819 / 440:16875 + dark variants).
+
+   Markup:
+     <aside class="hw-sidebar">
+       <div class="hw-sidebar__header">
+         <img class="hw-sidebar__logo" src="assets/logo/wordmark-light.svg" alt="Handiwork">
+         <hr class="hw-sidebar__divider">
+       </div>
+       <nav class="hw-sidebar__nav">
+         <a class="hw-nav-item is-active"><hw-icon name="home" variant="filled" size="14"></hw-icon><span>Home</span></a>
+         ...
+       </nav>
+       <div class="hw-sidebar__footer">
+         <a class="hw-nav-item hw-nav-item--logout"><hw-icon name="arrow-right-from-bracket" ...></hw-icon><span>Log Out</span></a>
+       </div>
+     </aside>
+
+   Modifiers: .hw-sidebar--noir (near-black theme) · .hw-sidebar--drawer (mobile)
+   ========================================================================== */
+
+.hw-sidebar {
+  /* component-local tokens (fall back to global design tokens) */
+  --_bg:          var(--hw-primary-dark, #001A13);
+  --_active-bg:   rgba(223, 241, 225, 0.10);   /* Background/primary-alpha */
+  --_active-fg:   #B6E3BD;                      /* Buttons/primary/bg/pressed */
+  --_default-fg:  var(--hw-gray-500, #9E9E9E);  /* Text/placeholder */
+  --_divider:     rgba(255, 255, 255, 0.10);
+  --_logout:      var(--hw-danger, #DC3545);
+
+  display: flex;
+  flex-direction: column;
+  width: 220px;
+  min-height: 100%;
+  background: var(--_bg);
+  color: var(--_default-fg);
+  font-family: var(--hw-font-body, system-ui, sans-serif);
+}
+.hw-sidebar * { box-sizing: border-box; }
+
+/* Theme — near-black */
+.hw-sidebar--noir { --_bg: #0D0D0D; --_divider: rgba(255, 255, 255, 0.08); }
+
+/* ----------------------------------------------------------------- Header */
+.hw-sidebar__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 16px 0;
+}
+.hw-sidebar__logo {
+  height: 24px;
+  width: auto;
+  display: block;
+  margin: 4px 0 16px;
+}
+.hw-sidebar__divider {
+  width: 100%;
+  height: 1px;
+  border: 0;
+  margin: 0;
+  background: var(--_divider);
+}
+
+/* -------------------------------------------------------------------- Nav */
+.hw-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  flex: 1 1 auto;      /* pushes footer to the bottom */
+}
+
+/* Nav item (Figma "Menu Buttons") */
+.hw-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 2px 8px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--_default-fg);
+  font: 700 14px/20px var(--hw-font-body, system-ui, sans-serif);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color .12s ease, color .12s ease;
+}
+.hw-nav-item hw-icon { flex: 0 0 auto; color: currentColor; }  /* icons follow text color */
+.hw-nav-item > span { white-space: nowrap; }
+
+.hw-nav-item:hover,
+.hw-nav-item:focus-visible {
+  background: var(--_active-bg);
+  color: var(--_active-fg);
+  outline: none;
+}
+.hw-nav-item.is-active {
+  background: var(--_active-bg);
+  color: var(--_active-fg);
+}
+/* 2px left accent bar on the active item */
+.hw-nav-item.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 24px;
+  background: var(--_active-fg);
+}
+
+/* ----------------------------------------------------------------- Footer */
+.hw-sidebar__footer {
+  padding: 16px;
+  margin-top: auto;
+}
+.hw-nav-item--logout { color: var(--_logout); }
+.hw-nav-item--logout:hover,
+.hw-nav-item--logout:focus-visible {
+  color: var(--_logout);
+  background: rgba(220, 53, 69, 0.10);
+}
+
+/* ==========================================================================
+   Mobile drawer variant
+   ========================================================================== */
+.hw-sidebar--drawer { width: 277px; }
+
+.hw-sidebar__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: 8px 8px 0;
+  padding: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--hw-white, #fff);
+  cursor: pointer;
+}
+.hw-sidebar__close:hover { background: rgba(255, 255, 255, 0.08); }
+.hw-sidebar__close svg { width: 20px; height: 20px; display: block; }
+
+/* Profile block */
+.hw-sidebar__profile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+}
+.hw-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(80, 200, 120, 0.15);
+  color: #F1F1F1;
+  font-family: var(--hw-font-heading, sans-serif);
+  font-size: 32px;
+  line-height: 40px;
+  letter-spacing: -0.5px;
+}
+.hw-profile__row { display: flex; align-items: center; gap: 8px; width: 100%; }
+.hw-profile__info { flex: 1 1 0; min-width: 0; }
+.hw-profile__name {
+  margin: 0;
+  font-family: var(--hw-font-heading, sans-serif);
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.5px;
+  color: #F5F5F5;
+}
+.hw-profile__email {
+  margin: 2px 0 0;
+  font: 400 12px/16px var(--hw-font-body, system-ui, sans-serif);
+  color: var(--hw-gray-400, #BDBDBD);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hw-profile__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--hw-white, #fff);
+  cursor: pointer;
+}
+.hw-profile__chevron:hover { background: rgba(255, 255, 255, 0.08); }
+.hw-sidebar__profile .hw-sidebar__divider { margin-top: 8px; }

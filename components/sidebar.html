@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Handiwork — Sidebar Navigation</title>
+<link rel="stylesheet" href="../assets/css/tokens.css" />
+<link rel="stylesheet" href="../assets/css/typography.css" />
+<link rel="stylesheet" href="../assets/css/sidebar.css" />
+<script src="../assets/icons/hw-icons.js"></script>
+<style>
+  body { margin: 0; background: var(--hw-gray-100); color: var(--hw-content-primary); }
+  .page { max-width: 1200px; margin: 0 auto; padding: 40px 24px 100px; }
+  .lead { color: var(--hw-body-text); margin: 4px 0 32px; }
+  .stage { display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start; }
+  .demo { display: flex; flex-direction: column; gap: 10px; }
+  .demo > .cap { font: 700 12px/1.4 var(--hw-font-body); color: var(--hw-content-secondary); }
+  .demo > .cap small { display: block; font-weight: 400; color: var(--hw-content-tertiary); }
+  /* frame that gives the sidebar a height so the footer sits at the bottom */
+  .frame { height: 560px; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.12); display: flex; }
+  .frame.tall { height: 640px; }
+  a { -webkit-tap-highlight-color: transparent; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1 class="hw-heading-l">Sidebar Navigation</h1>
+  <p class="lead hw-text-l">One component, six Figma variants — Customer &amp; Vendor roles, active/hover states, dark-green &amp; noir themes, plus the mobile drawer with profile header.</p>
+
+  <div class="stage">
+
+    <!-- 1. Desktop · Customer · green -->
+    <div class="demo">
+      <span class="cap">Desktop · Customer<small>brand dark-green theme</small></span>
+      <div class="frame">
+        <aside class="hw-sidebar">
+          <div class="hw-sidebar__header">
+            <img class="hw-sidebar__logo" src="../assets/logo/wordmark-light.svg" alt="Handiwork">
+            <hr class="hw-sidebar__divider">
+          </div>
+          <nav class="hw-sidebar__nav">
+            <a class="hw-nav-item is-active" href="#"><hw-icon name="home" variant="filled" size="14"></hw-icon><span>Home</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="clipboard" variant="filled" size="14"></hw-icon><span>My Jobs</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="comment-dots" variant="filled" size="14"></hw-icon><span>Messages</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="headphones" variant="filled" size="14"></hw-icon><span>Help &amp; Support</span></a>
+          </nav>
+          <div class="hw-sidebar__footer">
+            <a class="hw-nav-item hw-nav-item--logout" href="#"><hw-icon name="arrow-right-from-bracket" variant="filled" size="14"></hw-icon><span>Log Out</span></a>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- 2. Desktop · Vendor · green -->
+    <div class="demo">
+      <span class="cap">Desktop · Vendor<small>7 items</small></span>
+      <div class="frame">
+        <aside class="hw-sidebar">
+          <div class="hw-sidebar__header">
+            <img class="hw-sidebar__logo" src="../assets/logo/wordmark-light.svg" alt="Handiwork">
+            <hr class="hw-sidebar__divider">
+          </div>
+          <nav class="hw-sidebar__nav">
+            <a class="hw-nav-item is-active" href="#"><hw-icon name="home" variant="filled" size="14"></hw-icon><span>Home</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="address-card" variant="filled" size="14"></hw-icon><span>My Services</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="clipboard" variant="filled" size="14"></hw-icon><span>My Orders</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="comment-dots" variant="filled" size="14"></hw-icon><span>Messages</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="star-half" variant="filled" size="14"></hw-icon><span>My Reviews</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="chart-line" variant="filled" size="14"></hw-icon><span>Analytics</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="headphones" variant="filled" size="14"></hw-icon><span>Help &amp; Support</span></a>
+          </nav>
+          <div class="hw-sidebar__footer">
+            <a class="hw-nav-item hw-nav-item--logout" href="#"><hw-icon name="arrow-right-from-bracket" variant="filled" size="14"></hw-icon><span>Log Out</span></a>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- 3. Desktop · Customer · noir -->
+    <div class="demo">
+      <span class="cap">Desktop · Noir theme<small>near-black surface</small></span>
+      <div class="frame">
+        <aside class="hw-sidebar hw-sidebar--noir">
+          <div class="hw-sidebar__header">
+            <img class="hw-sidebar__logo" src="../assets/logo/wordmark-light.svg" alt="Handiwork">
+            <hr class="hw-sidebar__divider">
+          </div>
+          <nav class="hw-sidebar__nav">
+            <a class="hw-nav-item is-active" href="#"><hw-icon name="home" variant="filled" size="14"></hw-icon><span>Home</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="clipboard" variant="filled" size="14"></hw-icon><span>My Jobs</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="comment-dots" variant="filled" size="14"></hw-icon><span>Messages</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="headphones" variant="filled" size="14"></hw-icon><span>Help &amp; Support</span></a>
+          </nav>
+          <div class="hw-sidebar__footer">
+            <a class="hw-nav-item hw-nav-item--logout" href="#"><hw-icon name="arrow-right-from-bracket" variant="filled" size="14"></hw-icon><span>Log Out</span></a>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- 4. Mobile drawer · Customer · with profile -->
+    <div class="demo">
+      <span class="cap">Mobile drawer<small>close · profile · nav · logout</small></span>
+      <div class="frame tall">
+        <aside class="hw-sidebar hw-sidebar--drawer">
+          <button class="hw-sidebar__close" aria-label="Close menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+          <div class="hw-sidebar__profile">
+            <div class="hw-avatar">VD</div>
+            <div class="hw-profile__row">
+              <div class="hw-profile__info">
+                <p class="hw-profile__name">Veek Design</p>
+                <p class="hw-profile__email">myemail@email.com</p>
+              </div>
+              <button class="hw-profile__chevron" aria-label="View profile">
+                <hw-icon name="angle-right" variant="filled" size="20"></hw-icon>
+              </button>
+            </div>
+            <hr class="hw-sidebar__divider">
+          </div>
+          <nav class="hw-sidebar__nav">
+            <a class="hw-nav-item is-active" href="#"><hw-icon name="home" variant="filled" size="14"></hw-icon><span>Home</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="clipboard" variant="filled" size="14"></hw-icon><span>My Jobs</span></a>
+            <a class="hw-nav-item" href="#"><hw-icon name="headphones" variant="filled" size="14"></hw-icon><span>Help &amp; Support</span></a>
+          </nav>
+          <div class="hw-sidebar__footer">
+            <a class="hw-nav-item hw-nav-item--logout" href="#"><hw-icon name="arrow-right-from-bracket" variant="filled" size="14"></hw-icon><span>Log Out</span></a>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="hw-text-s" style="margin-top:40px;color:var(--hw-content-tertiary);">
+    Try hovering nav items and clicking to move the active state.
+  </p>
+</div>
+
+<script>
+  // Prototype behaviour: clicking a nav item makes it the active one within its sidebar.
+  document.querySelectorAll('.hw-sidebar__nav').forEach(function (nav) {
+    nav.addEventListener('click', function (e) {
+      var item = e.target.closest('.hw-nav-item');
+      if (!item || !nav.contains(item)) return;
+      e.preventDefault();
+      nav.querySelectorAll('.hw-nav-item').forEach(function (i) { i.classList.remove('is-active'); });
+      item.classList.add('is-active');
+    });
+  });
+</script>
+</body>
+</html>

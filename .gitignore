@@ -1,0 +1,12 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+
+# Temp / build
+.tmp_figma/
+node_modules/
+
+# Vercel
+.vercel
