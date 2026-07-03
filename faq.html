@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FAQ — Handiwork</title>
+<link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/typography.css" />
+<link rel="stylesheet" href="assets/css/button.css" />
+<link rel="stylesheet" href="assets/css/site.css" />
+<script src="assets/icons/hw-icons.js"></script>
+<script>
+  if ('IntersectionObserver' in window) document.documentElement.classList.add('js-reveal-ready');
+</script>
+<style>
+  /* FAQ page — centred single column of categorised accordion groups */
+  .faqpage { max-width: 820px; margin: var(--hw-space-6xl) auto 0; display: flex; flex-direction: column; gap: var(--hw-space-6xl); }
+  .faqpage__cat { display: flex; flex-direction: column; gap: var(--hw-space-s); }
+  .faqpage__cat-title {
+    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-color-brand-primary-900);
+    font-size: var(--hw-size-3xl); line-height: var(--hw-line-height-3xl); letter-spacing: var(--hw-letter-spacing-s);
+  }
+  .faqpage__group { display: flex; flex-direction: column; }
+  @media (max-width: 900px) {
+    .faqpage { margin-top: var(--hw-space-2xl); gap: var(--hw-space-2xl); }
+  }
+</style>
+</head>
+<body>
+
+<header class="lp-header">
+  <div class="lp-header__inner">
+    <nav class="lp-nav">
+      <a href="landing.html#top">Home</a>
+      <a href="faq.html" aria-current="page">FAQs</a>
+      <a href="contact.html">Contacts</a>
+    </nav>
+    <a class="lp-logo" href="landing.html" aria-label="Handiwork home">
+      <img src="assets/logo/horizontal-dark.svg" alt="Handiwork" />
+    </a>
+    <div class="lp-actions">
+      <a class="hw-button hw-button--secondary" href="#"><span class="hw-button__label">Log In</span></a>
+      <a class="hw-button hw-button--primary" href="#"><span class="hw-button__label">Get Started</span></a>
+    </div>
+    <button class="lp-burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
+      <svg class="ic-open" viewBox="0 0 24 24" fill="none"><path d="M3 8h18M3 16h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <svg class="ic-close" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <nav class="lp-menu" id="menu" aria-label="Mobile">
+    <div class="lp-menu__links">
+      <a href="landing.html#top">Home</a>
+      <a href="faq.html">FAQs</a>
+      <a href="contact.html">Contact Us</a>
+    </div>
+    <div class="lp-menu__actions">
+      <a class="hw-button hw-button--secondary hw-button--block" href="#"><span class="hw-button__label">Login</span></a>
+      <a class="hw-button hw-button--primary hw-button--block" href="#"><span class="hw-button__label">Get Started</span></a>
+    </div>
+  </nav>
+  <div class="lp-scrim" id="scrim"></div>
+</header>
+
+<main>
+  <section class="page">
+    <div class="page__inner">
+      <div class="page-head" data-reveal>
+        <span class="page-badge reveal" style="--reveal-i:0">Help Center</span>
+        <div class="page-heading">
+          <h1 class="page-title reveal" style="--reveal-i:1">Frequently asked questions</h1>
+          <p class="page-sub reveal" style="--reveal-i:2">Everything you need to know about using Handiwork — from booking your first job to getting paid as a pro. Can't find an answer? Reach out any time.</p>
+        </div>
+      </div>
+
+      <div class="faqpage">
+        <!-- Getting Started -->
+        <div class="faqpage__cat" data-reveal>
+          <h2 class="faqpage__cat-title reveal" style="--reveal-i:0">Getting Started</h2>
+          <div class="faqpage__group">
+            <div class="faq-item reveal" style="--reveal-i:1">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">What is Handiwork?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">Handiwork connects homeowners with verified local professionals for any home service, and lets you manage the whole job — quote, booking, and payment — in one place.</p></div>
+            </div>
+            <div class="faq-item reveal" style="--reveal-i:2">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">What types of projects can I do with Handiwork?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">Almost any home service — carpentry, plumbing, painting, roofing, electrical work, cleaning, gardening, and more. Describe the job and trusted pros nearby send you quotes.</p></div>
+            </div>
+            <div class="faq-item reveal" style="--reveal-i:3">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">How do I request a service?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">Open the app, describe the job, and submit your request. Providers in your area review it and send detailed quotes for you to compare.</p></div>
+            </div>
+            <div class="faq-item reveal" style="--reveal-i:4">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">Is Handiwork free to use?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">Creating an account and requesting quotes is free. You only pay for the service you book, with funds held safely in escrow until the job is done.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payments & Escrow -->
+        <div class="faqpage__cat" data-reveal>
+          <h2 class="faqpage__cat-title reveal" style="--reveal-i:0">Payments &amp; Escrow</h2>
+          <div class="faqpage__group">
+            <div class="faq-item reveal" style="--reveal-i:1">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">How does the escrow payment system work?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">When you accept a quote, you deposit the funds into a secure escrow account. The money is only released to the provider after you confirm the job is complete and you're satisfied.</p></div>
+            </div>
+            <div class="faq-item reveal" style="--reveal-i:2">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">When is the professional paid?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">Payment is released from escrow the moment you mark the job complete and confirm your satisfaction — never before.</p></div>
+            </div>
+            <div class="faq-item reveal" style="--reveal-i:3">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">What payment methods are accepted?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">Major debit and credit cards and bank transfer. The exact options available depend on your region and are shown at checkout.</p></div>
+            </div>
+            <div class="faq-item reveal" style="--reveal-i:4">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">Are there any hidden fees?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">None. You see the provider's quote up front and approve the amount before any funds move into escrow — no surprise charges.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Safety & Trust -->
+        <div class="faqpage__cat" data-reveal>
+          <h2 class="faqpage__cat-title reveal" style="--reveal-i:0">Safety &amp; Trust</h2>
+          <div class="faqpage__group">
+            <div class="faq-item reveal" style="--reveal-i:1">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">How do you verify your artisans?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">Every professional goes through a rigorous verification process: we confirm identity, credentials, and work history, and you can review ratings from other users before booking.</p></div>
+            </div>
+            <div class="faq-item reveal" style="--reveal-i:2">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">What if I'm not happy with the service?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">Because funds stay in escrow until you confirm, you're always in control. If something isn't right, our 24/7 support team helps mediate a fair resolution.</p></div>
+            </div>
+            <div class="faq-item reveal" style="--reveal-i:3">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">Are the professionals insured?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">We verify each provider's credentials during onboarding, including applicable insurance and licensing where required for their trade, so you can book with confidence.</p></div>
+            </div>
+            <div class="faq-item reveal" style="--reveal-i:4">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">How do I report a safety concern?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">Report any concern directly in the app or to our support team, available around the clock. We take every report seriously and act quickly to keep the community safe.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Account & Reviews -->
+        <div class="faqpage__cat" data-reveal>
+          <h2 class="faqpage__cat-title reveal" style="--reveal-i:0">Account &amp; Reviews</h2>
+          <div class="faqpage__group">
+            <div class="faq-item reveal" style="--reveal-i:1">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">How do the ratings and reviews work?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">After every completed job, both the customer and the provider leave a rating and review, keeping quality high and building a trustworthy community for everyone.</p></div>
+            </div>
+            <div class="faq-item reveal" style="--reveal-i:2">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">How do you protect my personal information?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">Your data is encrypted and never shared without your consent. We only use it to connect you with the right professionals and keep your account secure.</p></div>
+            </div>
+            <div class="faq-item reveal" style="--reveal-i:3">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">Can I cancel a request?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">Yes. You can cancel before work begins at no charge — and since funds are held in escrow until completion, you stay in control of your payment.</p></div>
+            </div>
+            <div class="faq-item reveal" style="--reveal-i:4">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">How do I update my account details?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">Manage your profile, contact details, and notification preferences any time from your account settings.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- For Providers -->
+        <div class="faqpage__cat" data-reveal>
+          <h2 class="faqpage__cat-title reveal" style="--reveal-i:0">For Providers</h2>
+          <div class="faqpage__group">
+            <div class="faq-item reveal" style="--reveal-i:1">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">How do I become a Handiwork professional?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">Sign up as a provider, complete verification (identity, credentials, and work history), and start receiving job requests in your area.</p></div>
+            </div>
+            <div class="faq-item reveal" style="--reveal-i:2">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">How and when do I get paid?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">Once the customer confirms the job is complete, the funds are released from escrow to you instantly.</p></div>
+            </div>
+            <div class="faq-item reveal" style="--reveal-i:3">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">What does Handiwork charge providers?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">A transparent service fee per completed job. The amount is shown clearly before you accept any work — no hidden deductions.</p></div>
+            </div>
+            <div class="faq-item reveal" style="--reveal-i:4">
+              <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">How do I grow my business on Handiwork?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+              <div class="faq-item__a"><p class="faq-item__a-inner">Build trust with a verified profile, strong ratings, and fast, quality work. Handiwork is the #1 source of business for our contractors, so great reviews compound quickly.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="closing__inner">
+      <div class="banner">
+        <img class="banner__pattern" src="assets/illustration/Handiwork Pattern.svg" alt="" aria-hidden="true" />
+        <div class="banner__glow" aria-hidden="true"></div>
+        <div class="banner__content" data-reveal>
+          <div class="banner__copy">
+            <h2 class="banner__title reveal" style="--reveal-i:0">Still have questions?</h2>
+            <p class="banner__subtitle reveal" style="--reveal-i:1">Can't find what you're looking for? Our team is here to help — reach out and we'll get back to you fast.</p>
+          </div>
+          <div class="banner__actions reveal" style="--reveal-i:2">
+            <a class="banner__btn banner__btn--brand" href="contact.html">Contact Us</a>
+            <a class="banner__btn banner__btn--light" href="landing.html">Explore Services</a>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer reveal" data-reveal style="--reveal-i:0">
+        <div class="footer__row">
+          <a class="footer__logo" href="landing.html" aria-label="Handiwork home"><img src="assets/logo/horizontal-dark.svg" alt="Handiwork" /></a>
+          <nav class="footer__nav" aria-label="Footer">
+            <a class="footer__link" href="faq.html">FAQs</a>
+            <a class="footer__link" href="contact.html">Contact Us</a>
+          </nav>
+          <div class="footer__social">
+            <a href="#" aria-label="Handiwork on Facebook"><img src="assets/icons/social/facebook.svg" alt="Facebook" /></a>
+            <a href="#" aria-label="Handiwork on Instagram"><img src="assets/icons/social/instagram.svg" alt="Instagram" /></a>
+          </div>
+        </div>
+        <div class="footer__legal-row">
+          <p class="footer__copy">© 2025. Handiwork All Rights Reserved.</p>
+          <nav class="footer__legal" aria-label="Legal">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms &amp; Conditions</a>
+          </nav>
+        </div>
+      </footer>
+    </div>
+  </section>
+</main>
+
+<script src="assets/js/site.js"></script>
+</body>
+</html>

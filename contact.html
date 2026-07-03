@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Contact Us — Handiwork</title>
+<link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/typography.css" />
+<link rel="stylesheet" href="assets/css/button.css" />
+<link rel="stylesheet" href="assets/css/input.css" />
+<link rel="stylesheet" href="assets/css/site.css" />
+<script src="assets/icons/hw-icons.js"></script>
+<script>
+  if ('IntersectionObserver' in window) document.documentElement.classList.add('js-reveal-ready');
+</script>
+<style>
+  /* Contact page — form (left) + info panel (right) */
+  .contact__grid { max-width: 1240px; margin: var(--hw-space-6xl) auto 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--hw-space-4xl); align-items: start; }
+  .contact__form { display: flex; flex-direction: column; }
+  .contact__fields { display: flex; flex-direction: column; gap: var(--hw-space-l); }
+  .contact__form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--hw-space-l); }
+  .contact__actions { margin-top: var(--hw-space-s); }
+  .contact__success {
+    display: none; align-items: center; gap: var(--hw-space-s);
+    padding: var(--hw-space-m) var(--hw-space-l); background: var(--hw-color-brand-primary-100);
+    color: var(--hw-color-brand-primary-800); font-family: var(--hw-font-body);
+    font-size: var(--hw-size-l); line-height: var(--hw-line-height-l);
+  }
+  .contact__form.is-sent .contact__fields { display: none; }
+  .contact__form.is-sent .contact__success { display: flex; }
+
+  .contact__info {
+    background: var(--hw-color-brand-primary-900); color: var(--hw-color-gray-100);
+    padding: var(--hw-space-2xl); display: flex; flex-direction: column; gap: var(--hw-space-xl);
+  }
+  .contact__info-head { display: flex; flex-direction: column; gap: var(--hw-space-s); }
+  .contact__info-title {
+    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-color-default-white);
+    font-size: var(--hw-size-3xl); line-height: var(--hw-line-height-3xl); letter-spacing: var(--hw-letter-spacing-s);
+  }
+  .contact__info-sub { margin: 0; font-family: var(--hw-font-body); color: var(--hw-color-gray-400); font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+  .contact__info-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--hw-space-l); }
+  .contact__info-item { display: flex; align-items: flex-start; gap: var(--hw-space-s); color: var(--hw-color-gray-100); }
+  .contact__info-item hw-icon { flex: 0 0 auto; color: var(--hw-color-brand-primary-300); }
+  .contact__info-item span { font-family: var(--hw-font-body); font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+
+  @media (max-width: 900px) {
+    .contact__grid { grid-template-columns: 1fr; margin-top: var(--hw-space-2xl); gap: var(--hw-space-2xl); }
+    .contact__form-row { grid-template-columns: 1fr; }
+    .contact__info { padding: var(--hw-space-l); }
+  }
+</style>
+</head>
+<body>
+
+<header class="lp-header">
+  <div class="lp-header__inner">
+    <nav class="lp-nav">
+      <a href="landing.html#top">Home</a>
+      <a href="faq.html">FAQs</a>
+      <a href="contact.html" aria-current="page">Contacts</a>
+    </nav>
+    <a class="lp-logo" href="landing.html" aria-label="Handiwork home">
+      <img src="assets/logo/horizontal-dark.svg" alt="Handiwork" />
+    </a>
+    <div class="lp-actions">
+      <a class="hw-button hw-button--secondary" href="#"><span class="hw-button__label">Log In</span></a>
+      <a class="hw-button hw-button--primary" href="#"><span class="hw-button__label">Get Started</span></a>
+    </div>
+    <button class="lp-burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
+      <svg class="ic-open" viewBox="0 0 24 24" fill="none"><path d="M3 8h18M3 16h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <svg class="ic-close" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <nav class="lp-menu" id="menu" aria-label="Mobile">
+    <div class="lp-menu__links">
+      <a href="landing.html#top">Home</a>
+      <a href="faq.html">FAQs</a>
+      <a href="contact.html">Contact Us</a>
+    </div>
+    <div class="lp-menu__actions">
+      <a class="hw-button hw-button--secondary hw-button--block" href="#"><span class="hw-button__label">Login</span></a>
+      <a class="hw-button hw-button--primary hw-button--block" href="#"><span class="hw-button__label">Get Started</span></a>
+    </div>
+  </nav>
+  <div class="lp-scrim" id="scrim"></div>
+</header>
+
+<main>
+  <section class="page">
+    <div class="page__inner">
+      <div class="page-head" data-reveal>
+        <span class="page-badge reveal" style="--reveal-i:0">Contact Us</span>
+        <div class="page-heading">
+          <h1 class="page-title reveal" style="--reveal-i:1">Get in touch</h1>
+          <p class="page-sub reveal" style="--reveal-i:2">Have a question, a project in mind, or feedback for the team? Send us a message and we'll get back to you as soon as we can.</p>
+        </div>
+      </div>
+
+      <div class="contact__grid">
+        <form class="contact__form reveal" data-reveal style="--reveal-i:0" id="contactForm" novalidate>
+          <div class="contact__fields">
+            <div class="contact__form-row">
+              <div class="hw-field">
+                <label for="cf-name">Name</label>
+                <input class="hw-input" type="text" id="cf-name" name="name" placeholder="Your full name" required>
+              </div>
+              <div class="hw-field">
+                <label for="cf-email">Email</label>
+                <input class="hw-input" type="email" id="cf-email" name="email" placeholder="you@example.com" required>
+              </div>
+            </div>
+            <div class="hw-field">
+              <label for="cf-subject">Subject</label>
+              <input class="hw-input" type="text" id="cf-subject" name="subject" placeholder="How can we help?">
+            </div>
+            <div class="hw-field">
+              <label for="cf-message">Message</label>
+              <textarea class="hw-input" id="cf-message" name="message" placeholder="Tell us a bit more about what you need…" required></textarea>
+            </div>
+            <div class="contact__actions">
+              <button class="hw-button hw-button--primary" type="submit"><span class="hw-button__label">Send Message</span></button>
+            </div>
+          </div>
+          <p class="contact__success" role="status">
+            <hw-icon name="badge-check" variant="filled" size="20"></hw-icon>
+            <span>Thanks — your message is on its way. We'll get back to you shortly.</span>
+          </p>
+        </form>
+
+        <aside class="contact__info" data-reveal>
+          <div class="contact__info-head reveal" style="--reveal-i:0">
+            <h2 class="contact__info-title">Other ways to reach us</h2>
+            <p class="contact__info-sub">Prefer to talk it through? Our support team is here around the clock.</p>
+          </div>
+          <ul class="contact__info-list">
+            <li class="contact__info-item reveal" style="--reveal-i:1"><hw-icon name="envelope" variant="filled" size="24"></hw-icon><span>hello@handiwork.com</span></li>
+            <li class="contact__info-item reveal" style="--reveal-i:2"><hw-icon name="phone" variant="filled" size="24"></hw-icon><span>+234 800 123 4567</span></li>
+            <li class="contact__info-item reveal" style="--reveal-i:3"><hw-icon name="map-pin" variant="filled" size="24"></hw-icon><span>12 Adeola Odeku Street, Victoria Island, Lagos</span></li>
+            <li class="contact__info-item reveal" style="--reveal-i:4"><hw-icon name="clock" variant="filled" size="24"></hw-icon><span>Support available 24/7</span></li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="closing__inner">
+      <footer class="footer reveal" data-reveal style="--reveal-i:0">
+        <div class="footer__row">
+          <a class="footer__logo" href="landing.html" aria-label="Handiwork home"><img src="assets/logo/horizontal-dark.svg" alt="Handiwork" /></a>
+          <nav class="footer__nav" aria-label="Footer">
+            <a class="footer__link" href="faq.html">FAQs</a>
+            <a class="footer__link" href="contact.html">Contact Us</a>
+          </nav>
+          <div class="footer__social">
+            <a href="#" aria-label="Handiwork on Facebook"><img src="assets/icons/social/facebook.svg" alt="Facebook" /></a>
+            <a href="#" aria-label="Handiwork on Instagram"><img src="assets/icons/social/instagram.svg" alt="Instagram" /></a>
+          </div>
+        </div>
+        <div class="footer__legal-row">
+          <p class="footer__copy">© 2025. Handiwork All Rights Reserved.</p>
+          <nav class="footer__legal" aria-label="Legal">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms &amp; Conditions</a>
+          </nav>
+        </div>
+      </footer>
+    </div>
+  </section>
+</main>
+
+<script src="assets/js/site.js"></script>
+<script>
+  // Static prototype: no backend — just confirm the submission visually.
+  var cf = document.getElementById('contactForm');
+  if (cf) cf.addEventListener('submit', function (e) { e.preventDefault(); cf.classList.add('is-sent'); });
+</script>
+</body>
+</html>

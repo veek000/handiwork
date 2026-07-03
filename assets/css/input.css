@@ -42,6 +42,9 @@
 
 .hw-input::placeholder { color: var(--hw-input-placeholder); }
 
+/* multiline variant — a <textarea class="hw-input"> for message/comment fields */
+textarea.hw-input { min-height: 140px; resize: vertical; }
+
 /* strip native search-field chrome so type=search matches other inputs */
 .hw-input::-webkit-search-decoration,
 .hw-input::-webkit-search-cancel-button { -webkit-appearance: none; }

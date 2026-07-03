@@ -254,6 +254,17 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   (→ `auto` under reduced-motion) with wired in-page nav anchors (Home → `#top`, FAQs →
   `#faqs`, Contacts → `#contact`).
 
+- **FAQ + Contact pages + shared chrome extraction** — Extracted the reusable site chrome from
+  `landing.html` into **`assets/css/site.css`** (globals, scroll-reveal, header/nav, mobile menu +
+  animations, CTA banner, footer, the `.faq-item` accordion component, a shared `.page-*` header
+  pattern, and `.hw-field` form fields) and **`assets/js/site.js`** (reveal observer, mobile-menu
+  state machine, accordion). Refactored `landing.html` to consume both (carousel JS stays inline);
+  its nav now links out to the new pages. Built **`faq.html`** (categorised single-column accordion —
+  5 groups, ~20 Q&A) and **`contact.html`** (two-column `.hw-input` form with a static success state
+  + a dark brand-900 info panel using `<hw-icon>` envelope/phone/map-pin/clock). Added
+  `textarea.hw-input` (min-height + resize) to `input.css`. Tokens only; reveal + reduced-motion +
+  progressive-enhancement carried across all three pages.
+
 ### Tracked debts / open decisions
 
 - **`.hw-btn` → `.hw-button` migration** — ✅ done. `landing.html` uses the canonical

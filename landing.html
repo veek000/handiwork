@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="assets/css/tokens.css" />
 <link rel="stylesheet" href="assets/css/typography.css" />
 <link rel="stylesheet" href="assets/css/button.css" />
+<link rel="stylesheet" href="assets/css/site.css" />
 <script src="assets/icons/hw-icons.js"></script>
 <script>
   /* Add the reveal-ready flag before first paint so there's no flash — but ONLY if
@@ -14,86 +15,9 @@
   if ('IntersectionObserver' in window) document.documentElement.classList.add('js-reveal-ready');
 </script>
 <style>
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body { margin: 0; background: var(--hw-white); color: var(--hw-content-primary); overflow-x: hidden; }
-  a { color: inherit; }
-
-  /* ===================== Scroll reveal (Phase 4b) =====================
-     Hidden initial state applies ONLY under .js-reveal-ready (added by JS with
-     IntersectionObserver support) — no JS / no support ⇒ content fully visible. */
-  html.js-reveal-ready .reveal {
-    opacity: 0;
-    transform: translateY(var(--hw-reveal-offset));
-    filter: blur(var(--hw-reveal-blur));
-    transition:
-      opacity var(--hw-duration-reveal) var(--hw-ease-standard),
-      transform var(--hw-duration-reveal) var(--hw-ease-standard),
-      filter var(--hw-duration-reveal) var(--hw-ease-standard);
-    transition-delay: calc(var(--reveal-i, 0) * var(--hw-stagger-step));
-  }
-  /* fade-only — bottom-anchored / decorative layers: opacity only, no slide or blur */
-  html.js-reveal-ready .reveal--fade {
-    transform: none; filter: none;
-    transition: opacity var(--hw-duration-reveal) var(--hw-ease-standard);
-    transition-delay: calc(var(--reveal-i, 0) * var(--hw-stagger-step));
-  }
-  html.js-reveal-ready [data-reveal].is-visible .reveal,
-  html.js-reveal-ready .reveal.is-visible {
-    opacity: 1; transform: none; filter: none;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    /* opacity is significant motion for a page-level entrance — skip it entirely, no transition */
-    html.js-reveal-ready .reveal,
-    html.js-reveal-ready .reveal--fade,
-    html.js-reveal-ready [data-reveal].is-visible .reveal,
-    html.js-reveal-ready .reveal.is-visible {
-      opacity: 1; transform: none; filter: none; transition: none;
-    }
-  }
-
-  /* ===================== Header ===================== */
-  .lp-header { position: relative; z-index: 30; background: var(--hw-white); }
-  .lp-header__inner {
-    max-width: 1440px; margin: 0 auto; padding: 20px 100px;
-    display: flex; align-items: center; gap: 32px;
-  }
-  .lp-nav { flex: 1 1 0; display: flex; gap: 32px; align-items: center; }
-  .lp-nav a {
-    font-family: var(--hw-font-heading); font-size: var(--hw-size-l); line-height: var(--hw-line-height-l);
-    letter-spacing: var(--hw-letter-spacing-s); text-decoration: none; color: var(--hw-content-primary);
-    transition: color var(--hw-duration-fast) var(--hw-ease-standard);
-  }
-  .lp-nav a:hover { color: var(--hw-primary); }
-  .lp-logo { flex: 0 0 auto; display: inline-flex; }
-  .lp-logo img { height: 32px; width: auto; display: block; }
-  .lp-actions { flex: 1 1 0; display: flex; gap: 12px; align-items: center; justify-content: flex-end; }
-
-  .lp-burger {
-    display: none; position: relative; align-items: center; justify-content: center; margin-left: auto;
-    width: 40px; height: 40px; padding: 8px; border: 0; border-radius: 8px;
-    background: transparent; color: var(--hw-content-primary); cursor: pointer;
-    transition: background-color var(--hw-duration-fast) var(--hw-ease-standard);
-  }
-  .lp-burger:hover { background: var(--hw-gray-100); }
-  /* hamburger ⇄ X: cross-rotate + fade rather than an instant display swap */
-  .lp-burger svg {
-    position: absolute; top: 50%; left: 50%; width: 24px; height: 24px;
-    transform: translate(-50%, -50%);
-    transition: opacity var(--hw-duration-base) var(--hw-ease-standard),
-                transform var(--hw-duration-base) var(--hw-ease-standard);
-  }
-  .lp-burger .ic-close { opacity: 0; transform: translate(-50%, -50%) rotate(-90deg); }
-  body.nav-open .lp-burger .ic-open { opacity: 0; transform: translate(-50%, -50%) rotate(90deg); }
-  body.nav-open .lp-burger .ic-close { opacity: 1; transform: translate(-50%, -50%) rotate(0deg); }
-
-  /* Mobile dropdown menu panel + scrim (only reachable on mobile) */
-  .lp-menu { display: none; }
-  .lp-scrim { display: none; }
-  @keyframes lp-item-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-  @keyframes lp-item-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(8px); } }
+  /* Shared chrome (globals, scroll-reveal, header, mobile menu, banner, footer,
+     FAQ-item accordion) now lives in assets/css/site.css. This file keeps only the
+     landing page's own sections. */
 
   /* ===================== Hero ===================== */
   .hero {
@@ -369,24 +293,7 @@
     font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl);
   }
   .faq__list { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: var(--hw-space-l); }
-  .faq-item { border-bottom: var(--hw-border-width-xs) solid var(--hw-border-divider); }
-  .faq-item__q {
-    display: flex; align-items: center; gap: var(--hw-space-s); width: 100%; padding: var(--hw-space-m) 0;
-    background: none; border: 0; cursor: pointer; text-align: left;
-    font-family: var(--hw-font-body); color: var(--hw-text-primary);
-    font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl);
-    transition: color var(--hw-duration-fast) var(--hw-ease-standard);
-  }
-  .faq-item__q:hover { color: var(--hw-color-brand-primary-600); }
-  .faq-item__q-text { flex: 1 1 0; min-width: 0; }
-  .faq-item__icon { flex: 0 0 auto; display: inline-flex; transition: transform var(--hw-duration-base) var(--hw-ease-standard); }
-  .faq-item__q[aria-expanded="true"] .faq-item__icon { transform: rotate(180deg); }
-  .faq-item__a { overflow: hidden; max-height: 0; transition: max-height var(--hw-duration-base) var(--hw-ease-standard); }
-  .faq-item__a-inner {
-    padding: 0 0 var(--hw-space-m); margin: 0; max-width: 640px;
-    font-family: var(--hw-font-body); color: var(--hw-text-secondary);
-    font-size: var(--hw-size-l); line-height: var(--hw-line-height-l);
-  }
+  /* .faq-item* accordion component → assets/css/site.css */
 
   /* ===================== Reviews / Testimonial carousel ===================== */
   .reviews { background: var(--hw-white); overflow: hidden; }
@@ -439,60 +346,11 @@
   .reviews__dot { width: 8px; height: 8px; padding: 0; border: 0; cursor: pointer; background: var(--hw-color-brand-primary-200); transition: width var(--hw-duration-base) var(--hw-ease-standard), background-color var(--hw-duration-base) var(--hw-ease-standard); }
   .reviews__dot.is-active { width: 32px; background: var(--hw-color-brand-primary-900); }
 
-  /* ===================== CTA banner + Footer ===================== */
-  .closing { background: var(--hw-white); }
-  .closing__inner { max-width: 1440px; margin: 0 auto; padding: var(--hw-space-6xl) 100px; display: flex; flex-direction: column; gap: var(--hw-space-4xl); }
-  .banner { position: relative; overflow: hidden; background: var(--hw-color-brand-primary-900); padding: var(--hw-space-6xl) var(--hw-space-xl); display: flex; justify-content: center; }
-  .banner__pattern { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-  /* Figma: a solid brand-900 rectangle with a heavy blur (≈40px) behind the text — its blurred
-     edges soften into the logo pattern. Sits above the pattern (z-0), below the text (z-1). */
-  .banner__glow {
-    position: absolute; z-index: 0; left: 50%; top: 50%; transform: translate(-50%, -50%);
-    width: 958px; max-width: 100%; height: 228px; pointer-events: none;
-    background: var(--hw-color-brand-primary-900); filter: blur(40px);
-  }
-  .banner__content { position: relative; z-index: 1; max-width: 900px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-xl); text-align: center; }
-  .banner__copy { display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-s); }
-  .banner__title {
-    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-color-default-white);
-    font-size: var(--hw-size-7xl); line-height: var(--hw-line-height-7xl); letter-spacing: var(--hw-letter-spacing-s);
-  }
-  .banner__subtitle {
-    margin: 0; font-family: var(--hw-font-body); color: var(--hw-color-gray-400);
-    font-size: var(--hw-size-l); line-height: var(--hw-line-height-l);
-  }
-  .banner__actions { display: flex; gap: var(--hw-space-l); flex-wrap: wrap; justify-content: center; }
-  .banner__btn {
-    display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: var(--hw-space-m) var(--hw-space-xl);
-    font-family: var(--hw-font-heading); font-weight: var(--hw-weight-regular); font-size: var(--hw-size-l); line-height: var(--hw-line-height-l);
-    letter-spacing: var(--hw-letter-spacing-s); border: 0; text-decoration: none; cursor: pointer; box-shadow: 0 1px 2px rgba(16,24,40,0.04);
-    transition: background-color var(--hw-duration-fast) var(--hw-ease-standard);
-  }
-  .banner__btn--brand { background: var(--hw-color-brand-primary-200); color: var(--hw-color-brand-primary-900); }
-  .banner__btn--brand:hover { background: var(--hw-color-brand-primary-300); }
-  .banner__btn--light { background: var(--hw-color-gray-100); color: var(--hw-color-brand-primary-900); }
-  .banner__btn--light:hover { background: var(--hw-color-gray-200); }
-
-  .footer { display: flex; flex-direction: column; gap: var(--hw-space-2xl); }
-  .footer__row { display: flex; align-items: center; justify-content: space-between; gap: var(--hw-space-xl); }
-  .footer__logo { flex: 1 1 0; display: inline-flex; }
-  .footer__logo img { height: 28px; width: auto; display: block; }
-  .footer__nav { display: flex; gap: var(--hw-space-4xl); }
-  .footer__link { font-family: var(--hw-font-body); font-weight: var(--hw-weight-bold); font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); color: var(--hw-text-primary); text-decoration: none; transition: color var(--hw-duration-fast) var(--hw-ease-standard); }
-  .footer__link:hover { color: var(--hw-color-brand-primary-600); }
-  .footer__social { flex: 1 1 0; display: flex; gap: var(--hw-space-xl); align-items: center; justify-content: flex-end; }
-  .footer__social a { display: inline-flex; transition: opacity var(--hw-duration-fast) var(--hw-ease-standard); }
-  .footer__social a:hover { opacity: 0.7; }
-  .footer__social img { width: 24px; height: 24px; display: block; }
-  .footer__legal-row { display: flex; align-items: center; justify-content: space-between; gap: var(--hw-space-xl); padding-top: var(--hw-space-2xl); }
-  .footer__copy { margin: 0; font-family: var(--hw-font-body); font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); color: var(--hw-text-secondary); }
-  .footer__legal { display: flex; gap: var(--hw-space-4xl); }
-  .footer__legal a { font-family: var(--hw-font-body); font-weight: var(--hw-weight-bold); font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); color: var(--hw-text-secondary); text-decoration: none; transition: color var(--hw-duration-fast) var(--hw-ease-standard); }
-  .footer__legal a:hover { color: var(--hw-color-brand-primary-600); }
+  /* CTA banner + footer (.closing/.banner*/.footer*) → assets/css/site.css */
 
   /* ===================== Responsive ===================== */
   @media (max-width: 1180px) {
-    .lp-header__inner { padding: 20px 40px; }
+    /* .lp-header__inner + .closing__inner responsive → site.css */
     .hero__inner { padding: 120px 40px 400px; }
     .about__inner { padding: var(--hw-space-6xl) 40px; }
     .services__inner { padding: var(--hw-space-6xl) 40px; }
@@ -501,70 +359,9 @@
     .safety__inner { padding: var(--hw-space-6xl) 40px; }
     .faq__inner { padding: var(--hw-space-6xl) 40px; }
     .reviews__head { padding-inline: 40px; }
-    .closing__inner { padding: var(--hw-space-6xl) 40px; }
   }
   @media (max-width: 900px) {
-    /* header → logo + burger (sticky, fixed 56px) */
-    .lp-header { position: sticky; top: 0; z-index: 40; }
-    .lp-header__inner { padding: 0 16px; min-height: 56px; gap: 12px; }
-    .lp-nav, .lp-actions { display: none; }
-    .lp-logo img { height: 24px; }
-    .lp-burger { display: inline-flex; }
-
-    /* lock body scroll while the menu is open */
-    body.nav-open, body.nav-closing { overflow: hidden; }
-
-    /* dropdown panel */
-    .lp-menu {
-      position: fixed; left: 0; right: 0; top: 56px; z-index: 35;
-      display: flex; flex-direction: column; gap: 16px; padding: 16px;
-      background: var(--hw-white);
-      box-shadow: 0 12px 16px -4px rgba(16,24,40,0.08), 0 4px 6px -2px rgba(16,24,40,0.03);
-      transform: translateY(-8px); opacity: 0; pointer-events: none;
-      transition: opacity var(--hw-duration-base) var(--hw-ease-standard), transform var(--hw-duration-base) var(--hw-ease-standard);
-    }
-    body.nav-open .lp-menu { transform: none; opacity: 1; pointer-events: auto; }
-    /* on close the panel holds through the item exit (~240ms) so the reverse cascade is fully
-       visible, then it fades/slides up */
-    body.nav-closing .lp-menu { transform: translateY(-8px); opacity: 0; transition-delay: 240ms; }
-    .lp-menu__links { display: flex; flex-direction: column; gap: 8px; }
-    .lp-menu__links a {
-      font-family: var(--hw-font-heading); font-size: var(--hw-size-3xl); line-height: var(--hw-lh-3xl);
-      letter-spacing: var(--hw-ls-s); color: var(--hw-content-primary); text-decoration: none; padding: 8px 0;
-      transition: color var(--hw-duration-fast) var(--hw-ease-standard);
-    }
-    .lp-menu__links a:hover { color: var(--hw-primary); }
-    .lp-menu__actions { display: flex; flex-direction: column; gap: 8px; }
-
-    /* menu items cascade in when the panel opens (animation, so the buttons keep their own
-       colour transition; delays reuse --hw-stagger-step) */
-    body.nav-open .lp-menu__links a,
-    body.nav-open .lp-menu__actions .hw-button {
-      animation: lp-item-in var(--hw-duration-fast) var(--hw-ease-standard) both;
-    }
-    body.nav-open .lp-menu__links a:nth-child(1) { animation-delay: calc(1 * var(--hw-stagger-step) / 2); }
-    body.nav-open .lp-menu__links a:nth-child(2) { animation-delay: calc(2 * var(--hw-stagger-step) / 2); }
-    body.nav-open .lp-menu__links a:nth-child(3) { animation-delay: calc(3 * var(--hw-stagger-step) / 2); }
-    body.nav-open .lp-menu__actions .hw-button:nth-child(1) { animation-delay: calc(4 * var(--hw-stagger-step) / 2); }
-    body.nav-open .lp-menu__actions .hw-button:nth-child(2) { animation-delay: calc(5 * var(--hw-stagger-step) / 2); }
-
-    /* reverse cascade on close — items leave last-in-first-out while the panel holds */
-    body.nav-closing .lp-menu__links a,
-    body.nav-closing .lp-menu__actions .hw-button {
-      animation: lp-item-out var(--hw-duration-fast) var(--hw-ease-standard) both;
-    }
-    body.nav-closing .lp-menu__actions .hw-button:nth-child(2) { animation-delay: 0ms; }
-    body.nav-closing .lp-menu__actions .hw-button:nth-child(1) { animation-delay: calc(1 * var(--hw-stagger-step) / 2); }
-    body.nav-closing .lp-menu__links a:nth-child(3) { animation-delay: calc(2 * var(--hw-stagger-step) / 2); }
-    body.nav-closing .lp-menu__links a:nth-child(2) { animation-delay: calc(3 * var(--hw-stagger-step) / 2); }
-    body.nav-closing .lp-menu__links a:nth-child(1) { animation-delay: calc(4 * var(--hw-stagger-step) / 2); }
-
-    /* dark scrim behind the panel */
-    .lp-scrim {
-      display: block; position: fixed; left: 0; right: 0; bottom: 0; top: 56px; z-index: 34;
-      background: var(--hw-color-gray-900); opacity: 0; pointer-events: none; transition: opacity var(--hw-duration-base) var(--hw-ease-standard);
-    }
-    body.nav-open .lp-scrim { opacity: 0.4; pointer-events: auto; }
+    /* header, mobile menu (panel/scrim/cascades) responsive → site.css */
 
     /* hero → stacked & viewport-height, cropped illustration fills the rest */
     .hero {
@@ -664,35 +461,12 @@
     .review-card__name { flex: 0 0 auto; }
     .review-card__cta { width: 100%; }
     .reviews__dots { display: flex; }
-
-    /* closing → stacked banner buttons + centred stacked footer */
-    .closing__inner { padding: var(--hw-space-2xl) var(--hw-space-l); gap: var(--hw-space-2xl); }
-    .banner { padding: var(--hw-space-2xl); }
-    .banner__glow { width: 100%; height: 280px; }
-    .banner__title { font-size: var(--hw-size-5xl); line-height: var(--hw-line-height-5xl); }
-    .banner__actions { flex-direction: column; align-self: stretch; }
-    .banner__btn { width: 100%; }
-    /* footer: everything centred & stacked (logo · links · social · legal · copyright) */
-    .footer { align-items: center; }
-    .footer__row { flex-direction: column; align-items: center; gap: var(--hw-space-2xl); }
-    .footer__logo, .footer__social { flex: 0 0 auto; }
-    .footer__social { justify-content: center; }
-    .footer__legal-row { flex-direction: column-reverse; align-items: center; gap: var(--hw-space-2xl); padding-top: var(--hw-space-l); }
-    .footer__legal { flex-direction: column; align-items: center; gap: var(--hw-space-2xl); }
+    /* closing/banner/footer responsive → site.css */
   }
 
-  /* Motion: honour reduced-motion for the landing's own transitions.
-     (.hw-button carries its own reduced-motion guard in button.css.) */
+  /* reduced-motion for the hero's custom search input (chrome guards live in site.css) */
   @media (prefers-reduced-motion: reduce) {
-    .lp-nav a, .lp-menu__links a, .lp-burger, .lp-burger svg, .hero__search input, .lp-menu, .lp-scrim {
-      transition-duration: 0.01ms;
-    }
-    /* no cascade for the menu items — open/close immediately */
-    body.nav-open .lp-menu__links a,
-    body.nav-open .lp-menu__actions .hw-button,
-    body.nav-closing .lp-menu__links a,
-    body.nav-closing .lp-menu__actions .hw-button { animation: none; }
-    body.nav-closing .lp-menu { transition-delay: 0ms; }
+    .hero__search input { transition-duration: 0.01ms; }
   }
 </style>
 </head>
@@ -702,8 +476,8 @@
   <div class="lp-header__inner">
     <nav class="lp-nav">
       <a href="#top">Home</a>
-      <a href="#faqs">FAQs</a>
-      <a href="#contact">Contacts</a>
+      <a href="faq.html">FAQs</a>
+      <a href="contact.html">Contacts</a>
     </nav>
     <a class="lp-logo" href="#" aria-label="Handiwork home">
       <img src="assets/logo/horizontal-dark.svg" alt="Handiwork" />
@@ -720,8 +494,8 @@
   <nav class="lp-menu" id="menu" aria-label="Mobile">
     <div class="lp-menu__links">
       <a href="#top">Home</a>
-      <a href="#faqs">FAQs</a>
-      <a href="#contact">Contact Us</a>
+      <a href="faq.html">FAQs</a>
+      <a href="contact.html">Contact Us</a>
     </div>
     <div class="lp-menu__actions">
       <a class="hw-button hw-button--secondary hw-button--block" href="#"><span class="hw-button__label">Login</span></a>
@@ -1031,8 +805,8 @@
       <div class="footer__row">
         <a class="footer__logo" href="#" aria-label="Handiwork home"><img src="assets/logo/horizontal-dark.svg" alt="Handiwork" /></a>
         <nav class="footer__nav" aria-label="Footer">
-          <a class="footer__link" href="#">FAQs</a>
-          <a class="footer__link" href="#">Contact Us</a>
+          <a class="footer__link" href="faq.html">FAQs</a>
+          <a class="footer__link" href="contact.html">Contact Us</a>
         </nav>
         <div class="footer__social">
           <a href="#" aria-label="Handiwork on Facebook"><img src="assets/icons/social/facebook.svg" alt="Facebook" /></a>
@@ -1050,78 +824,8 @@
   </div>
 </section>
 
+<script src="assets/js/site.js"></script>
 <script>
-  // Scroll reveal (Phase 4b): reveal groups/elements once as they enter, then unobserve.
-  (function scrollReveal() {
-    if (!('IntersectionObserver' in window)) return;   // PE: .js-reveal-ready never added ⇒ content visible
-    var CAP = 5;
-
-    // Grids flagged for row stagger: assign --reveal-i by visual row (breakpoint-robust; transforms
-    // don't affect offsetTop, so hidden state doesn't skew the measurement).
-    document.querySelectorAll('[data-reveal-stagger="row"]').forEach(function (grid) {
-      var rows = [];
-      Array.prototype.slice.call(grid.querySelectorAll('.reveal')).forEach(function (el) {
-        var top = el.offsetTop, row = -1;
-        for (var i = 0; i < rows.length; i++) { if (Math.abs(rows[i] - top) < 8) { row = i; break; } }
-        if (row === -1) { rows.push(top); row = rows.length - 1; }
-        el.style.setProperty('--reveal-i', Math.min(row, CAP));
-      });
-    });
-
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
-      });
-    }, { rootMargin: '0px 0px -10% 0px', threshold: 0 });
-
-    document.querySelectorAll('[data-reveal]').forEach(function (el) { io.observe(el); });
-  })();
-
-  // Mobile menu toggle (open panel + dark scrim; hamburger ↔ X)
-  var burger = document.getElementById('burger');
-  var scrim = document.getElementById('scrim');
-  var menu = document.getElementById('menu');
-  var navCloseTimer;
-  function setNav(open) {
-    clearTimeout(navCloseTimer);
-    var body = document.body;
-    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
-    burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-    if (open) {
-      body.classList.remove('nav-closing');
-      body.classList.add('nav-open');
-      return;
-    }
-    if (!body.classList.contains('nav-open')) return;   // already closed / closing
-    body.classList.remove('nav-open');
-    // reduced motion: close instantly, no reverse cascade
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    body.classList.add('nav-closing');                  // hold the panel while items exit, then drop it
-    navCloseTimer = setTimeout(function () { body.classList.remove('nav-closing'); }, 420);
-  }
-  burger.addEventListener('click', function () { setNav(!document.body.classList.contains('nav-open')); });
-  scrim.addEventListener('click', function () { setNav(false); });
-  menu.addEventListener('click', function (e) { if (e.target.closest('a')) setNav(false); });
-
-  // FAQ accordion (single-open; animates max-height for a smooth expand/collapse)
-  var faqButtons = document.querySelectorAll('.faq-item__q');
-  faqButtons.forEach(function (btn) {
-    var panel = btn.nextElementSibling;
-    btn.addEventListener('click', function () {
-      var isOpen = btn.getAttribute('aria-expanded') === 'true';
-      // close all
-      faqButtons.forEach(function (b) {
-        b.setAttribute('aria-expanded', 'false');
-        b.nextElementSibling.style.maxHeight = null;
-      });
-      // open this one (unless it was already open → acts as toggle)
-      if (!isOpen) {
-        btn.setAttribute('aria-expanded', 'true');
-        panel.style.maxHeight = panel.scrollHeight + 'px';
-      }
-    });
-  });
-
   // Testimonial carousel: seamless infinite loop (…1·2·3·1·2·3…); centred card is focused.
   (function reviews() {
     var vp = document.getElementById('reviewsViewport');
