@@ -93,6 +93,7 @@
   .lp-menu { display: none; }
   .lp-scrim { display: none; }
   @keyframes lp-item-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes lp-item-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(8px); } }
 
   /* ===================== Hero ===================== */
   .hero {
@@ -511,7 +512,7 @@
     .lp-burger { display: inline-flex; }
 
     /* lock body scroll while the menu is open */
-    body.nav-open { overflow: hidden; }
+    body.nav-open, body.nav-closing { overflow: hidden; }
 
     /* dropdown panel */
     .lp-menu {
@@ -523,6 +524,8 @@
       transition: opacity var(--hw-duration-base) var(--hw-ease-standard), transform var(--hw-duration-base) var(--hw-ease-standard);
     }
     body.nav-open .lp-menu { transform: none; opacity: 1; pointer-events: auto; }
+    /* on close the panel holds ~120ms (transition-delay) so the items lead, then fades/slides up */
+    body.nav-closing .lp-menu { transform: translateY(-8px); opacity: 0; transition-delay: 120ms; }
     .lp-menu__links { display: flex; flex-direction: column; gap: 8px; }
     .lp-menu__links a {
       font-family: var(--hw-font-heading); font-size: var(--hw-size-3xl); line-height: var(--hw-lh-3xl);
@@ -543,6 +546,17 @@
     body.nav-open .lp-menu__links a:nth-child(3) { animation-delay: calc(3 * var(--hw-stagger-step) / 2); }
     body.nav-open .lp-menu__actions .hw-button:nth-child(1) { animation-delay: calc(4 * var(--hw-stagger-step) / 2); }
     body.nav-open .lp-menu__actions .hw-button:nth-child(2) { animation-delay: calc(5 * var(--hw-stagger-step) / 2); }
+
+    /* reverse cascade on close — items leave last-in-first-out while the panel holds */
+    body.nav-closing .lp-menu__links a,
+    body.nav-closing .lp-menu__actions .hw-button {
+      animation: lp-item-out var(--hw-duration-fast) var(--hw-ease-standard) both;
+    }
+    body.nav-closing .lp-menu__actions .hw-button:nth-child(2) { animation-delay: 0ms; }
+    body.nav-closing .lp-menu__actions .hw-button:nth-child(1) { animation-delay: calc(1 * var(--hw-stagger-step) / 2); }
+    body.nav-closing .lp-menu__links a:nth-child(3) { animation-delay: calc(2 * var(--hw-stagger-step) / 2); }
+    body.nav-closing .lp-menu__links a:nth-child(2) { animation-delay: calc(3 * var(--hw-stagger-step) / 2); }
+    body.nav-closing .lp-menu__links a:nth-child(1) { animation-delay: calc(4 * var(--hw-stagger-step) / 2); }
 
     /* dark scrim behind the panel */
     .lp-scrim {
@@ -672,9 +686,12 @@
     .lp-nav a, .lp-menu__links a, .lp-burger, .lp-burger svg, .hero__search input, .lp-menu, .lp-scrim {
       transition-duration: 0.01ms;
     }
-    /* no cascade for the menu items — show them immediately */
+    /* no cascade for the menu items — open/close immediately */
     body.nav-open .lp-menu__links a,
-    body.nav-open .lp-menu__actions .hw-button { animation: none; }
+    body.nav-open .lp-menu__actions .hw-button,
+    body.nav-closing .lp-menu__links a,
+    body.nav-closing .lp-menu__actions .hw-button { animation: none; }
+    body.nav-closing .lp-menu { transition-delay: 0ms; }
   }
 </style>
 </head>
@@ -1063,10 +1080,23 @@
   var burger = document.getElementById('burger');
   var scrim = document.getElementById('scrim');
   var menu = document.getElementById('menu');
+  var navCloseTimer;
   function setNav(open) {
-    document.body.classList.toggle('nav-open', open);
+    clearTimeout(navCloseTimer);
+    var body = document.body;
     burger.setAttribute('aria-expanded', open ? 'true' : 'false');
     burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    if (open) {
+      body.classList.remove('nav-closing');
+      body.classList.add('nav-open');
+      return;
+    }
+    if (!body.classList.contains('nav-open')) return;   // already closed / closing
+    body.classList.remove('nav-open');
+    // reduced motion: close instantly, no reverse cascade
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    body.classList.add('nav-closing');                  // hold the panel while items exit, then drop it
+    navCloseTimer = setTimeout(function () { body.classList.remove('nav-closing'); }, 300);
   }
   burger.addEventListener('click', function () { setNav(!document.body.classList.contains('nav-open')); });
   scrim.addEventListener('click', function () { setNav(false); });
