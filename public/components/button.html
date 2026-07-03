@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Handiwork — Button</title>
+<link rel="stylesheet" href="../assets/css/tokens.css" />
+<link rel="stylesheet" href="../assets/css/typography.css" />
+<link rel="stylesheet" href="../assets/css/button.css" />
+<script src="../assets/icons/hw-icons.js"></script>
+<style>
+  body { margin: 0; background: var(--hw-bg-default); color: var(--hw-text-primary); }
+  .page { max-width: 900px; margin: 0 auto; padding: 40px 24px 100px; }
+  .lead { color: var(--hw-text-secondary); margin: 4px 0 32px; }
+  .group { border: 1px solid var(--hw-border-divider); border-radius: 12px; background: var(--hw-input-bg); padding: 20px; margin-bottom: 20px; }
+  .group h2 { font-family: var(--hw-font-heading); color: var(--hw-text-primary); font-size: 18px; margin: 0 0 4px; }
+  .group p { color: var(--hw-text-tertiary); font-size: 12px; margin: 0 0 16px; }
+  .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+  .cell { display: flex; flex-direction: column; gap: 8px; }
+  .cell small { color: var(--hw-text-tertiary); font: 400 11px var(--hw-font-body); }
+  .block-demo { max-width: 320px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1 class="hw-heading-l">Button</h1>
+  <p class="lead hw-text-l">Primary &amp; secondary, built on <code>Semantic__Color</code> button tokens. Hover / press / focus to see states (focus a button with the keyboard for the ring).</p>
+
+  <div class="group">
+    <h2>Primary</h2>
+    <p>bg 900→800 (hover/pressed) · text 500 · disabled Gray/200 + Gray/400</p>
+    <div class="row">
+      <div class="cell"><button class="hw-button hw-button--primary">Get Started</button><small>default</small></div>
+      <div class="cell">
+        <button class="hw-button hw-button--primary"><hw-icon class="hw-button__icon" name="hammer" variant="filled" size="18"></hw-icon><span class="hw-button__label">Book now</span></button>
+        <small>with icon</small>
+      </div>
+      <div class="cell"><button class="hw-button hw-button--primary" disabled>Get Started</button><small>disabled</small></div>
+    </div>
+  </div>
+
+  <div class="group">
+    <h2>Secondary</h2>
+    <p>bg 100→200→300 (default/hover/pressed) · text 900 · disabled Gray/200 + Gray/400</p>
+    <div class="row">
+      <div class="cell"><button class="hw-button hw-button--secondary">Log In</button><small>default</small></div>
+      <div class="cell">
+        <button class="hw-button hw-button--secondary"><hw-icon class="hw-button__icon" name="user" variant="filled" size="18"></hw-icon><span class="hw-button__label">Sign in</span></button>
+        <small>with icon</small>
+      </div>
+      <div class="cell"><button class="hw-button hw-button--secondary" disabled>Log In</button><small>disabled</small></div>
+    </div>
+  </div>
+
+  <div class="group">
+    <h2>Full width</h2>
+    <p><code>.hw-button--block</code> layout modifier (forms, mobile menu)</p>
+    <div class="block-demo">
+      <button class="hw-button hw-button--primary hw-button--block" style="margin-bottom:8px;">Get Started</button>
+      <button class="hw-button hw-button--secondary hw-button--block">Log In</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
