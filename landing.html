@@ -536,13 +536,13 @@
        colour transition; delays reuse --hw-stagger-step) */
     body.nav-open .lp-menu__links a,
     body.nav-open .lp-menu__actions .hw-button {
-      animation: lp-item-in var(--hw-duration-base) var(--hw-ease-standard) both;
+      animation: lp-item-in var(--hw-duration-fast) var(--hw-ease-standard) both;
     }
-    body.nav-open .lp-menu__links a:nth-child(1) { animation-delay: calc(1 * var(--hw-stagger-step)); }
-    body.nav-open .lp-menu__links a:nth-child(2) { animation-delay: calc(2 * var(--hw-stagger-step)); }
-    body.nav-open .lp-menu__links a:nth-child(3) { animation-delay: calc(3 * var(--hw-stagger-step)); }
-    body.nav-open .lp-menu__actions .hw-button:nth-child(1) { animation-delay: calc(4 * var(--hw-stagger-step)); }
-    body.nav-open .lp-menu__actions .hw-button:nth-child(2) { animation-delay: calc(5 * var(--hw-stagger-step)); }
+    body.nav-open .lp-menu__links a:nth-child(1) { animation-delay: calc(1 * var(--hw-stagger-step) / 2); }
+    body.nav-open .lp-menu__links a:nth-child(2) { animation-delay: calc(2 * var(--hw-stagger-step) / 2); }
+    body.nav-open .lp-menu__links a:nth-child(3) { animation-delay: calc(3 * var(--hw-stagger-step) / 2); }
+    body.nav-open .lp-menu__actions .hw-button:nth-child(1) { animation-delay: calc(4 * var(--hw-stagger-step) / 2); }
+    body.nav-open .lp-menu__actions .hw-button:nth-child(2) { animation-delay: calc(5 * var(--hw-stagger-step) / 2); }
 
     /* dark scrim behind the panel */
     .lp-scrim {
