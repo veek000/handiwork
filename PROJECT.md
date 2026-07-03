@@ -265,6 +265,20 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   `textarea.hw-input` (min-height + resize) to `input.css`. Tokens only; reveal + reduced-motion +
   progressive-enhancement carried across all three pages.
 
+- **Next.js migration (rewrite-based static serving)** — Wrapped the completed static
+  pages in a Next.js app (App Router, TypeScript, Next 16 / React 19) **without porting
+  any HTML to JSX**. `landing.html` / `faq.html` / `contact.html` moved verbatim into
+  `public/`, and `assets/` into `public/assets/` (single source, no sync script). Clean
+  routes are served by **rewrites** in `next.config.mjs` (`/`→`/landing.html`,
+  `/faq`→`/faq.html`, `/contact`→`/contact.html`); **no `app/` page owns those paths**
+  (a matching route would silently override the rewrite). `app/layout.tsx` is a minimal
+  root layout only — it exists to satisfy the App Router and host future `app/` routes
+  (customer/vendor dashboards). All internal asset paths were already relative, so they
+  resolve identically once served from `public/`. Verified: all 3 routes 200 + byte-for-byte
+  verbatim, zero 404s (CSS `@import`s + woff2 fonts included), `next build` passes.
+  `index.html` + `components/*.html` deliberately left **out** of `public/` (internal
+  style-guide tools, not production routes).
+
 ### Tracked debts / open decisions
 
 - **`.hw-btn` → `.hw-button` migration** — ✅ done. `landing.html` uses the canonical

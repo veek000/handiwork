@@ -8,5 +8,10 @@ desktop.ini
 .tmp_*/
 node_modules/
 
+# Next.js
+.next/
+next-env.d.ts
+*.tsbuildinfo
+
 # Vercel
 .vercel
