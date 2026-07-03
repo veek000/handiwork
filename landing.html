@@ -524,8 +524,9 @@
       transition: opacity var(--hw-duration-base) var(--hw-ease-standard), transform var(--hw-duration-base) var(--hw-ease-standard);
     }
     body.nav-open .lp-menu { transform: none; opacity: 1; pointer-events: auto; }
-    /* on close the panel holds ~120ms (transition-delay) so the items lead, then fades/slides up */
-    body.nav-closing .lp-menu { transform: translateY(-8px); opacity: 0; transition-delay: 120ms; }
+    /* on close the panel holds through the item exit (~240ms) so the reverse cascade is fully
+       visible, then it fades/slides up */
+    body.nav-closing .lp-menu { transform: translateY(-8px); opacity: 0; transition-delay: 240ms; }
     .lp-menu__links { display: flex; flex-direction: column; gap: 8px; }
     .lp-menu__links a {
       font-family: var(--hw-font-heading); font-size: var(--hw-size-3xl); line-height: var(--hw-lh-3xl);
@@ -1096,7 +1097,7 @@
     // reduced motion: close instantly, no reverse cascade
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     body.classList.add('nav-closing');                  // hold the panel while items exit, then drop it
-    navCloseTimer = setTimeout(function () { body.classList.remove('nav-closing'); }, 300);
+    navCloseTimer = setTimeout(function () { body.classList.remove('nav-closing'); }, 420);
   }
   burger.addEventListener('click', function () { setNav(!document.body.classList.contains('nav-open')); });
   scrim.addEventListener('click', function () { setNav(false); });
