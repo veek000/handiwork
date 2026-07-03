@@ -1,0 +1,86 @@
+/* ==========================================================================
+   Handiwork — Button
+   Depends on tokens (primitives.css + semantic.css). Tokens only — no raw values.
+   Colour states pulled directly from Semantic__Color Buttons/primary|secondary
+   (default / hover / pressed / disabled, bg + text). Focus per COMPONENT-BUILD-RULES.
+
+     <button class="hw-button hw-button--primary">
+       <hw-icon class="hw-button__icon" name="hammer" variant="filled" size="18"></hw-icon>
+       <span class="hw-button__label">Book now</span>
+     </button>
+
+   Variants: --primary · --secondary   |   Layout modifier: --block (full width)
+   States: default · hover · :active (pressed) · :focus-visible · disabled/.is-disabled
+   ========================================================================== */
+
+.hw-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--hw-space-s);              /* Figma shows 6px; no 6px token — rounded up to 8 (space-s) to avoid a cramped icon+label */
+  padding: var(--hw-space-m) var(--hw-space-xl);   /* 12 / 24 */
+  border: 0;
+  border-radius: var(--hw-radius-none);
+  font-family: var(--hw-font-heading);
+  font-weight: var(--hw-weight-regular);
+  font-size: var(--hw-size-l);
+  line-height: var(--hw-line-height-l);
+  letter-spacing: var(--hw-letter-spacing-s);
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background-color var(--hw-duration-fast) var(--hw-ease-standard),
+              color var(--hw-duration-fast) var(--hw-ease-standard),
+              transform var(--hw-duration-fast) var(--hw-ease-standard);
+}
+
+/* Pressed feedback — subtle scale layered on top of the colour change (tactile, not bouncy) */
+.hw-button:not(:disabled):not(.is-disabled):active { transform: scale(0.97); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hw-button { transition-duration: 0.01ms; }
+  .hw-button:not(:disabled):not(.is-disabled):active { transform: none; }
+}
+
+.hw-button__icon  { display: inline-flex; flex: 0 0 auto; }   /* colour inherits currentColor from the button */
+.hw-button__label { display: inline-block; }
+
+/* Layout modifier — not a Figma colour variant; fills its container (forms, mobile menu) */
+.hw-button--block { width: 100%; }
+
+/* ----- Primary (Semantic__Color Buttons/primary) ----- */
+.hw-button--primary {
+  background: var(--hw-button-primary-bg-default);
+  color: var(--hw-button-primary-text-default);
+}
+.hw-button--primary:not(:disabled):not(.is-disabled):hover  { background: var(--hw-button-primary-bg-hover); }
+.hw-button--primary:not(:disabled):not(.is-disabled):active { background: var(--hw-button-primary-bg-pressed); }
+
+/* ----- Secondary (Semantic__Color Buttons/secondary) ----- */
+.hw-button--secondary {
+  background: var(--hw-button-secondary-bg-default);
+  color: var(--hw-button-secondary-text-default);
+}
+.hw-button--secondary:not(:disabled):not(.is-disabled):hover  { background: var(--hw-button-secondary-bg-hover); }
+.hw-button--secondary:not(:disabled):not(.is-disabled):active { background: var(--hw-button-secondary-bg-pressed); }
+
+/* ----- Focus (COMPONENT-BUILD-RULES: Border/focus, 2px outline, 2px offset) ----- */
+.hw-button:focus-visible {
+  outline: var(--hw-border-width-m) solid var(--hw-border-focus);
+  outline-offset: var(--hw-space-2xs);
+}
+
+/* ----- Disabled ----- */
+.hw-button--primary:disabled,
+.hw-button--primary.is-disabled {
+  background: var(--hw-button-primary-bg-disabled);
+  color: var(--hw-button-primary-text-disabled);
+}
+.hw-button--secondary:disabled,
+.hw-button--secondary.is-disabled {
+  background: var(--hw-button-secondary-bg-disabled);
+  color: var(--hw-button-secondary-text-disabled);
+}
+.hw-button:disabled,
+.hw-button.is-disabled { cursor: not-allowed; }

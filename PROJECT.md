@@ -41,14 +41,21 @@ handiwork/
 │                          icons · logos · illustrations · components (tabbed)
 ├─ PROJECT.md              This file
 │
-├─ components/             Reusable UI components (built on the tokens)
-│  └─ sidebar.html         Sidebar nav — standalone demo (also embedded in index)
+├─ components/             Reusable UI component demos (built on the tokens)
+│  ├─ sidebar.html         Sidebar nav — standalone demo (also embedded in index)
+│  ├─ button.html          Button demo (primary/secondary, states)
+│  └─ input.html           Input demo (default/focus/disabled)
 │
 ├─ assets/                 ← single home for everything a page links
 │  ├─ css/
-│  │  ├─ tokens.css        All design tokens as CSS vars (--hw-*)
+│  │  ├─ tokens.css        Compat shim → @imports tokens/primitives + tokens/semantic
+│  │  ├─ tokens/
+│  │  │  ├─ primitives.css Raw values (color ramps/type/spacing/radius/border/breakpoints)
+│  │  │  └─ semantic.css   Role tokens (Light) + unwired [data-theme="dark"] + legacy aliases
 │  │  ├─ typography.css    @font-face + heading/text classes
-│  │  └─ sidebar.css       Sidebar navigation component styles
+│  │  ├─ sidebar.css       Sidebar navigation component styles
+│  │  ├─ button.css        Button component (.hw-button)
+│  │  └─ input.css         Input component (.hw-input)
 │  ├─ fonts/               Manrope (400–800) + Changa One (400), woff2, local
 │  ├─ tokens.json          Same tokens, machine-readable (for tooling)
 │  ├─ icons/
@@ -68,20 +75,24 @@ handiwork/
 
 ---
 
-## Color system
+## Token architecture (Primitive → Semantic)
 
-Defined in `assets/css/tokens.css` (CSS vars) and `assets/tokens.json`.
+Two layers per `TOKEN-GOVERNANCE.md`, mirrored in `assets/tokens.json`:
 
-| Group     | Tokens | Notes |
-|-----------|--------|-------|
-| Brand     | `--hw-primary` `#50C878`, `--hw-primary-dark` `#001A13`, `--hw-primary-light` `#DFF1E1`, `--hw-secondary` `#FFC300`, `--hw-secondary-dark` `#816207`, `--hw-secondary-light` `#FFECB3` | Emerald + gold |
-| Neutrals  | `--hw-gray-100` … `--hw-gray-900`, `--hw-white`, `--hw-black` | Gray ramp |
-| Content   | `--hw-content-primary/secondary/tertiary`, `--hw-heading-title` `#152536`, `--hw-body-text` `#6B7176`, `--hw-border-subtle` `#E5E5E5` | Text & borders |
-| Semantic  | `--hw-success` `#198754`, `--hw-warning` `#FFC107`, `--hw-danger` `#DC3545`, `--hw-info` `#0DCAF0` | Status colors |
-| Palettes  | `--hw-{blue,indigo,purple,pink,red,orange,yellow,green,teal,cyan}-{100..900}` | Extended ramps |
+- **`tokens/primitives.css`** — raw values only, named `--hw-color-*`, `--hw-size-*`,
+  `--hw-space-*`, `--hw-radius-*`, `--hw-border-width-*`, `--hw-bp-*`, type families/weights.
+  Brand primary/secondary ramps 100–900, full gray + 10 extended palettes.
+- **`tokens/semantic.css`** — role tokens that reference primitives:
+  `--hw-text-*`, `--hw-bg-*`, `--hw-border-*` (incl. `--hw-border-focus` `#50C878`),
+  `--hw-button-{primary,secondary}-{bg,text}-{default,hover,pressed,disabled}`,
+  `--hw-input-*`, `--hw-feedback-{success,warning,error,info}-{bg,border,text}`,
+  `--hw-icon-*`, `--hw-font-heading/body`. Light in `:root`; a **full but unwired**
+  `[data-theme="dark"]` block (backlog); then a **legacy compatibility alias** layer
+  keeping old flat `--hw-*` names alive (Option A).
+- **`tokens.css`** is now just a 2-line `@import` shim so existing `<link>`s keep working.
 
-> One value was inferred: `--hw-blue-300` (`#6EA8FE`) — Figma exposed the blue ramp
-> without a 300 step; the standard value was filled in to complete the ramp.
+Flagged / unresolved (comment-only, referenced by nothing): `--hw-input-bg-2`,
+`--hw-bg-default-2` (identical to base in Light, diverge in Dark — purpose TBD).
 
 ## Typography system
 
@@ -140,6 +151,27 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
 - **Roles:** Customer (Home, My Jobs, Messages, Help & Support) and Vendor (adds My Services, My Orders, My Reviews, Analytics) — just change the nav items.
 - Live demo of every variant: `components/sidebar.html`.
 
+### Button — `assets/css/button.css`
+
+```html
+<button class="hw-button hw-button--primary">
+  <hw-icon class="hw-button__icon" name="hammer" variant="filled" size="18"></hw-icon>
+  <span class="hw-button__label">Book now</span>
+</button>
+<button class="hw-button hw-button--secondary">Log In</button>
+```
+
+- Variants `--primary` / `--secondary`; layout modifier `--block` (full width).
+- States pulled directly from `Semantic__Color` Buttons/* (default/hover/`:active`/disabled, bg+text). Focus: `Border/focus` 2px outline, 2px offset. Sharp corners (`radius-none`), Changa One. Demo: `components/button.html`.
+
+### Input — `assets/css/input.css`
+
+```html
+<input class="hw-input" type="text" placeholder="Search by role, skills or keywords">
+```
+
+- States: default · `:focus-visible` (`Border/focus`) · disabled (`Border/disabled` + `Text/disabled`). **No hover** by design (no Input hover token). **No error** state yet (deferred until a screen needs it). `Input/bg 2` intentionally unused. Demo: `components/input.html`.
+
 ## Deploying
 
 - **Live:** https://handiworkv1.vercel.app
@@ -169,9 +201,90 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   `fetch`, so they work offline — the earlier blank-color-sections bug is fixed).
   Logos and illustrations are displayed inline; each section is branded with the
   Handiwork logomark.
+- **Token architecture migration** — Split the flat `tokens.css` into layered
+  `tokens/primitives.css` + `tokens/semantic.css` from new Figma exports
+  (Primitive/Semantic Color+Type, Spacing, Border, Layout), per `TOKEN-GOVERNANCE.md`.
+  Added Option A legacy alias layer (`tokens.css` → `@import` shim), a full unwired
+  `[data-theme="dark"]` block (backlog), and regenerated `tokens.json`. Adopted new
+  verified primitives (gray-100 `#F5F5F5`, gray-200 `#EEEEEE`, green-800 `#0A442D`);
+  retired `--hw-heading-title`/`--hw-body-text`/`--hw-border-subtle`/`--hw-content-secondary`
+  (migrated call sites to `text-primary`/`text-secondary`/`border-divider`); fixed a
+  `--hw-text-tertiary` alias collision; Circle radius set to `50%`.
+- **Button + Input components** — `assets/css/button.css` + `assets/css/input.css`
+  with demos in `components/`, tokens-only, states pulled directly from
+  `Semantic__Color`. Focus rings use `--hw-border-focus`.
+- **Motion tokens (Phase 4a)** — Added a Motion block to `primitives.css` / `tokens.json`
+  (set directly, no Figma export): `--hw-duration-fast/base/slow` (100/150/250ms) +
+  `--hw-ease-standard` (`cubic-bezier(0.4,0,0.2,1)`). Wired transitions: Button bg/text
+  and Input focus outline/border @ `fast`; Sidebar nav-item bg/text @ `base` with the
+  left-bar indicator animated (Option B — base `::before`, `scaleY(0)→scaleY(1)`) @ `base`.
+  All guarded by `prefers-reduced-motion: reduce` (collapse to 0.01ms). New **Motion tab**
+  in `index.html`.
+- **Sidebar token cutover (Option B)** — Migrated `sidebar.css` off the legacy
+  compatibility aliases to direct tokens (A+B): surface → `--hw-color-brand-primary-900`,
+  default text → `--hw-text-placeholder`, logout → `--hw-feedback-error-text`, drawer
+  whites → `--hw-color-default-white`, active bg/fg → `brand-primary-light-alpha` /
+  `brand-primary-200`, profile name → `--hw-text-inverse`. Fixed two stale comments
+  (the active-bg/fg no longer match `Background/primary-alpha` / `Buttons/.../pressed`).
+  Five dark-surface literals kept (white/danger/primary alphas + `#F1F1F1` — no matching
+  token). `--hw-gray-400` alias **retained** (not sidebar-only — the Colors tab reads the
+  gray ramp dynamically).
+- **Landing page** — Built `landing.html` section-by-section from Figma (desktop + mobile,
+  responsive @ 393/768/1024/1440): header/nav + mobile drawer · hero · About · Services
+  (12-tile grid) · How-it-works (3-step timeline) · Power (perks + worker photo) · Safety
+  (dark trust cards + bleed graphic) · FAQ (interactive accordion) · Testimonials (infinite
+  swipe carousel, cloned-set loop) · CTA banner (logo pattern + blurred glow) + footer.
+  Layered tokens only. Migrated the landing buttons from the ad-hoc `.hw-btn` to the canonical
+  `.hw-button` and **deleted `assets/css/buttons.css`**. Photos in `assets/img/`; social brand
+  icons in `assets/icons/social/`. Illustrations pulled from the existing set (incl. the
+  reused `Handiwork Pattern.svg`).
+- **Scroll reveal (Phase 4b)** — Added a page-entrance motion tier to `primitives.css`:
+  `--hw-duration-reveal` (600ms), `--hw-reveal-offset` (24px), `--hw-reveal-blur` (6px),
+  `--hw-stagger-step` (80ms), reusing `--hw-ease-standard`. `.reveal` elements fade in +
+  slide up (24px) + sharpen (blur 6→0) as they enter, via an IntersectionObserver toggling
+  **`.is-visible`** (deliberately not `.is-active`), `rootMargin: 0 0 -10% 0`, **unobserved
+  after first trigger**. Stagger = `--reveal-i × step`, **capped at index 5 (400ms)**; the
+  Services grid staggers by **visual row** (JS groups by `offsetTop`, breakpoint-robust).
+  Progressive enhancement: the hidden state is scoped under `html.js-reveal-ready`, a class
+  added **before first paint but only when `IntersectionObserver` exists** — no-JS / unsupported
+  / failed load leaves content fully visible. **`prefers-reduced-motion`: the reveal is skipped
+  entirely** (opacity/transform/filter/transition all off — opacity is significant motion here).
+  Bleed layers (hero/about art, banner pattern+glow, cloned carousel cards) excluded; hero art
+  and safety decor are fade-only (`.reveal--fade`). Also added `scroll-behavior: smooth`
+  (→ `auto` under reduced-motion) with wired in-page nav anchors (Home → `#top`, FAQs →
+  `#faqs`, Contacts → `#contact`).
+
+### Tracked debts / open decisions
+
+- **`.hw-btn` → `.hw-button` migration** — ✅ done. `landing.html` uses the canonical
+  `.hw-button`; the ad-hoc `.hw-btn` stylesheet `assets/css/buttons.css` has been **deleted**.
+- **Button `:active` scale (deferred, approved)** — Add a subtle `transform: scale(0.97)` on
+  `:active` to `.hw-button` (on top of the existing colour transition), reduced-motion-guarded.
+  Approved as its own standalone edit to the finalized Button component — **not** folded into
+  the landing/Phase-4b work. Next up.
+- **Parked landing flags (resolve together)** — off-system values reproduced faithfully but
+  not yet tokenized, pending a joint cleanup pass: Services labels `#313131` (→ `--hw-text-primary`,
+  1-shade delta); works step-body `rgba(39,45,55,0.8)` (→ `--hw-text-secondary`); works timeline
+  `#EAEBF0` + FAQ item border `#DAE0E6` (both → `--hw-border-divider`; Figma "Neutral/700" isn't
+  a token); footer social icons carry Figma's `#272D37`; banner subtitle `#BDBDBD` (→ `--hw-color-gray-400`);
+  the "TradeTrust" placeholder copy in the works subtitle; and the three landing section headers
+  (About/Services/Works/etc. badge+title+subtitle) could consolidate into one shared component.
+- **Components-tab format (resolved)** — Went with a **single consolidated Components
+  tab** in `index.html`: Sidebar, Button, and Input are previewable there as stacked
+  sections. Standalone per-component demo pages in `components/` are kept too (deep
+  links / isolation). `sidebar.html` stays as-is (no migration needed).
+- **`sidebar.css` Option B** — ✅ done. `sidebar.css` no longer references any legacy
+  compatibility alias. The alias layer itself stays (other pages still use it); retire
+  it fully once `index.html` / `landing.html` are migrated too.
+- **Shared brand-surface role (backlog)** — Sidebar surface and Button bg both resolve
+  to `#001A13` (brand/900) but for independent reasons. Sidebar now points at the
+  primitive `--hw-color-brand-primary-900` (not Button's token) to avoid coupling. If
+  that coupling is ever intentional, introduce a shared semantic role
+  (e.g. `--hw-surface-brand-strong`) referenced by both — don't have one point at the
+  other's token.
 
 ### Ideas / next steps
 
-- Component CSS (buttons, inputs, cards, badges) built on these tokens.
+- Card / Badge / Tag components (un-specced — derive from primitives per rules).
 - A page scaffold/template that pre-links the stylesheets.
-- Optional dark theme via a `[data-theme="dark"]` token override block.
+- Decide dark-mode scope (tokens are captured, switching not wired).

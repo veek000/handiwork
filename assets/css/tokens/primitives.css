@@ -1,0 +1,240 @@
+/* ==========================================================================
+   Handiwork — PRIMITIVES  (generated from Figma exports; do not hand-edit)
+   Raw values only: color ramps, type scale, spacing, radius, border width,
+   breakpoints. No roles. Naming per TOKEN-GOVERNANCE.md §2.
+   ========================================================================== */
+:root {
+
+  /* ----- Color ----- */
+  --hw-color-brand-primary-color: #50C878;
+  --hw-color-brand-primary-color-dark: #001A13;
+  --hw-color-brand-primary-light: #DFF1E1;
+  --hw-color-brand-primary-color-alpha: rgba(80, 200, 120, 0.1);
+  --hw-color-brand-primary-color-dark-alpha: rgba(0, 26, 19, 0.1);
+  --hw-color-brand-primary-light-alpha: rgba(223, 241, 225, 0.1);
+  --hw-color-brand-primary-color-alpha-2: rgba(80, 200, 120, 0.5);
+  --hw-color-brand-primary-color-dark-alpha-2: rgba(0, 26, 19, 0.5);
+  --hw-color-brand-primary-light-alpha-2: rgba(223, 241, 225, 0.5);
+  --hw-color-brand-secondary-color: #FFC300;
+  --hw-color-brand-secondary-dark-color: #816207;
+  --hw-color-brand-secondary-light-color: #FFECB3;
+  --hw-color-brand-primary-100: #DFF1E1;
+  --hw-color-brand-primary-200: #B6E3BD;
+  --hw-color-brand-primary-300: #8ED799;
+  --hw-color-brand-primary-400: #6FCF82;
+  --hw-color-brand-primary-500: #50C878;
+  --hw-color-brand-primary-600: #3BAE67;
+  --hw-color-brand-primary-700: #288554;
+  --hw-color-brand-primary-800: #155D3E;
+  --hw-color-brand-primary-900: #001A13;
+  --hw-color-brand-secondary-100: #FFECB3;
+  --hw-color-brand-secondary-200: #FFE080;
+  --hw-color-brand-secondary-300: #FFD54D;
+  --hw-color-brand-secondary-400: #FFCA26;
+  --hw-color-brand-secondary-500: #FFC300;
+  --hw-color-brand-secondary-600: #E6AD00;
+  --hw-color-brand-secondary-700: #B38300;
+  --hw-color-brand-secondary-800: #806100;
+  --hw-color-brand-secondary-900: #816207;
+  --hw-color-default-white: #FFFFFF;
+  --hw-color-default-black: #000000;
+  --hw-color-gray-100: #F5F5F5;
+  --hw-color-gray-200: #EEEEEE;
+  --hw-color-gray-300: #E0E0E0;
+  --hw-color-gray-400: #BDBDBD;
+  --hw-color-gray-500: #9E9E9E;
+  --hw-color-gray-600: #757575;
+  --hw-color-gray-700: #616161;
+  --hw-color-gray-800: #424242;
+  --hw-color-gray-900: #212121;
+  --hw-color-blue-100: #CFE2FF;
+  --hw-color-blue-200: #9EC5FE;
+  --hw-color-blue-300: #6EA8FE;
+  --hw-color-blue-400: #3D8BFD;
+  --hw-color-blue-500: #0D6EFD;
+  --hw-color-blue-600: #0A58CA;
+  --hw-color-blue-700: #084298;
+  --hw-color-blue-800: #052C65;
+  --hw-color-blue-900: #031633;
+  --hw-color-indigo-100: #E0CFFC;
+  --hw-color-indigo-200: #C29FFA;
+  --hw-color-indigo-300: #A370F7;
+  --hw-color-indigo-400: #8540F5;
+  --hw-color-indigo-500: #6610F2;
+  --hw-color-indigo-600: #520DC2;
+  --hw-color-indigo-700: #3D0A91;
+  --hw-color-indigo-800: #290661;
+  --hw-color-indigo-900: #140330;
+  --hw-color-purple-100: #E2D9F3;
+  --hw-color-purple-200: #C5B3E6;
+  --hw-color-purple-300: #A98EDA;
+  --hw-color-purple-400: #8C68CD;
+  --hw-color-purple-500: #6F42C1;
+  --hw-color-purple-600: #59359A;
+  --hw-color-purple-700: #432874;
+  --hw-color-purple-800: #2C1A4D;
+  --hw-color-purple-900: #160D27;
+  --hw-color-pink-100: #F7D6E6;
+  --hw-color-pink-200: #EFADCE;
+  --hw-color-pink-300: #E685B5;
+  --hw-color-pink-400: #DE5C9D;
+  --hw-color-pink-500: #D63384;
+  --hw-color-pink-600: #AB296A;
+  --hw-color-pink-700: #801F4F;
+  --hw-color-pink-800: #561435;
+  --hw-color-pink-900: #2B0A1A;
+  --hw-color-red-100: #F8D7DA;
+  --hw-color-red-200: #F1AEB5;
+  --hw-color-red-300: #EA868F;
+  --hw-color-red-400: #E35D6A;
+  --hw-color-red-500: #DC3545;
+  --hw-color-red-600: #B02A37;
+  --hw-color-red-700: #842029;
+  --hw-color-red-800: #58151C;
+  --hw-color-red-900: #2C0B0E;
+  --hw-color-orange-100: #FFE5D0;
+  --hw-color-orange-200: #FECBA1;
+  --hw-color-orange-300: #FEB272;
+  --hw-color-orange-400: #FD9843;
+  --hw-color-orange-500: #FD7E14;
+  --hw-color-orange-600: #CA6510;
+  --hw-color-orange-700: #984C0C;
+  --hw-color-orange-800: #653208;
+  --hw-color-orange-900: #331904;
+  --hw-color-yellow-100: #FFF3CD;
+  --hw-color-yellow-200: #FFE69C;
+  --hw-color-yellow-300: #FFDA6A;
+  --hw-color-yellow-400: #FFCD39;
+  --hw-color-yellow-500: #FFC107;
+  --hw-color-yellow-600: #CC9A06;
+  --hw-color-yellow-700: #997404;
+  --hw-color-yellow-800: #664D03;
+  --hw-color-yellow-900: #332701;
+  --hw-color-green-100: #D1E7DD;
+  --hw-color-green-200: #A3CFBB;
+  --hw-color-green-300: #75B798;
+  --hw-color-green-400: #479F76;
+  --hw-color-green-500: #198754;
+  --hw-color-green-600: #146C43;
+  --hw-color-green-700: #0F5132;
+  --hw-color-green-800: #0A442D;
+  --hw-color-green-900: #051B11;
+  --hw-color-teal-100: #D2F4EA;
+  --hw-color-teal-200: #A6E9D5;
+  --hw-color-teal-300: #79DFC1;
+  --hw-color-teal-400: #4DD4AC;
+  --hw-color-teal-500: #20C997;
+  --hw-color-teal-600: #1AA179;
+  --hw-color-teal-700: #13795B;
+  --hw-color-teal-800: #0D503C;
+  --hw-color-teal-900: #06281E;
+  --hw-color-cyan-100: #CFF4FC;
+  --hw-color-cyan-200: #9EEAF9;
+  --hw-color-cyan-300: #6EDFF6;
+  --hw-color-cyan-400: #3DD5F3;
+  --hw-color-cyan-500: #0DCAF0;
+  --hw-color-cyan-600: #0AA2C0;
+  --hw-color-cyan-700: #087990;
+  --hw-color-cyan-800: #055160;
+  --hw-color-cyan-900: #032830;
+
+  /* ----- Type: families ----- */
+  --hw-family-changa-one: "Changa One";
+  --hw-family-manrope: "Manrope";
+
+  /* ----- Type: weights (Figma strings mapped to CSS numeric) ----- */
+  --hw-weight-regular: 400;
+  --hw-weight-bold: 700;
+
+  /* ----- Type: font sizes ----- */
+  --hw-size-xs: 10px;
+  --hw-size-s: 12px;
+  --hw-size-m: 14px;
+  --hw-size-l: 16px;
+  --hw-size-xl: 18px;
+  --hw-size-2xl: 20px;
+  --hw-size-3xl: 24px;
+  --hw-size-4xl: 28px;
+  --hw-size-5xl: 32px;
+  --hw-size-6xl: 40px;
+  --hw-size-7xl: 48px;
+  --hw-size-8xl: 56px;
+  --hw-size-9xl: 64px;
+  --hw-size-10xl: 72px;
+
+  /* ----- Type: line heights ----- */
+  --hw-line-height-xs: 14px;
+  --hw-line-height-s: 16px;
+  --hw-line-height-m: 20px;
+  --hw-line-height-l: 24px;
+  --hw-line-height-xl: 26px;
+  --hw-line-height-2xl: 28px;
+  --hw-line-height-3xl: 32px;
+  --hw-line-height-4xl: 36px;
+  --hw-line-height-5xl: 40px;
+  --hw-line-height-6xl: 48px;
+  --hw-line-height-7xl: 56px;
+  --hw-line-height-8xl: 64px;
+  --hw-line-height-9xl: 72px;
+  --hw-line-height-10xl: 80px;
+
+  /* ----- Type: letter spacing ----- */
+  --hw-letter-spacing-xs: -1px;
+  --hw-letter-spacing-s: -0.5px;
+  --hw-letter-spacing-none: 0px;
+
+  /* ----- Spacing ----- */
+  --hw-space-3xs: 0px;
+  --hw-space-2xs: 2px;
+  --hw-space-xs: 4px;
+  --hw-space-s: 8px;
+  --hw-space-m: 12px;
+  --hw-space-l: 16px;
+  --hw-space-xl: 24px;
+  --hw-space-2xl: 32px;
+  --hw-space-3xl: 40px;
+  --hw-space-4xl: 48px;
+  --hw-space-5xl: 56px;
+  --hw-space-6xl: 64px;
+  --hw-space-7xl: 72px;
+  --hw-space-8xl: 80px;
+  --hw-space-9xl: 88px;
+  --hw-space-10xl: 96px;
+  --hw-space-11xl: 104px;
+  --hw-space-12xl: 112px;
+
+  /* ----- Border radius ----- */
+  --hw-radius-circle: 50%;  /* full round regardless of element size (avatars, icon buttons) — % is required for this */
+  --hw-radius-pill: 999px;
+  --hw-radius-l: 16px;
+  --hw-radius-m: 12px;
+  --hw-radius-s: 8px;
+  --hw-radius-xs: 4px;
+  --hw-radius-none: 0px;
+
+  /* ----- Border width ----- */
+  --hw-border-width-xl: 8px;
+  --hw-border-width-l: 4px;
+  --hw-border-width-m: 2px;
+  --hw-border-width-s: 1.5px;
+  --hw-border-width-xs: 1px;
+
+  /* ----- Breakpoints (reference only — CSS custom props can't drive @media) ----- */
+  --hw-bp-xl: 1440px;
+  --hw-bp-l: 1024px;
+  --hw-bp-m: 768px;
+  --hw-bp-s: 393px;
+
+  /* ----- Motion (set directly — no Figma export) ----- */
+  --hw-duration-fast: 100ms;
+  --hw-duration-base: 150ms;
+  --hw-duration-slow: 250ms;
+  --hw-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Scroll-reveal tier — page-level entrance, deliberately slower than the
+     micro-interaction durations above (Phase 4b). */
+  --hw-duration-reveal: 600ms;
+  --hw-reveal-offset: 24px;
+  --hw-reveal-blur: 6px;
+  --hw-stagger-step: 80ms;
+}

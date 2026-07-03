@@ -1,0 +1,290 @@
+/* ==========================================================================
+   Handiwork — SEMANTIC  (generated + hand-authored alias layer)
+   Role-based tokens that reference primitives. Light in :root, Dark captured
+   as an UNWIRED [data-theme="dark"] block (backlog — not referenced anywhere).
+   ========================================================================== */
+:root {
+  /* ----- Font roles ----- */
+  --hw-font-heading: var(--hw-family-changa-one), system-ui, -apple-system, sans-serif;
+  --hw-font-body:    var(--hw-family-manrope), system-ui, -apple-system, sans-serif;
+
+  /* ----- Semantic color roles (Light) ----- */
+  --hw-logo-dark: var(--hw-color-brand-primary-color-dark);
+  --hw-logo-light: var(--hw-color-brand-primary-color);
+  --hw-bg-default: var(--hw-color-gray-100);
+  --hw-bg-primary-alpha: var(--hw-color-brand-primary-color-dark-alpha);
+  --hw-bg-default-2: var(--hw-color-default-white);  /* FLAGGED (TOKEN-GOVERNANCE §3): purpose unconfirmed — do not use in components yet */
+  --hw-bg-subtle: var(--hw-color-gray-200);
+  --hw-bg-surface: var(--hw-color-gray-100);
+  --hw-bg-elevated: var(--hw-color-gray-200);
+  --hw-bg-hover: var(--hw-color-gray-300);
+  --hw-bg-pressed: var(--hw-color-gray-400);
+  --hw-bg-inverted: var(--hw-color-gray-900);
+  --hw-text-primary: var(--hw-color-gray-900);
+  --hw-text-secondary: var(--hw-color-gray-700);
+  --hw-text-tertiary: var(--hw-color-gray-600);
+  --hw-text-placeholder: var(--hw-color-gray-500);
+  --hw-text-disabled: var(--hw-color-gray-400);
+  --hw-text-inverse: var(--hw-color-gray-100);
+  --hw-text-link: var(--hw-color-brand-primary-600);
+  --hw-border-default: var(--hw-color-gray-300);
+  --hw-border-default-2: var(--hw-color-brand-primary-100);  /* FLAGGED (TOKEN-GOVERNANCE §3): purpose unconfirmed — do not use in components yet */
+  --hw-border-strong: var(--hw-color-gray-500);
+  --hw-border-divider: var(--hw-color-gray-200);
+  --hw-border-disabled: var(--hw-color-gray-200);
+  --hw-border-focus: var(--hw-color-brand-primary-500);
+  --hw-button-primary-bg-default: var(--hw-color-brand-primary-900);
+  --hw-button-primary-bg-hover: var(--hw-color-brand-primary-800);
+  --hw-button-primary-bg-pressed: var(--hw-color-brand-primary-800);
+  --hw-button-primary-bg-disabled: var(--hw-color-gray-200);
+  --hw-button-primary-text-default: var(--hw-color-brand-primary-500);
+  --hw-button-primary-text-disabled: var(--hw-color-gray-400);
+  --hw-button-secondary-bg-default: var(--hw-color-brand-primary-100);
+  --hw-button-secondary-bg-hover: var(--hw-color-brand-primary-200);
+  --hw-button-secondary-bg-pressed: var(--hw-color-brand-primary-300);
+  --hw-button-secondary-bg-disabled: var(--hw-color-gray-200);
+  --hw-button-secondary-text-default: var(--hw-color-brand-primary-900);
+  --hw-button-secondary-text-disabled: var(--hw-color-gray-400);
+  --hw-feedback-success-bg: var(--hw-color-green-100);
+  --hw-feedback-success-border: var(--hw-color-green-300);
+  --hw-feedback-success-text: var(--hw-color-green-700);
+  --hw-feedback-warning-bg: var(--hw-color-yellow-100);
+  --hw-feedback-warning-border: var(--hw-color-yellow-300);
+  --hw-feedback-warning-text: var(--hw-color-yellow-700);
+  --hw-feedback-error-bg: var(--hw-color-red-100);
+  --hw-feedback-error-border: var(--hw-color-red-300);
+  --hw-feedback-error-text: var(--hw-color-red-500);
+  --hw-feedback-info-bg: var(--hw-color-blue-100);
+  --hw-feedback-info-border: var(--hw-color-blue-300);
+  --hw-feedback-info-text: var(--hw-color-blue-700);
+  --hw-input-bg: var(--hw-color-default-white);
+  --hw-input-bg-2: var(--hw-color-default-white);  /* FLAGGED (TOKEN-GOVERNANCE §3): purpose unconfirmed — do not use in components yet */
+  --hw-input-border: var(--hw-color-gray-300);
+  --hw-input-placeholder: var(--hw-color-gray-500);
+  --hw-input-text: var(--hw-color-gray-900);
+  --hw-icon-primary: var(--hw-color-brand-primary-700);
+  --hw-icon-tertiary: var(--hw-color-gray-600);
+  --hw-icon-secondary: var(--hw-color-gray-900);
+}
+
+[data-theme="dark"] {
+  /* Dark mode — captured per COMPONENT-BUILD-RULES "Theming scope"; BACKLOG.
+     Not wired to any switcher, not referenced by any component. */
+  --hw-logo-dark: var(--hw-color-brand-primary-color);
+  --hw-logo-light: var(--hw-color-brand-primary-color-dark);
+  --hw-bg-default: var(--hw-color-gray-900);
+  --hw-bg-primary-alpha: var(--hw-color-brand-primary-light-alpha);
+  --hw-bg-default-2: var(--hw-color-brand-primary-900);  /* FLAGGED (TOKEN-GOVERNANCE §3): purpose unconfirmed — do not use in components yet */
+  --hw-bg-subtle: var(--hw-color-gray-800);
+  --hw-bg-surface: var(--hw-color-gray-900);
+  --hw-bg-elevated: var(--hw-color-gray-800);
+  --hw-bg-hover: var(--hw-color-gray-700);
+  --hw-bg-pressed: var(--hw-color-gray-600);
+  --hw-bg-inverted: var(--hw-color-gray-100);
+  --hw-text-primary: var(--hw-color-gray-100);
+  --hw-text-secondary: var(--hw-color-gray-300);
+  --hw-text-tertiary: var(--hw-color-gray-400);
+  --hw-text-placeholder: var(--hw-color-gray-500);
+  --hw-text-disabled: var(--hw-color-gray-600);
+  --hw-text-inverse: var(--hw-color-gray-900);
+  --hw-text-link: var(--hw-color-brand-primary-400);
+  --hw-border-default: var(--hw-color-gray-700);
+  --hw-border-default-2: var(--hw-color-brand-primary-800);  /* FLAGGED (TOKEN-GOVERNANCE §3): purpose unconfirmed — do not use in components yet */
+  --hw-border-strong: var(--hw-color-gray-500);
+  --hw-border-divider: var(--hw-color-gray-800);
+  --hw-border-disabled: var(--hw-color-gray-700);
+  --hw-border-focus: var(--hw-color-brand-primary-500);
+  --hw-button-primary-bg-default: var(--hw-color-brand-primary-200);
+  --hw-button-primary-bg-hover: var(--hw-color-brand-primary-300);
+  --hw-button-primary-bg-pressed: var(--hw-color-brand-primary-200);
+  --hw-button-primary-bg-disabled: var(--hw-color-gray-800);
+  --hw-button-primary-text-default: var(--hw-color-brand-primary-900);
+  --hw-button-primary-text-disabled: var(--hw-color-gray-600);
+  --hw-button-secondary-bg-default: var(--hw-color-brand-primary-900);
+  --hw-button-secondary-bg-hover: var(--hw-color-brand-primary-800);
+  --hw-button-secondary-bg-pressed: var(--hw-color-brand-primary-700);
+  --hw-button-secondary-bg-disabled: var(--hw-color-gray-800);
+  --hw-button-secondary-text-default: var(--hw-color-brand-primary-100);
+  --hw-button-secondary-text-disabled: var(--hw-color-gray-600);
+  --hw-feedback-success-bg: var(--hw-color-green-900);
+  --hw-feedback-success-border: var(--hw-color-green-700);
+  --hw-feedback-success-text: var(--hw-color-green-300);
+  --hw-feedback-warning-bg: var(--hw-color-yellow-900);
+  --hw-feedback-warning-border: var(--hw-color-yellow-700);
+  --hw-feedback-warning-text: var(--hw-color-yellow-300);
+  --hw-feedback-error-bg: var(--hw-color-red-900);
+  --hw-feedback-error-border: var(--hw-color-red-700);
+  --hw-feedback-error-text: var(--hw-color-red-400);
+  --hw-feedback-info-bg: var(--hw-color-blue-900);
+  --hw-feedback-info-border: var(--hw-color-blue-700);
+  --hw-feedback-info-text: var(--hw-color-blue-300);
+  --hw-input-bg: var(--hw-color-gray-900);
+  --hw-input-bg-2: var(--hw-color-brand-primary-900);  /* FLAGGED (TOKEN-GOVERNANCE §3): purpose unconfirmed — do not use in components yet */
+  --hw-input-border: var(--hw-color-gray-700);
+  --hw-input-placeholder: var(--hw-color-gray-500);
+  --hw-input-text: var(--hw-color-gray-100);
+  --hw-icon-primary: var(--hw-color-brand-primary-400);
+  --hw-icon-tertiary: var(--hw-color-gray-400);
+  --hw-icon-secondary: var(--hw-color-gray-100);
+}
+
+/* ==========================================================================
+   LEGACY COMPATIBILITY ALIASES — Option A (TOKEN-GOVERNANCE.md §4)
+   Keeps every old flat --hw-* name alive so sidebar.css / existing pages work
+   unmodified. Do not use these in NEW code. Remove in the later Option B pass.
+   ========================================================================== */
+:root {
+  /* Brand */
+  --hw-primary:         var(--hw-color-brand-primary-500);
+  --hw-primary-dark:    var(--hw-color-brand-primary-900);
+  --hw-primary-light:   var(--hw-color-brand-primary-100);
+  --hw-secondary:       var(--hw-color-brand-secondary-500);
+  --hw-secondary-dark:  var(--hw-color-brand-secondary-900);
+  --hw-secondary-light: var(--hw-color-brand-secondary-100);
+
+  /* Neutrals */
+  --hw-white: var(--hw-color-default-white);
+  --hw-black: var(--hw-color-default-black);
+  --hw-gray-100: var(--hw-color-gray-100);
+  --hw-gray-200: var(--hw-color-gray-200);
+  --hw-gray-300: var(--hw-color-gray-300);
+  --hw-gray-400: var(--hw-color-gray-400);
+  --hw-gray-500: var(--hw-color-gray-500);
+  --hw-gray-600: var(--hw-color-gray-600);
+  --hw-gray-700: var(--hw-color-gray-700);
+  --hw-gray-800: var(--hw-color-gray-800);
+  --hw-gray-900: var(--hw-color-gray-900);
+
+  /* Content roles — legacy aliases retained (Option A). */
+  --hw-content-primary:  var(--hw-text-primary);   /* #212121 */
+  --hw-content-tertiary: var(--hw-text-tertiary);  /* #757575 */
+
+  /* Orphaned legacy value, no Figma source — kept only for the Colors-tab 'Dark' swatch */
+  --hw-dark: #343A40;
+
+  /* RETIRED in Phase 2 finalization — names removed, call sites migrated to
+     semantic tokens:
+       heading-title    -> text-primary   (#152536 -> #212121)
+       body-text        -> text-secondary (#6B7176 -> #616161)
+       border-subtle    -> border-divider (#E5E5E5 -> #EEEEEE)
+       content-secondary-> text-secondary (#424242 -> #616161) */
+
+  /* Flat status colors -> new 3-role feedback text (all currently unused).
+     Option A corrected values. */
+  --hw-success: var(--hw-feedback-success-text); /* was #198754 -> #0F5132 */
+  --hw-warning: var(--hw-feedback-warning-text); /* was #FFC107 -> #997404 */
+  --hw-danger:  var(--hw-feedback-error-text);   /* #DC3545 — unchanged */
+  --hw-info:    var(--hw-feedback-info-text);    /* was #0DCAF0 -> #084298 */
+
+  /* Extended palette flat aliases (read by the Colors tab) */
+  --hw-blue-100: var(--hw-color-blue-100);
+  --hw-blue-200: var(--hw-color-blue-200);
+  --hw-blue-300: var(--hw-color-blue-300);
+  --hw-blue-400: var(--hw-color-blue-400);
+  --hw-blue-500: var(--hw-color-blue-500);
+  --hw-blue-600: var(--hw-color-blue-600);
+  --hw-blue-700: var(--hw-color-blue-700);
+  --hw-blue-800: var(--hw-color-blue-800);
+  --hw-blue-900: var(--hw-color-blue-900);
+  --hw-indigo-100: var(--hw-color-indigo-100);
+  --hw-indigo-200: var(--hw-color-indigo-200);
+  --hw-indigo-300: var(--hw-color-indigo-300);
+  --hw-indigo-400: var(--hw-color-indigo-400);
+  --hw-indigo-500: var(--hw-color-indigo-500);
+  --hw-indigo-600: var(--hw-color-indigo-600);
+  --hw-indigo-700: var(--hw-color-indigo-700);
+  --hw-indigo-800: var(--hw-color-indigo-800);
+  --hw-indigo-900: var(--hw-color-indigo-900);
+  --hw-purple-100: var(--hw-color-purple-100);
+  --hw-purple-200: var(--hw-color-purple-200);
+  --hw-purple-300: var(--hw-color-purple-300);
+  --hw-purple-400: var(--hw-color-purple-400);
+  --hw-purple-500: var(--hw-color-purple-500);
+  --hw-purple-600: var(--hw-color-purple-600);
+  --hw-purple-700: var(--hw-color-purple-700);
+  --hw-purple-800: var(--hw-color-purple-800);
+  --hw-purple-900: var(--hw-color-purple-900);
+  --hw-pink-100: var(--hw-color-pink-100);
+  --hw-pink-200: var(--hw-color-pink-200);
+  --hw-pink-300: var(--hw-color-pink-300);
+  --hw-pink-400: var(--hw-color-pink-400);
+  --hw-pink-500: var(--hw-color-pink-500);
+  --hw-pink-600: var(--hw-color-pink-600);
+  --hw-pink-700: var(--hw-color-pink-700);
+  --hw-pink-800: var(--hw-color-pink-800);
+  --hw-pink-900: var(--hw-color-pink-900);
+  --hw-red-100: var(--hw-color-red-100);
+  --hw-red-200: var(--hw-color-red-200);
+  --hw-red-300: var(--hw-color-red-300);
+  --hw-red-400: var(--hw-color-red-400);
+  --hw-red-500: var(--hw-color-red-500);
+  --hw-red-600: var(--hw-color-red-600);
+  --hw-red-700: var(--hw-color-red-700);
+  --hw-red-800: var(--hw-color-red-800);
+  --hw-red-900: var(--hw-color-red-900);
+  --hw-orange-100: var(--hw-color-orange-100);
+  --hw-orange-200: var(--hw-color-orange-200);
+  --hw-orange-300: var(--hw-color-orange-300);
+  --hw-orange-400: var(--hw-color-orange-400);
+  --hw-orange-500: var(--hw-color-orange-500);
+  --hw-orange-600: var(--hw-color-orange-600);
+  --hw-orange-700: var(--hw-color-orange-700);
+  --hw-orange-800: var(--hw-color-orange-800);
+  --hw-orange-900: var(--hw-color-orange-900);
+  --hw-yellow-100: var(--hw-color-yellow-100);
+  --hw-yellow-200: var(--hw-color-yellow-200);
+  --hw-yellow-300: var(--hw-color-yellow-300);
+  --hw-yellow-400: var(--hw-color-yellow-400);
+  --hw-yellow-500: var(--hw-color-yellow-500);
+  --hw-yellow-600: var(--hw-color-yellow-600);
+  --hw-yellow-700: var(--hw-color-yellow-700);
+  --hw-yellow-800: var(--hw-color-yellow-800);
+  --hw-yellow-900: var(--hw-color-yellow-900);
+  --hw-green-100: var(--hw-color-green-100);
+  --hw-green-200: var(--hw-color-green-200);
+  --hw-green-300: var(--hw-color-green-300);
+  --hw-green-400: var(--hw-color-green-400);
+  --hw-green-500: var(--hw-color-green-500);
+  --hw-green-600: var(--hw-color-green-600);
+  --hw-green-700: var(--hw-color-green-700);
+  --hw-green-800: var(--hw-color-green-800);
+  --hw-green-900: var(--hw-color-green-900);
+  --hw-teal-100: var(--hw-color-teal-100);
+  --hw-teal-200: var(--hw-color-teal-200);
+  --hw-teal-300: var(--hw-color-teal-300);
+  --hw-teal-400: var(--hw-color-teal-400);
+  --hw-teal-500: var(--hw-color-teal-500);
+  --hw-teal-600: var(--hw-color-teal-600);
+  --hw-teal-700: var(--hw-color-teal-700);
+  --hw-teal-800: var(--hw-color-teal-800);
+  --hw-teal-900: var(--hw-color-teal-900);
+  --hw-cyan-100: var(--hw-color-cyan-100);
+  --hw-cyan-200: var(--hw-color-cyan-200);
+  --hw-cyan-300: var(--hw-color-cyan-300);
+  --hw-cyan-400: var(--hw-color-cyan-400);
+  --hw-cyan-500: var(--hw-color-cyan-500);
+  --hw-cyan-600: var(--hw-color-cyan-600);
+  --hw-cyan-700: var(--hw-color-cyan-700);
+  --hw-cyan-800: var(--hw-color-cyan-800);
+  --hw-cyan-900: var(--hw-color-cyan-900);
+
+  /* Type scale legacy short names (typography.css uses --hw-lh-* / --hw-ls-*).
+     --hw-size-* / --hw-space-* / --hw-weight-* already match primitive names. */
+  --hw-lh-xs: var(--hw-line-height-xs);
+  --hw-lh-s: var(--hw-line-height-s);
+  --hw-lh-m: var(--hw-line-height-m);
+  --hw-lh-l: var(--hw-line-height-l);
+  --hw-lh-xl: var(--hw-line-height-xl);
+  --hw-lh-2xl: var(--hw-line-height-2xl);
+  --hw-lh-3xl: var(--hw-line-height-3xl);
+  --hw-lh-4xl: var(--hw-line-height-4xl);
+  --hw-lh-5xl: var(--hw-line-height-5xl);
+  --hw-lh-6xl: var(--hw-line-height-6xl);
+  --hw-lh-7xl: var(--hw-line-height-7xl);
+  --hw-lh-8xl: var(--hw-line-height-8xl);
+  --hw-lh-9xl: var(--hw-line-height-9xl);
+  --hw-lh-10xl: var(--hw-line-height-10xl);
+  --hw-ls-none: var(--hw-letter-spacing-none);
+  --hw-ls-s: var(--hw-letter-spacing-s);
+  --hw-ls-xs: var(--hw-letter-spacing-xs);
+}

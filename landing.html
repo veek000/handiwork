@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Handiwork — Your Handy Home Partner</title>
+<link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/typography.css" />
+<link rel="stylesheet" href="assets/css/button.css" />
+<script src="assets/icons/hw-icons.js"></script>
+<script>
+  /* Add the reveal-ready flag before first paint so there's no flash — but ONLY if
+     IntersectionObserver is available, so unsupported/failed JS leaves content visible. */
+  if ('IntersectionObserver' in window) document.documentElement.classList.add('js-reveal-ready');
+</script>
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--hw-white); color: var(--hw-content-primary); overflow-x: hidden; }
+  a { color: inherit; }
+
+  /* ===================== Scroll reveal (Phase 4b) =====================
+     Hidden initial state applies ONLY under .js-reveal-ready (added by JS with
+     IntersectionObserver support) — no JS / no support ⇒ content fully visible. */
+  html.js-reveal-ready .reveal {
+    opacity: 0;
+    transform: translateY(var(--hw-reveal-offset));
+    filter: blur(var(--hw-reveal-blur));
+    transition:
+      opacity var(--hw-duration-reveal) var(--hw-ease-standard),
+      transform var(--hw-duration-reveal) var(--hw-ease-standard),
+      filter var(--hw-duration-reveal) var(--hw-ease-standard);
+    transition-delay: calc(var(--reveal-i, 0) * var(--hw-stagger-step));
+  }
+  /* fade-only — bottom-anchored / decorative layers: opacity only, no slide or blur */
+  html.js-reveal-ready .reveal--fade {
+    transform: none; filter: none;
+    transition: opacity var(--hw-duration-reveal) var(--hw-ease-standard);
+    transition-delay: calc(var(--reveal-i, 0) * var(--hw-stagger-step));
+  }
+  html.js-reveal-ready [data-reveal].is-visible .reveal,
+  html.js-reveal-ready .reveal.is-visible {
+    opacity: 1; transform: none; filter: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    /* opacity is significant motion for a page-level entrance — skip it entirely, no transition */
+    html.js-reveal-ready .reveal,
+    html.js-reveal-ready .reveal--fade,
+    html.js-reveal-ready [data-reveal].is-visible .reveal,
+    html.js-reveal-ready .reveal.is-visible {
+      opacity: 1; transform: none; filter: none; transition: none;
+    }
+  }
+
+  /* ===================== Header ===================== */
+  .lp-header { position: relative; z-index: 30; background: var(--hw-white); }
+  .lp-header__inner {
+    max-width: 1440px; margin: 0 auto; padding: 20px 100px;
+    display: flex; align-items: center; gap: 32px;
+  }
+  .lp-nav { flex: 1 1 0; display: flex; gap: 32px; align-items: center; }
+  .lp-nav a {
+    font-family: var(--hw-font-heading); font-size: var(--hw-size-l); line-height: var(--hw-line-height-l);
+    letter-spacing: var(--hw-letter-spacing-s); text-decoration: none; color: var(--hw-content-primary);
+    transition: color var(--hw-duration-fast) var(--hw-ease-standard);
+  }
+  .lp-nav a:hover { color: var(--hw-primary); }
+  .lp-logo { flex: 0 0 auto; display: inline-flex; }
+  .lp-logo img { height: 32px; width: auto; display: block; }
+  .lp-actions { flex: 1 1 0; display: flex; gap: 12px; align-items: center; justify-content: flex-end; }
+
+  .lp-burger {
+    display: none; position: relative; align-items: center; justify-content: center; margin-left: auto;
+    width: 40px; height: 40px; padding: 8px; border: 0; border-radius: 8px;
+    background: transparent; color: var(--hw-content-primary); cursor: pointer;
+    transition: background-color var(--hw-duration-fast) var(--hw-ease-standard);
+  }
+  .lp-burger:hover { background: var(--hw-gray-100); }
+  /* hamburger ⇄ X: cross-rotate + fade rather than an instant display swap */
+  .lp-burger svg {
+    position: absolute; top: 50%; left: 50%; width: 24px; height: 24px;
+    transform: translate(-50%, -50%);
+    transition: opacity var(--hw-duration-base) var(--hw-ease-standard),
+                transform var(--hw-duration-base) var(--hw-ease-standard);
+  }
+  .lp-burger .ic-close { opacity: 0; transform: translate(-50%, -50%) rotate(-90deg); }
+  body.nav-open .lp-burger .ic-open { opacity: 0; transform: translate(-50%, -50%) rotate(90deg); }
+  body.nav-open .lp-burger .ic-close { opacity: 1; transform: translate(-50%, -50%) rotate(0deg); }
+
+  /* Mobile dropdown menu panel + scrim (only reachable on mobile) */
+  .lp-menu { display: none; }
+  .lp-scrim { display: none; }
+  @keyframes lp-item-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* ===================== Hero ===================== */
+  .hero {
+    position: relative; overflow: hidden; background: var(--hw-white);
+    min-height: max(760px, calc(100vh - 72px));   /* header is ~72px tall */
+    display: flex; flex-direction: column;
+  }
+  .hero__inner {
+    position: relative; z-index: 2; width: 100%; max-width: 1440px; margin: 0 auto;
+    padding: 88px 100px 0;
+  }
+  .hero__text { max-width: 620px; }
+  .hero__title {
+    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-content-primary);
+    font-size: var(--hw-size-10xl); line-height: var(--hw-lh-10xl); letter-spacing: var(--hw-ls-xs);
+  }
+  .hero__subtitle {
+    margin: 16px 0 0; font-family: var(--hw-font-body); color: var(--hw-content-tertiary);
+    font-size: var(--hw-size-2xl); line-height: var(--hw-lh-2xl);
+  }
+  .hero__search { display: flex; gap: 16px; margin-top: 32px; }
+  .hero__search input {
+    flex: 1 1 0; min-width: 0; width: 100%; height: 48px; padding: 0 16px; border: 0; border-radius: 0;
+    background: var(--hw-color-gray-200); font-family: var(--hw-font-body); font-size: var(--hw-size-l); color: var(--hw-content-primary);
+    -webkit-appearance: none; appearance: none; box-sizing: border-box;
+    transition: outline-color var(--hw-duration-fast) var(--hw-ease-standard);
+  }
+  .hero__search input::-webkit-search-decoration,
+  .hero__search input::-webkit-search-cancel-button { -webkit-appearance: none; }
+  .hero__search input::placeholder { color: var(--hw-text-placeholder); }
+  .hero__search input:focus { outline: 2px solid var(--hw-primary); outline-offset: -2px; }
+  .hero__search .hw-button { height: 48px; }
+
+  .hero__art { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; pointer-events: none; }
+  .hero__art img { display: block; width: 100%; height: auto; }
+
+  /* ===================== About / Two audiences ===================== */
+  .about { background: var(--hw-white); overflow: hidden; }
+  .about__inner {
+    max-width: 1440px; margin: 0 auto; padding: var(--hw-space-6xl) 100px;
+    display: flex; align-items: center; justify-content: center; gap: var(--hw-space-4xl);
+  }
+  .about__content {
+    flex: 1 1 0; min-width: 0;
+    display: flex; flex-direction: column; align-items: flex-start; gap: var(--hw-space-2xl);
+  }
+  .about__head { display: flex; flex-direction: column; align-items: flex-start; gap: var(--hw-space-l); }
+  .about__badge {
+    display: inline-flex; align-items: center;
+    padding: var(--hw-space-xs) var(--hw-space-s);
+    background: var(--hw-button-secondary-bg-default); color: var(--hw-color-brand-primary-800);
+    font-family: var(--hw-font-body); font-size: var(--hw-size-m); line-height: var(--hw-line-height-m);
+  }
+  .about__copy { display: flex; flex-direction: column; gap: var(--hw-space-2xl); max-width: 596px; }
+  .about__title {
+    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-color-brand-primary-900);
+    font-size: var(--hw-size-7xl); line-height: var(--hw-line-height-7xl); letter-spacing: var(--hw-letter-spacing-s);
+  }
+  .about__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--hw-space-l); }
+  .about__item { display: flex; flex-direction: column; gap: var(--hw-space-s); }
+  .about__item-head { display: flex; align-items: center; gap: var(--hw-space-s); color: var(--hw-text-primary); }
+  .about__icon { flex: 0 0 auto; }
+  .about__item-title {
+    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-text-primary);
+    font-size: var(--hw-size-3xl); line-height: var(--hw-line-height-3xl); letter-spacing: var(--hw-letter-spacing-s);
+  }
+  .about__item-body {
+    margin: 0; font-family: var(--hw-font-body); color: var(--hw-text-tertiary);
+    font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl);
+  }
+  /* Figma: 596-wide column, 844.5px vector top-anchored, bleeding off right + bottom.
+     Section clips the overflow (.about { overflow:hidden }). 844.5/596 ≈ 142%. */
+  .about__art { flex: 1 1 0; min-width: 0; align-self: stretch; position: relative; }
+  .about__art img {
+    position: absolute; top: 0; left: 0;
+    width: 142%; max-width: none; height: auto;
+  }
+
+  /* ===================== Services / Category grid ===================== */
+  .services { background: var(--hw-white); }
+  .services__inner {
+    max-width: 1440px; margin: 0 auto; padding: var(--hw-space-6xl) 100px;
+    display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-4xl);
+  }
+  .services__head { width: 100%; display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-l); }
+  .services__badge {
+    display: inline-flex; align-items: center;
+    padding: var(--hw-space-xs) var(--hw-space-s);
+    background: var(--hw-color-brand-primary-100); color: var(--hw-color-brand-primary-800);
+    font-family: var(--hw-font-body); font-size: var(--hw-size-m); line-height: var(--hw-line-height-m);
+  }
+  .services__heading { display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-m); text-align: center; }
+  .services__title {
+    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-color-brand-primary-900);
+    font-size: var(--hw-size-7xl); line-height: var(--hw-line-height-7xl); letter-spacing: var(--hw-letter-spacing-s);
+  }
+  .services__title-accent { color: var(--hw-color-brand-primary-500); }
+  .services__subtitle {
+    margin: 0; max-width: 800px; font-family: var(--hw-font-body); color: var(--hw-text-tertiary);
+    font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl);
+  }
+  .services__grid {
+    list-style: none; margin: 0; padding: 0; width: 100%; max-width: 1240px;
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--hw-space-2xl) var(--hw-space-3xl);
+  }
+  .service { display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-s); }
+  .service__tile {
+    width: 100%; aspect-ratio: 1 / 1; background: var(--hw-color-brand-primary-100);
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  .service__tile img { width: 76.5%; height: 76.5%; object-fit: contain; display: block; }
+  .service__label {
+    margin: 0; font-family: var(--hw-font-body); color: var(--hw-text-primary);
+    font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); text-align: center;
+  }
+
+  /* ===================== How it works / Step timeline ===================== */
+  .works { background: var(--hw-white); }
+  .works__inner {
+    max-width: 1440px; margin: 0 auto; padding: var(--hw-space-6xl) 100px;
+    display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-4xl);
+  }
+  .works__head { width: 100%; display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-l); }
+  .works__badge {
+    display: inline-flex; align-items: center;
+    padding: var(--hw-space-xs) var(--hw-space-s);
+    background: var(--hw-color-brand-primary-100); color: var(--hw-color-brand-primary-800);
+    font-family: var(--hw-font-body); font-size: var(--hw-size-m); line-height: var(--hw-line-height-m);
+  }
+  .works__heading { display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-m); text-align: center; }
+  .works__title {
+    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-color-brand-primary-900);
+    font-size: var(--hw-size-7xl); line-height: var(--hw-line-height-7xl); letter-spacing: var(--hw-letter-spacing-s);
+  }
+  .works__subtitle {
+    margin: 0; max-width: 800px; font-family: var(--hw-font-body); color: var(--hw-text-tertiary);
+    font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl);
+  }
+  .works__steps { position: relative; width: 100%; max-width: 1240px; display: flex; flex-direction: column; gap: var(--hw-space-6xl); }
+  .work-step { position: relative; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; column-gap: var(--hw-space-3xl); }
+  .work-step > * { grid-row: 1; }   /* keep text · badge · media on one row (avoid grid auto-placement bumping media down) */
+  /* connector: from this badge's centre down to the next badge's centre (steps ≈ equal height) */
+  .work-step:not(:last-child)::after {
+    content: ""; position: absolute; z-index: 0; left: 50%; top: 50%; transform: translateX(-50%);
+    width: 1px; height: calc(100% + var(--hw-space-6xl)); background: var(--hw-border-divider);
+  }
+  .work-step__badge {
+    grid-column: 2; position: relative; z-index: 1;
+    display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 32px;
+    background: var(--hw-color-brand-primary-900); color: var(--hw-color-default-white);
+    font-family: var(--hw-font-body); font-weight: var(--hw-weight-bold);
+    font-size: var(--hw-size-l); line-height: var(--hw-line-height-l);
+  }
+  .work-step__text { max-width: 403px; min-width: 0; display: flex; flex-direction: column; gap: var(--hw-space-xl); }
+  .work-step__copy { display: flex; flex-direction: column; gap: var(--hw-space-m); }
+  .work-step__title {
+    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-color-default-black);
+    font-size: var(--hw-size-5xl); line-height: var(--hw-line-height-5xl); letter-spacing: var(--hw-letter-spacing-s);
+  }
+  .work-step__body {
+    margin: 0; font-family: var(--hw-font-body); color: var(--hw-text-secondary);
+    font-size: var(--hw-size-l); line-height: var(--hw-line-height-l);
+  }
+  .work-step__media { max-width: 384px; min-width: 0; width: 100%; aspect-ratio: 384 / 252; }
+  .work-step__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* alternating sides: odd = text left / media right · even = media left / text right */
+  .work-step:nth-child(odd) .work-step__text  { grid-column: 1; justify-self: start; }
+  .work-step:nth-child(odd) .work-step__media { grid-column: 3; justify-self: end; }
+  .work-step:nth-child(even) .work-step__media { grid-column: 1; justify-self: start; }
+  .work-step:nth-child(even) .work-step__text  { grid-column: 3; justify-self: end; }
+
+  /* ===================== Power / Network + perks ===================== */
+  .power { background: var(--hw-white); }
+  .power__inner {
+    max-width: 1440px; margin: 0 auto; padding: var(--hw-space-6xl) 100px;
+    display: flex; align-items: stretch; gap: var(--hw-space-4xl);
+  }
+  .power__content { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; gap: var(--hw-space-2xl); }
+  .power__intro { width: 100%; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: var(--hw-space-l); }
+  .power__icon { width: 48px; height: 48px; display: block; }
+  .power__title {
+    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-color-default-black);
+    font-size: var(--hw-size-7xl); line-height: var(--hw-line-height-7xl); letter-spacing: var(--hw-letter-spacing-s);
+  }
+  .power__subtitle {
+    margin: 0; font-family: var(--hw-font-body); color: var(--hw-text-tertiary);
+    font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl);
+  }
+  .power__perks { width: 100%; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: var(--hw-space-s); }
+  .power__perks-title {
+    margin: 0; font-family: var(--hw-font-body); font-weight: var(--hw-weight-bold); color: var(--hw-text-tertiary);
+    font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl);
+  }
+  .power__perk-list { list-style: none; margin: 0; padding: 0; width: 100%; max-width: 596px; display: flex; flex-direction: column; gap: var(--hw-space-xs); }
+  .power__perk { display: flex; align-items: center; gap: var(--hw-space-s); padding: var(--hw-space-s) 0; color: var(--hw-text-primary); }
+  .power__perk hw-icon { flex: 0 0 auto; }
+  .power__perk span {
+    font-family: var(--hw-font-body); color: var(--hw-text-primary);
+    font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl);
+  }
+  /* image ships with the brand-primary-200 (#B6E3BD) panel baked in, so it covers the whole media box */
+  .power__media {
+    flex: 1 1 0; min-width: 0; position: relative; overflow: hidden;
+    background: var(--hw-color-brand-primary-200); min-height: 512px;
+  }
+  .power__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center bottom; display: block; }
+
+  /* ===================== Safety / Trust cards (dark) ===================== */
+  .safety { position: relative; overflow: hidden; background: var(--hw-color-brand-primary-800); }
+  .safety__inner {
+    position: relative; z-index: 1; max-width: 1440px; margin: 0 auto; padding: var(--hw-space-6xl) 100px;
+    display: flex; flex-direction: column; gap: var(--hw-space-6xl);
+  }
+  .safety__intro { display: flex; flex-direction: column; align-items: flex-start; gap: var(--hw-space-l); max-width: 700px; }
+  .safety__badge {
+    display: inline-flex; align-items: center; padding: var(--hw-space-xs) var(--hw-space-s);
+    background: var(--hw-color-brand-primary-100); color: var(--hw-color-brand-primary-900);
+    font-family: var(--hw-font-body); font-size: var(--hw-size-m); line-height: var(--hw-line-height-m);
+  }
+  .safety__title {
+    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-color-gray-100);
+    font-size: var(--hw-size-7xl); line-height: var(--hw-line-height-7xl); letter-spacing: var(--hw-letter-spacing-s);
+  }
+  .safety__subtitle {
+    margin: 0; font-family: var(--hw-font-body); color: var(--hw-color-gray-100);
+    font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl);
+  }
+  .safety__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--hw-space-2xl); max-width: 816px; }
+  .safety-card {
+    display: flex; flex-direction: column; gap: var(--hw-space-s); padding: var(--hw-space-xl);
+    background: var(--hw-color-green-800); box-shadow: 0 1px 2px rgba(16,24,40,0.04); color: var(--hw-text-inverse);
+  }
+  .safety-card__head { display: flex; align-items: center; gap: var(--hw-space-l); }
+  .safety-card__head hw-icon { flex: 0 0 auto; }
+  .safety-card__title {
+    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-text-inverse);
+    font-size: var(--hw-size-3xl); line-height: var(--hw-line-height-3xl); letter-spacing: var(--hw-letter-spacing-s);
+  }
+  .safety-card__body {
+    margin: 0; font-family: var(--hw-font-body); color: var(--hw-text-inverse);
+    font-size: var(--hw-size-l); line-height: var(--hw-line-height-l);
+  }
+  /* Figma (1440 frame): graphic at x=932 y=122 w=688.8 — left edge sits 212px right of frame centre,
+     top 122px, bleeds ~181px off the right (clipped by .safety overflow:hidden). Anchored to the
+     centred 1440 box via left:50% + margin-left so it holds position on any viewport width. */
+  .safety__decor { position: absolute; z-index: 0; top: 122px; left: 50%; margin-left: 212px; width: 688.8px; max-width: none; pointer-events: none; }
+  .safety__decor img { display: block; width: 100%; height: auto; }
+
+  /* ===================== FAQ / Accordion ===================== */
+  .faq { background: var(--hw-white); }
+  .faq__inner {
+    max-width: 1440px; margin: 0 auto; padding: var(--hw-space-6xl) 100px;
+    display: flex; align-items: stretch; gap: var(--hw-space-4xl);
+  }
+  .faq__aside { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; gap: var(--hw-space-2xl); }
+  .faq__intro { display: flex; flex-direction: column; align-items: flex-start; gap: var(--hw-space-l); }
+  .faq__badge {
+    display: inline-flex; align-items: center; padding: var(--hw-space-xs) var(--hw-space-s);
+    background: var(--hw-color-brand-primary-100); color: var(--hw-color-brand-primary-800);
+    font-family: var(--hw-font-body); font-size: var(--hw-size-m); line-height: var(--hw-line-height-m);
+  }
+  .faq__title {
+    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-color-default-black);
+    font-size: var(--hw-size-7xl); line-height: var(--hw-line-height-7xl); letter-spacing: var(--hw-letter-spacing-s);
+  }
+  .faq__subtitle {
+    margin: 0; font-family: var(--hw-font-body); color: var(--hw-text-tertiary);
+    font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl);
+  }
+  .faq__cta { display: flex; flex-direction: column; align-items: flex-start; gap: var(--hw-space-l); }
+  .faq__cta-label {
+    margin: 0; font-family: var(--hw-font-body); color: var(--hw-text-tertiary);
+    font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl);
+  }
+  .faq__list { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: var(--hw-space-l); }
+  .faq-item { border-bottom: var(--hw-border-width-xs) solid var(--hw-border-divider); }
+  .faq-item__q {
+    display: flex; align-items: center; gap: var(--hw-space-s); width: 100%; padding: var(--hw-space-m) 0;
+    background: none; border: 0; cursor: pointer; text-align: left;
+    font-family: var(--hw-font-body); color: var(--hw-text-primary);
+    font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl);
+    transition: color var(--hw-duration-fast) var(--hw-ease-standard);
+  }
+  .faq-item__q:hover { color: var(--hw-color-brand-primary-600); }
+  .faq-item__q-text { flex: 1 1 0; min-width: 0; }
+  .faq-item__icon { flex: 0 0 auto; display: inline-flex; transition: transform var(--hw-duration-base) var(--hw-ease-standard); }
+  .faq-item__q[aria-expanded="true"] .faq-item__icon { transform: rotate(180deg); }
+  .faq-item__a { overflow: hidden; max-height: 0; transition: max-height var(--hw-duration-base) var(--hw-ease-standard); }
+  .faq-item__a-inner {
+    padding: 0 0 var(--hw-space-m); margin: 0; max-width: 640px;
+    font-family: var(--hw-font-body); color: var(--hw-text-secondary);
+    font-size: var(--hw-size-l); line-height: var(--hw-line-height-l);
+  }
+
+  /* ===================== Reviews / Testimonial carousel ===================== */
+  .reviews { background: var(--hw-white); overflow: hidden; }
+  /* inner is full-width so the carousel can bleed to the screen edges; the header is capped/centred */
+  .reviews__inner {
+    max-width: none; padding: var(--hw-space-6xl) 0;
+    display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-4xl);
+  }
+  .reviews__head { width: 100%; max-width: 1440px; margin-inline: auto; box-sizing: border-box; padding-inline: 100px; display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-l); }
+  .reviews__badge {
+    display: inline-flex; align-items: center; padding: var(--hw-space-xs) var(--hw-space-s);
+    background: var(--hw-color-brand-primary-100); color: var(--hw-color-brand-primary-800);
+    font-family: var(--hw-font-body); font-size: var(--hw-size-m); line-height: var(--hw-line-height-m);
+  }
+  .reviews__heading { display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-m); text-align: center; }
+  .reviews__title {
+    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-color-brand-primary-900);
+    font-size: var(--hw-size-7xl); line-height: var(--hw-line-height-7xl); letter-spacing: var(--hw-letter-spacing-s);
+  }
+  .reviews__subtitle {
+    margin: 0; max-width: 800px; font-family: var(--hw-font-body); color: var(--hw-text-tertiary);
+    font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl);
+  }
+  /* Full-bleed swipe carousel: fixed 596px cards, the centred card is focused (full opacity),
+     neighbours bleed to the screen edges. Swipe/scroll moves focus. grid-auto-columns uses the
+     viewport's definite width — no flex-basis/100vw feedback loop. */
+  .reviews__viewport { width: 100%; min-width: 0; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .reviews__viewport::-webkit-scrollbar { display: none; }
+  .reviews__track { display: grid; grid-auto-flow: column; grid-auto-columns: 596px; gap: var(--hw-space-2xl); padding-inline: max(0px, calc(50% - 298px)); }
+  .review-card {
+    scroll-snap-align: center; display: flex; flex-direction: column; gap: var(--hw-space-l);
+    opacity: 0.5; transition: opacity var(--hw-duration-base) var(--hw-ease-standard);
+  }
+  .review-card.is-active { opacity: 1; }
+  .review-card__media { width: 100%; height: 320px; border: var(--hw-border-width-xs) solid var(--hw-border-default); overflow: hidden; }
+  .review-card__media img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+  .review-card__quote {
+    margin: 0; font-family: var(--hw-font-body); color: var(--hw-text-disabled);
+    font-size: var(--hw-size-l); line-height: var(--hw-line-height-l);
+  }
+  .review-card.is-active .review-card__quote { color: var(--hw-text-tertiary); }
+  .review-card__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--hw-space-l); width: 100%; }
+  .review-card__name {
+    margin: 0; flex: 1 1 0; min-width: 0; font-family: var(--hw-font-heading); color: var(--hw-text-disabled);
+    font-size: var(--hw-size-3xl); line-height: var(--hw-line-height-3xl); letter-spacing: var(--hw-letter-spacing-s);
+  }
+  .review-card.is-active .review-card__name { color: var(--hw-color-default-black); }
+  .review-card__cta { flex: 0 0 auto; padding: var(--hw-space-s) var(--hw-space-xl); }
+  .reviews__dots { display: none; gap: var(--hw-space-xs); align-items: center; justify-content: center; }
+  .reviews__dot { width: 8px; height: 8px; padding: 0; border: 0; cursor: pointer; background: var(--hw-color-brand-primary-200); transition: width var(--hw-duration-base) var(--hw-ease-standard), background-color var(--hw-duration-base) var(--hw-ease-standard); }
+  .reviews__dot.is-active { width: 32px; background: var(--hw-color-brand-primary-900); }
+
+  /* ===================== CTA banner + Footer ===================== */
+  .closing { background: var(--hw-white); }
+  .closing__inner { max-width: 1440px; margin: 0 auto; padding: var(--hw-space-6xl) 100px; display: flex; flex-direction: column; gap: var(--hw-space-4xl); }
+  .banner { position: relative; overflow: hidden; background: var(--hw-color-brand-primary-900); padding: var(--hw-space-6xl) var(--hw-space-xl); display: flex; justify-content: center; }
+  .banner__pattern { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+  /* Figma: a solid brand-900 rectangle with a heavy blur (≈40px) behind the text — its blurred
+     edges soften into the logo pattern. Sits above the pattern (z-0), below the text (z-1). */
+  .banner__glow {
+    position: absolute; z-index: 0; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 958px; max-width: 100%; height: 228px; pointer-events: none;
+    background: var(--hw-color-brand-primary-900); filter: blur(40px);
+  }
+  .banner__content { position: relative; z-index: 1; max-width: 900px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-xl); text-align: center; }
+  .banner__copy { display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-s); }
+  .banner__title {
+    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-color-default-white);
+    font-size: var(--hw-size-7xl); line-height: var(--hw-line-height-7xl); letter-spacing: var(--hw-letter-spacing-s);
+  }
+  .banner__subtitle {
+    margin: 0; font-family: var(--hw-font-body); color: var(--hw-color-gray-400);
+    font-size: var(--hw-size-l); line-height: var(--hw-line-height-l);
+  }
+  .banner__actions { display: flex; gap: var(--hw-space-l); flex-wrap: wrap; justify-content: center; }
+  .banner__btn {
+    display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: var(--hw-space-m) var(--hw-space-xl);
+    font-family: var(--hw-font-heading); font-weight: var(--hw-weight-regular); font-size: var(--hw-size-l); line-height: var(--hw-line-height-l);
+    letter-spacing: var(--hw-letter-spacing-s); border: 0; text-decoration: none; cursor: pointer; box-shadow: 0 1px 2px rgba(16,24,40,0.04);
+    transition: background-color var(--hw-duration-fast) var(--hw-ease-standard);
+  }
+  .banner__btn--brand { background: var(--hw-color-brand-primary-200); color: var(--hw-color-brand-primary-900); }
+  .banner__btn--brand:hover { background: var(--hw-color-brand-primary-300); }
+  .banner__btn--light { background: var(--hw-color-gray-100); color: var(--hw-color-brand-primary-900); }
+  .banner__btn--light:hover { background: var(--hw-color-gray-200); }
+
+  .footer { display: flex; flex-direction: column; gap: var(--hw-space-2xl); }
+  .footer__row { display: flex; align-items: center; justify-content: space-between; gap: var(--hw-space-xl); }
+  .footer__logo { flex: 1 1 0; display: inline-flex; }
+  .footer__logo img { height: 28px; width: auto; display: block; }
+  .footer__nav { display: flex; gap: var(--hw-space-4xl); }
+  .footer__link { font-family: var(--hw-font-body); font-weight: var(--hw-weight-bold); font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); color: var(--hw-text-primary); text-decoration: none; transition: color var(--hw-duration-fast) var(--hw-ease-standard); }
+  .footer__link:hover { color: var(--hw-color-brand-primary-600); }
+  .footer__social { flex: 1 1 0; display: flex; gap: var(--hw-space-xl); align-items: center; justify-content: flex-end; }
+  .footer__social a { display: inline-flex; transition: opacity var(--hw-duration-fast) var(--hw-ease-standard); }
+  .footer__social a:hover { opacity: 0.7; }
+  .footer__social img { width: 24px; height: 24px; display: block; }
+  .footer__legal-row { display: flex; align-items: center; justify-content: space-between; gap: var(--hw-space-xl); padding-top: var(--hw-space-2xl); }
+  .footer__copy { margin: 0; font-family: var(--hw-font-body); font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); color: var(--hw-text-secondary); }
+  .footer__legal { display: flex; gap: var(--hw-space-4xl); }
+  .footer__legal a { font-family: var(--hw-font-body); font-weight: var(--hw-weight-bold); font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); color: var(--hw-text-secondary); text-decoration: none; transition: color var(--hw-duration-fast) var(--hw-ease-standard); }
+  .footer__legal a:hover { color: var(--hw-color-brand-primary-600); }
+
+  /* ===================== Responsive ===================== */
+  @media (max-width: 1180px) {
+    .lp-header__inner { padding: 20px 40px; }
+    .hero__inner { padding: 120px 40px 400px; }
+    .about__inner { padding: var(--hw-space-6xl) 40px; }
+    .services__inner { padding: var(--hw-space-6xl) 40px; }
+    .works__inner { padding: var(--hw-space-6xl) 40px; }
+    .power__inner { padding: var(--hw-space-6xl) 40px; }
+    .safety__inner { padding: var(--hw-space-6xl) 40px; }
+    .faq__inner { padding: var(--hw-space-6xl) 40px; }
+    .reviews__head { padding-inline: 40px; }
+    .closing__inner { padding: var(--hw-space-6xl) 40px; }
+  }
+  @media (max-width: 900px) {
+    /* header → logo + burger (sticky, fixed 56px) */
+    .lp-header { position: sticky; top: 0; z-index: 40; }
+    .lp-header__inner { padding: 0 16px; min-height: 56px; gap: 12px; }
+    .lp-nav, .lp-actions { display: none; }
+    .lp-logo img { height: 24px; }
+    .lp-burger { display: inline-flex; }
+
+    /* lock body scroll while the menu is open */
+    body.nav-open { overflow: hidden; }
+
+    /* dropdown panel */
+    .lp-menu {
+      position: fixed; left: 0; right: 0; top: 56px; z-index: 35;
+      display: flex; flex-direction: column; gap: 16px; padding: 16px;
+      background: var(--hw-white);
+      box-shadow: 0 12px 16px -4px rgba(16,24,40,0.08), 0 4px 6px -2px rgba(16,24,40,0.03);
+      transform: translateY(-8px); opacity: 0; pointer-events: none;
+      transition: opacity var(--hw-duration-base) var(--hw-ease-standard), transform var(--hw-duration-base) var(--hw-ease-standard);
+    }
+    body.nav-open .lp-menu { transform: none; opacity: 1; pointer-events: auto; }
+    .lp-menu__links { display: flex; flex-direction: column; gap: 8px; }
+    .lp-menu__links a {
+      font-family: var(--hw-font-heading); font-size: var(--hw-size-3xl); line-height: var(--hw-lh-3xl);
+      letter-spacing: var(--hw-ls-s); color: var(--hw-content-primary); text-decoration: none; padding: 8px 0;
+      transition: color var(--hw-duration-fast) var(--hw-ease-standard);
+    }
+    .lp-menu__links a:hover { color: var(--hw-primary); }
+    .lp-menu__actions { display: flex; flex-direction: column; gap: 8px; }
+
+    /* menu items cascade in when the panel opens (animation, so the buttons keep their own
+       colour transition; delays reuse --hw-stagger-step) */
+    body.nav-open .lp-menu__links a,
+    body.nav-open .lp-menu__actions .hw-button {
+      animation: lp-item-in var(--hw-duration-base) var(--hw-ease-standard) both;
+    }
+    body.nav-open .lp-menu__links a:nth-child(1) { animation-delay: calc(1 * var(--hw-stagger-step)); }
+    body.nav-open .lp-menu__links a:nth-child(2) { animation-delay: calc(2 * var(--hw-stagger-step)); }
+    body.nav-open .lp-menu__links a:nth-child(3) { animation-delay: calc(3 * var(--hw-stagger-step)); }
+    body.nav-open .lp-menu__actions .hw-button:nth-child(1) { animation-delay: calc(4 * var(--hw-stagger-step)); }
+    body.nav-open .lp-menu__actions .hw-button:nth-child(2) { animation-delay: calc(5 * var(--hw-stagger-step)); }
+
+    /* dark scrim behind the panel */
+    .lp-scrim {
+      display: block; position: fixed; left: 0; right: 0; bottom: 0; top: 56px; z-index: 34;
+      background: var(--hw-color-gray-900); opacity: 0; pointer-events: none; transition: opacity var(--hw-duration-base) var(--hw-ease-standard);
+    }
+    body.nav-open .lp-scrim { opacity: 0.4; pointer-events: auto; }
+
+    /* hero → stacked & viewport-height, cropped illustration fills the rest */
+    .hero {
+      display: flex; flex-direction: column;
+      min-height: calc(100vh - 56px);    /* header ≈ 56px on mobile */
+    }
+    .hero__inner { padding: 28px 16px 0; flex: 0 0 auto; }
+    .hero__text { max-width: none; }
+    .hero__title { font-size: var(--hw-size-7xl); line-height: var(--hw-lh-7xl); letter-spacing: var(--hw-ls-s); }
+    .hero__subtitle { font-size: var(--hw-size-l); line-height: var(--hw-lh-l); }
+    .hero__search { flex-direction: column; gap: 8px; }
+    .hero__search input { width: 100%; min-width: 0; flex: 0 0 auto; }
+    .hero__search .hw-button { width: 100%; }
+    .hero__art { position: relative; margin-top: 24px; flex: 1 1 auto; min-height: 220px; }
+    .hero__art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 72% 45%; }
+
+    /* about → stacked: copy on top, illustration below */
+    .about__inner {
+      flex-direction: column; align-items: stretch; justify-content: flex-start;
+      padding: var(--hw-space-2xl) var(--hw-space-l); gap: var(--hw-space-4xl);
+    }
+    .about__content { width: 100%; }
+    .about__copy { max-width: none; }
+    .about__title { font-size: var(--hw-size-5xl); line-height: var(--hw-line-height-5xl); }
+    .about__item-body { font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+    /* Figma: 361×350 window over the 531px-wide illustration, anchored top-left —
+       shows all four tiles + a little space under the worker. padding-bottom = 350/361,
+       image width = 531/361. (padding-box height is flex-proof, unlike aspect-ratio here.) */
+    .about__art {
+      width: 100%; align-self: auto; flex: 0 0 auto;
+      position: relative; overflow: hidden; height: 0; padding-bottom: 96.95%;
+    }
+    .about__art img { position: absolute; top: 0; left: 0; transform: none; width: 147.1%; max-width: none; height: auto; }
+
+    /* services → 2-column grid, tighter gaps */
+    .services__inner { padding: var(--hw-space-2xl) var(--hw-space-l); }
+    .services__heading { gap: var(--hw-space-s); }
+    .services__title { font-size: var(--hw-size-5xl); line-height: var(--hw-line-height-5xl); }
+    .services__subtitle { font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+    .services__grid { grid-template-columns: repeat(2, 1fr); gap: var(--hw-space-l); }
+
+    /* works → left-rail timeline, content stacked to the right of each number */
+    .works__inner { padding: var(--hw-space-2xl) var(--hw-space-l); }
+    .works__heading { gap: var(--hw-space-s); }
+    .works__title { font-size: var(--hw-size-5xl); line-height: var(--hw-line-height-5xl); }
+    .works__subtitle { font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+    .works__steps { gap: var(--hw-space-2xl); max-width: none; }
+    .work-step {
+      grid-template-columns: auto 1fr; grid-template-rows: auto auto;
+      column-gap: var(--hw-space-2xl); row-gap: var(--hw-space-l); align-items: start;
+    }
+    .work-step:not(:last-child)::after {
+      left: 21px; top: 16px; transform: none; height: calc(100% + var(--hw-space-2xl));
+    }
+    .work-step__badge { grid-column: 1; grid-row: 1 / span 2; align-self: start; }
+    .work-step:nth-child(odd) .work-step__media,
+    .work-step:nth-child(even) .work-step__media { grid-column: 2; grid-row: 1; justify-self: stretch; max-width: none; }
+    .work-step:nth-child(odd) .work-step__text,
+    .work-step:nth-child(even) .work-step__text { grid-column: 2; grid-row: 2; justify-self: stretch; max-width: none; }
+    .work-step__title { font-size: var(--hw-size-3xl); line-height: var(--hw-line-height-3xl); }
+    .work-step__text .hw-button { width: 100%; }
+
+    /* power → stacked: content then image panel */
+    .power__inner { flex-direction: column; align-items: stretch; padding: var(--hw-space-2xl) var(--hw-space-l); gap: var(--hw-space-2xl); }
+    .power__icon { width: 64px; height: 64px; }
+    .power__title { font-size: var(--hw-size-5xl); line-height: var(--hw-line-height-5xl); }
+    .power__subtitle { font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+    .power__perks-title { font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+    .power__perk span { font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+    .power__perk-list { max-width: none; }
+    .power__media { flex: 0 0 auto; min-height: 0; height: 361px; }
+
+    /* safety → single column of cards, decor hidden (it bleeds behind on desktop only) */
+    .safety__inner { padding: var(--hw-space-2xl) var(--hw-space-l); gap: var(--hw-space-2xl); }
+    .safety__intro { max-width: none; }
+    .safety__title { font-size: var(--hw-size-5xl); line-height: var(--hw-line-height-5xl); }
+    .safety__subtitle { font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+    .safety__grid { grid-template-columns: 1fr; gap: var(--hw-space-l); max-width: none; }
+    .safety__decor { display: none; }
+
+    /* faq → stacked: aside then accordion */
+    .faq__inner { flex-direction: column; align-items: stretch; padding: var(--hw-space-2xl) var(--hw-space-l); gap: var(--hw-space-2xl); }
+    .faq__title { font-size: var(--hw-size-5xl); line-height: var(--hw-line-height-5xl); }
+    .faq__subtitle { font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+    .faq__cta-label { font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+    .faq-item__q { font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+
+    /* reviews → single-card swipe carousel with pagination dots */
+    .reviews__inner { padding: var(--hw-space-2xl) 0; gap: var(--hw-space-2xl); }
+    .reviews__head { padding-inline: var(--hw-space-l); }
+    .reviews__heading { gap: var(--hw-space-s); }
+    .reviews__title { font-size: var(--hw-size-5xl); line-height: var(--hw-line-height-5xl); }
+    .reviews__subtitle { font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+    /* one card fills the content area with a 16px gutter each side (Figma); swipe to the next */
+    .reviews__track { grid-auto-columns: 100%; padding-inline: var(--hw-space-l); gap: var(--hw-space-l); }
+    .review-card__foot { flex-direction: column; align-items: stretch; gap: var(--hw-space-l); }
+    .review-card__name { flex: 0 0 auto; }
+    .review-card__cta { width: 100%; }
+    .reviews__dots { display: flex; }
+
+    /* closing → stacked banner buttons + centred stacked footer */
+    .closing__inner { padding: var(--hw-space-2xl) var(--hw-space-l); gap: var(--hw-space-2xl); }
+    .banner { padding: var(--hw-space-2xl); }
+    .banner__glow { width: 100%; height: 280px; }
+    .banner__title { font-size: var(--hw-size-5xl); line-height: var(--hw-line-height-5xl); }
+    .banner__actions { flex-direction: column; align-self: stretch; }
+    .banner__btn { width: 100%; }
+    /* footer: everything centred & stacked (logo · links · social · legal · copyright) */
+    .footer { align-items: center; }
+    .footer__row { flex-direction: column; align-items: center; gap: var(--hw-space-2xl); }
+    .footer__logo, .footer__social { flex: 0 0 auto; }
+    .footer__social { justify-content: center; }
+    .footer__legal-row { flex-direction: column-reverse; align-items: center; gap: var(--hw-space-2xl); padding-top: var(--hw-space-l); }
+    .footer__legal { flex-direction: column; align-items: center; gap: var(--hw-space-2xl); }
+  }
+
+  /* Motion: honour reduced-motion for the landing's own transitions.
+     (.hw-button carries its own reduced-motion guard in button.css.) */
+  @media (prefers-reduced-motion: reduce) {
+    .lp-nav a, .lp-menu__links a, .lp-burger, .lp-burger svg, .hero__search input, .lp-menu, .lp-scrim {
+      transition-duration: 0.01ms;
+    }
+    /* no cascade for the menu items — show them immediately */
+    body.nav-open .lp-menu__links a,
+    body.nav-open .lp-menu__actions .hw-button { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="lp-header">
+  <div class="lp-header__inner">
+    <nav class="lp-nav">
+      <a href="#top">Home</a>
+      <a href="#faqs">FAQs</a>
+      <a href="#contact">Contacts</a>
+    </nav>
+    <a class="lp-logo" href="#" aria-label="Handiwork home">
+      <img src="assets/logo/horizontal-dark.svg" alt="Handiwork" />
+    </a>
+    <div class="lp-actions">
+      <a class="hw-button hw-button--secondary" href="#"><span class="hw-button__label">Log In</span></a>
+      <a class="hw-button hw-button--primary" href="#"><span class="hw-button__label">Get Started</span></a>
+    </div>
+    <button class="lp-burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
+      <svg class="ic-open" viewBox="0 0 24 24" fill="none"><path d="M3 8h18M3 16h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <svg class="ic-close" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <nav class="lp-menu" id="menu" aria-label="Mobile">
+    <div class="lp-menu__links">
+      <a href="#top">Home</a>
+      <a href="#faqs">FAQs</a>
+      <a href="#contact">Contact Us</a>
+    </div>
+    <div class="lp-menu__actions">
+      <a class="hw-button hw-button--secondary hw-button--block" href="#"><span class="hw-button__label">Login</span></a>
+      <a class="hw-button hw-button--primary hw-button--block" href="#"><span class="hw-button__label">Get Started</span></a>
+    </div>
+  </nav>
+  <div class="lp-scrim" id="scrim"></div>
+</header>
+
+<section class="hero" id="top">
+  <div class="hero__inner">
+    <div class="hero__text" data-reveal>
+      <h1 class="hero__title reveal" style="--reveal-i:0">Your Handy Home Partner.</h1>
+      <p class="hero__subtitle reveal" style="--reveal-i:1">Invest in your home with quality work from verified professionals.</p>
+      <form class="hero__search reveal" style="--reveal-i:2" onsubmit="return false;">
+        <input type="search" placeholder="Search by role, skills or keywords" aria-label="Search" />
+        <button class="hw-button hw-button--primary" type="submit"><span class="hw-button__label">Search</span></button>
+      </form>
+    </div>
+  </div>
+  <div class="hero__art reveal reveal--fade" data-reveal style="--reveal-i:0">
+    <img src="assets/illustration/hero-home.svg" alt="Illustration of a home with green fields" />
+  </div>
+</section>
+
+<section class="about" aria-labelledby="about-title">
+  <div class="about__inner">
+    <div class="about__content" data-reveal>
+      <div class="about__head">
+        <span class="about__badge reveal" style="--reveal-i:0">About Us</span>
+        <div class="about__copy">
+          <h2 class="about__title reveal" style="--reveal-i:1" id="about-title">From Quote to Completion, Stress-Free</h2>
+          <ul class="about__list reveal" style="--reveal-i:2">
+            <li class="about__item">
+              <div class="about__item-head">
+                <hw-icon class="about__icon" name="money" variant="filled" size="24"></hw-icon>
+                <h3 class="about__item-title">For Customer</h3>
+              </div>
+              <p class="about__item-body">Book with confidence. Find trusted professionals with a proven track record, and manage the entire job from initial quote to final payment, all in one place.</p>
+            </li>
+            <li class="about__item">
+              <div class="about__item-head">
+                <hw-icon class="about__icon" name="money" variant="filled" size="24"></hw-icon>
+                <h3 class="about__item-title">For Providers</h3>
+              </div>
+              <p class="about__item-body">Build trust with clients through your verified profile and expertise, and manage all your communications seamlessly to save time.</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <a class="hw-button hw-button--primary reveal" style="--reveal-i:3" href="#"><span class="hw-button__label">Get Started</span></a>
+    </div>
+    <div class="about__art reveal" data-reveal style="--reveal-i:0">
+      <img src="assets/illustration/illustration-27.svg" alt="A job flowing from home to a verified provider, connected in one place" />
+    </div>
+  </div>
+</section>
+
+<section class="services" aria-labelledby="services-title">
+  <div class="services__inner">
+    <div class="services__head" data-reveal>
+      <span class="services__badge reveal" style="--reveal-i:0">Our Services</span>
+      <div class="services__heading">
+        <h2 class="services__title reveal" style="--reveal-i:1" id="services-title">We've Got You <span class="services__title-accent">Covered</span></h2>
+        <p class="services__subtitle reveal" style="--reveal-i:2">Keeping up with a home can feel like a full-time job. From fixing a leaky tap to hanging new shelves, we make it easy to get help from trusted pros in your area.</p>
+      </div>
+    </div>
+    <ul class="services__grid" data-reveal data-reveal-stagger="row">
+      <li class="service reveal"><div class="service__tile"><img src="assets/illustration/illustration-01.svg" alt="" /></div><p class="service__label">Carpentry</p></li>
+      <li class="service reveal"><div class="service__tile"><img src="assets/illustration/illustration-04.svg" alt="" /></div><p class="service__label">Plumbing</p></li>
+      <li class="service reveal"><div class="service__tile"><img src="assets/illustration/illustration-10.svg" alt="" /></div><p class="service__label">Painting</p></li>
+      <li class="service reveal"><div class="service__tile"><img src="assets/illustration/illustration-21.svg" alt="" /></div><p class="service__label">Laundry</p></li>
+      <li class="service reveal"><div class="service__tile"><img src="assets/illustration/illustration-05.svg" alt="" /></div><p class="service__label">Roofing</p></li>
+      <li class="service reveal"><div class="service__tile"><img src="assets/illustration/illustration-06.svg" alt="" /></div><p class="service__label">Beautician</p></li>
+      <li class="service reveal"><div class="service__tile"><img src="assets/illustration/illustration-08.svg" alt="" /></div><p class="service__label">Gardening</p></li>
+      <li class="service reveal"><div class="service__tile"><img src="assets/illustration/illustration-12.svg" alt="" /></div><p class="service__label">Electrician</p></li>
+      <li class="service reveal"><div class="service__tile"><img src="assets/illustration/illustration-07.svg" alt="" /></div><p class="service__label">Photography</p></li>
+      <li class="service reveal"><div class="service__tile"><img src="assets/illustration/illustration-19.svg" alt="" /></div><p class="service__label">Appliance Fix</p></li>
+      <li class="service reveal"><div class="service__tile"><img src="assets/illustration/illustration-09.svg" alt="" /></div><p class="service__label">Fumigation</p></li>
+      <li class="service reveal"><div class="service__tile"><img src="assets/illustration/illustration-20.svg" alt="" /></div><p class="service__label">Auto Repair</p></li>
+    </ul>
+  </div>
+</section>
+
+<section class="works" aria-labelledby="works-title">
+  <div class="works__inner">
+    <div class="works__head" data-reveal>
+      <span class="works__badge reveal" style="--reveal-i:0">How it works</span>
+      <div class="works__heading">
+        <h2 class="works__title reveal" style="--reveal-i:1" id="works-title">How Handiwork Works</h2>
+        <p class="works__subtitle reveal" style="--reveal-i:2">For businesses and freelancers, managing deals effectively means overcoming uncertainty. TradeTrust provides the secure framework you need.</p>
+      </div>
+    </div>
+    <div class="works__steps" data-reveal>
+      <article class="work-step reveal" style="--reveal-i:0">
+        <span class="work-step__badge">1</span>
+        <div class="work-step__text">
+          <div class="work-step__copy">
+            <h3 class="work-step__title">Request a Service</h3>
+            <p class="work-step__body">In the Handiwork app, you can easily request the service you need. Simply describe the job and submit your request. Service providers in your area will then send a detailed quote for you to review.</p>
+          </div>
+          <a class="hw-button hw-button--primary" href="#"><span class="hw-button__label">Get Started</span></a>
+        </div>
+        <div class="work-step__media"><img src="assets/img/request-a-service.png" alt="Requesting a service in the Handiwork app" /></div>
+      </article>
+      <article class="work-step reveal" style="--reveal-i:1">
+        <span class="work-step__badge">2</span>
+        <div class="work-step__text">
+          <div class="work-step__copy">
+            <h3 class="work-step__title">Pay Escrow</h3>
+            <p class="work-step__body">Once you've accepted a quote, you'll securely deposit the funds into your dedicated escrow account. The money is held safely, giving you peace of mind that it will only be released once the job is completed to your satisfaction.</p>
+          </div>
+          <a class="hw-button hw-button--primary" href="#"><span class="hw-button__label">Get Started</span></a>
+        </div>
+        <div class="work-step__media"><img src="assets/img/pay-escrow.png" alt="Payment held securely in escrow" /></div>
+      </article>
+      <article class="work-step reveal" style="--reveal-i:2">
+        <span class="work-step__badge">3</span>
+        <div class="work-step__text">
+          <div class="work-step__copy">
+            <h3 class="work-step__title">Job Completed and Payment</h3>
+            <p class="work-step__body">When the service provider marks the job as complete and you confirm your satisfaction, the funds are instantly released from escrow to the provider. You can then rate and review your experience.</p>
+          </div>
+          <a class="hw-button hw-button--primary" href="#"><span class="hw-button__label">Get Started</span></a>
+        </div>
+        <div class="work-step__media"><img src="assets/img/job-completed.png" alt="Job completed and payment released" /></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="power" aria-labelledby="power-title">
+  <div class="power__inner">
+    <div class="power__content">
+      <div class="power__intro" data-reveal>
+        <img class="power__icon reveal" style="--reveal-i:0" src="assets/illustration/illustration-17.svg" alt="" />
+        <h2 class="power__title reveal" style="--reveal-i:1" id="power-title">You get the power of Handiwork's network</h2>
+        <p class="power__subtitle reveal" style="--reveal-i:2">Because Handiwork is the #1 source of business for our contractors, they go the extra mile for Handiwork customers.</p>
+      </div>
+      <div class="power__perks" data-reveal>
+        <p class="power__perks-title reveal" style="--reveal-i:0">Handiwork Perks</p>
+        <ul class="power__perk-list">
+          <li class="power__perk reveal" style="--reveal-i:1"><hw-icon name="money" variant="filled" size="24"></hw-icon><span>10-25% lower project costs</span></li>
+          <li class="power__perk reveal" style="--reveal-i:2"><hw-icon name="shield-check" variant="filled" size="24"></hw-icon><span>2x the industry average warranty</span></li>
+          <li class="power__perk reveal" style="--reveal-i:3"><hw-icon name="sparkles" variant="filled" size="24"></hw-icon><span>Better quality craftmanship</span></li>
+          <li class="power__perk reveal" style="--reveal-i:4"><hw-icon name="clock" variant="filled" size="24"></hw-icon><span>Fast issue resolution</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="power__media reveal" data-reveal style="--reveal-i:0">
+      <img src="assets/img/worker-thumbs-up.png" alt="A smiling Handiwork contractor in a hard hat giving two thumbs up" />
+    </div>
+  </div>
+</section>
+
+<section class="safety" aria-labelledby="safety-title">
+  <div class="safety__decor reveal reveal--fade" data-reveal style="--reveal-i:0" aria-hidden="true">
+    <img src="assets/illustration/illustration-24.svg" alt="" />
+  </div>
+  <div class="safety__inner">
+    <div class="safety__intro" data-reveal>
+      <span class="safety__badge reveal" style="--reveal-i:0">Your Safety</span>
+      <h2 class="safety__title reveal" style="--reveal-i:1" id="safety-title">Your safety is our priority</h2>
+      <p class="safety__subtitle reveal" style="--reveal-i:2">Your safety and security are our top priorities. Handiwork has implemented a number of robust measures to ensure a safe and secure experience for both homeowners and service providers.</p>
+    </div>
+    <ul class="safety__grid" data-reveal>
+      <li class="safety-card reveal" style="--reveal-i:0">
+        <div class="safety-card__head">
+          <hw-icon name="badge-check" variant="filled" size="24"></hw-icon>
+          <h3 class="safety-card__title">Verified Artisans</h3>
+        </div>
+        <p class="safety-card__body">All professionals on our platform undergo a rigorous verification process. We confirm their identity, credentials, and work history to give you confidence in who you are hiring. You can see their ratings and reviews from other users before you book a job.</p>
+      </li>
+      <li class="safety-card reveal" style="--reveal-i:1">
+        <div class="safety-card__head">
+          <hw-icon name="shield-check" variant="filled" size="24"></hw-icon>
+          <h3 class="safety-card__title">Secure Escrow System</h3>
+        </div>
+        <p class="safety-card__body">Our secure escrow system protects your payment. When you book a service, the funds are held securely until the job is completed to your satisfaction. Payment is only released to the professional after you confirm the work is done and you are happy with the results.</p>
+      </li>
+      <li class="safety-card reveal" style="--reveal-i:2">
+        <div class="safety-card__head">
+          <hw-icon name="headphones" variant="filled" size="24"></hw-icon>
+          <h3 class="safety-card__title">24/7 Support</h3>
+        </div>
+        <p class="safety-card__body">Our support team is available around the clock to assist you with any issues or concerns you may have. If a dispute arises, we are here to help mediate and ensure a fair resolution for everyone involved.</p>
+      </li>
+      <li class="safety-card reveal" style="--reveal-i:3">
+        <div class="safety-card__head">
+          <hw-icon name="megaphone" variant="filled" size="24"></hw-icon>
+          <h3 class="safety-card__title">Ratings &amp; Reviews</h3>
+        </div>
+        <p class="safety-card__body">After every completed job, both parties are encouraged to leave a rating and review. This system helps maintain a high standard of quality and accountability on our platform, creating a trustworthy community for everyone.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="faq" id="faqs" aria-labelledby="faq-title">
+  <div class="faq__inner">
+    <div class="faq__aside" data-reveal>
+      <div class="faq__intro">
+        <span class="faq__badge reveal" style="--reveal-i:0">Our FAQs</span>
+        <h2 class="faq__title reveal" style="--reveal-i:1" id="faq-title">Frequently asked questions</h2>
+        <p class="faq__subtitle reveal" style="--reveal-i:2">Have questions about Handiwork? Browse our FAQ for answers. If you don't see what you're looking for, don't hesitate to reach out to our team, we're here to help!</p>
+      </div>
+      <div class="faq__cta reveal" style="--reveal-i:3">
+        <p class="faq__cta-label">Still have questions?</p>
+        <a class="hw-button hw-button--primary" href="#"><span class="hw-button__label">Contact Us</span></a>
+      </div>
+    </div>
+    <div class="faq__list" data-reveal>
+      <div class="faq-item reveal" style="--reveal-i:0">
+        <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">What types of projects can I do with Handiwork?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+        <div class="faq-item__a"><p class="faq-item__a-inner">You can request almost any home service on Handiwork — from carpentry, plumbing, and painting to roofing, electrical work, cleaning, and more. Just describe the job and trusted pros in your area will send you a quote.</p></div>
+      </div>
+      <div class="faq-item reveal" style="--reveal-i:1">
+        <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">How do you verify your artisans?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+        <div class="faq-item__a"><p class="faq-item__a-inner">Every professional undergoes a rigorous verification process. We confirm their identity, credentials, and work history, and you can review ratings and reviews from other users before you book.</p></div>
+      </div>
+      <div class="faq-item reveal" style="--reveal-i:2">
+        <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">What if I'm not happy with the service?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+        <div class="faq-item__a"><p class="faq-item__a-inner">Your payment is held securely in escrow and only released once you confirm the job is done to your satisfaction. If something isn't right, our 24/7 support team will help mediate a fair resolution.</p></div>
+      </div>
+      <div class="faq-item reveal" style="--reveal-i:3">
+        <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">How do the ratings and reviews work?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+        <div class="faq-item__a"><p class="faq-item__a-inner">After every completed job, both the customer and the provider are encouraged to leave a rating and review. This keeps quality high and builds a trustworthy community for everyone.</p></div>
+      </div>
+      <div class="faq-item reveal" style="--reveal-i:4">
+        <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">How do I report a safety concern?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+        <div class="faq-item__a"><p class="faq-item__a-inner">You can report any safety concern directly from the app or by contacting our support team, available around the clock. We take every report seriously and act quickly to keep the community safe.</p></div>
+      </div>
+      <div class="faq-item reveal" style="--reveal-i:5">
+        <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">Do you have a cancellation policy?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+        <div class="faq-item__a"><p class="faq-item__a-inner">Yes. You can cancel a request before work begins at no charge. Because funds are held in escrow until you confirm completion, you're always in control of your payment.</p></div>
+      </div>
+      <div class="faq-item reveal" style="--reveal-i:5">
+        <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">Are the professionals insured?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+        <div class="faq-item__a"><p class="faq-item__a-inner">We verify each professional's credentials during onboarding, including applicable insurance and licensing where required for their trade, so you can book with confidence.</p></div>
+      </div>
+      <div class="faq-item reveal" style="--reveal-i:5">
+        <button class="faq-item__q" aria-expanded="false"><span class="faq-item__q-text">How do you protect my personal information?</span><hw-icon class="faq-item__icon" name="angle-down" variant="hollow" size="20"></hw-icon></button>
+        <div class="faq-item__a"><p class="faq-item__a-inner">Your data is encrypted and never shared without your consent. We only use your information to connect you with the right professionals and to keep your account secure.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="reviews" aria-labelledby="reviews-title">
+  <div class="reviews__inner">
+    <div class="reviews__head" data-reveal>
+      <span class="reviews__badge reveal" style="--reveal-i:0">Our Customer Review</span>
+      <div class="reviews__heading">
+        <h2 class="reviews__title reveal" style="--reveal-i:1" id="reviews-title">Rated #1 by the People Who Matter Most —Homeowners.</h2>
+        <p class="reviews__subtitle reveal" style="--reveal-i:2">Over 1,500 glowing reviews and a 4.6-star average on Google. Our homeowners say it best—just see for yourself.</p>
+      </div>
+    </div>
+    <div class="reviews__viewport reveal" data-reveal style="--reveal-i:0" id="reviewsViewport">
+      <div class="reviews__track">
+        <article class="review-card">
+          <div class="review-card__media"><img src="assets/img/review-yellow.png" alt="A happy Handiwork customer in a yellow shirt" /></div>
+          <p class="review-card__quote">I couldn't have done it without Handiwork. I didn't know what I was doing. With Handiwork, I felt covered and protected from making a lot of mistakes.</p>
+          <div class="review-card__foot">
+            <h3 class="review-card__name">Chidi - Abuja</h3>
+            <a class="hw-button hw-button--primary review-card__cta is-disabled" href="#"><span class="hw-button__label">Read Customer Story</span></a>
+          </div>
+        </article>
+        <article class="review-card is-active">
+          <div class="review-card__media"><img src="assets/img/review-okay.png" alt="A satisfied Handiwork customer giving an OK hand sign" /></div>
+          <p class="review-card__quote">I couldn't have done it without Handiwork. I didn't know what I was doing. With Handiwork, I felt covered and protected from making a lot of mistakes.</p>
+          <div class="review-card__foot">
+            <h3 class="review-card__name">Francis - Lagos</h3>
+            <a class="hw-button hw-button--primary review-card__cta" href="#"><span class="hw-button__label">Read Customer Story</span></a>
+          </div>
+        </article>
+        <article class="review-card">
+          <div class="review-card__media"><img src="assets/img/review-old.png" alt="A smiling older Handiwork customer at his laptop" /></div>
+          <p class="review-card__quote">I couldn't have done it without Handiwork. I didn't know what I was doing. With Handiwork, I felt covered and protected from making a lot of mistakes.</p>
+          <div class="review-card__foot">
+            <h3 class="review-card__name">Emeka - Enugu</h3>
+            <a class="hw-button hw-button--primary review-card__cta is-disabled" href="#"><span class="hw-button__label">Read Customer Story</span></a>
+          </div>
+        </article>
+      </div>
+    </div>
+    <div class="reviews__dots" id="reviewsDots" role="tablist" aria-label="Reviews"></div>
+  </div>
+</section>
+
+<section class="closing" aria-labelledby="closing-title">
+  <div class="closing__inner">
+    <div class="banner">
+      <img class="banner__pattern" src="assets/illustration/Handiwork Pattern.svg" alt="" aria-hidden="true" />
+      <div class="banner__glow" aria-hidden="true"></div>
+      <div class="banner__content" data-reveal>
+        <div class="banner__copy">
+          <h2 class="banner__title reveal" style="--reveal-i:0" id="closing-title">Ready to Start Your Next Project?</h2>
+          <p class="banner__subtitle reveal" style="--reveal-i:1">Find the perfect professional for your home, or showcase your own skills to a growing community of clients. Handiwork is your trusted partner for getting projects done right.</p>
+        </div>
+        <div class="banner__actions reveal" style="--reveal-i:2">
+          <a class="banner__btn banner__btn--brand" href="#">Find a Pro</a>
+          <a class="banner__btn banner__btn--light" href="#">Become an Artisan</a>
+        </div>
+      </div>
+    </div>
+    <footer class="footer reveal" id="contact" data-reveal style="--reveal-i:0">
+      <div class="footer__row">
+        <a class="footer__logo" href="#" aria-label="Handiwork home"><img src="assets/logo/horizontal-dark.svg" alt="Handiwork" /></a>
+        <nav class="footer__nav" aria-label="Footer">
+          <a class="footer__link" href="#">FAQs</a>
+          <a class="footer__link" href="#">Contact Us</a>
+        </nav>
+        <div class="footer__social">
+          <a href="#" aria-label="Handiwork on Facebook"><img src="assets/icons/social/facebook.svg" alt="Facebook" /></a>
+          <a href="#" aria-label="Handiwork on Instagram"><img src="assets/icons/social/instagram.svg" alt="Instagram" /></a>
+        </div>
+      </div>
+      <div class="footer__legal-row">
+        <p class="footer__copy">© 2025. Handiwork All Rights Reserved.</p>
+        <nav class="footer__legal" aria-label="Legal">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms &amp; Conditions</a>
+        </nav>
+      </div>
+    </footer>
+  </div>
+</section>
+
+<script>
+  // Scroll reveal (Phase 4b): reveal groups/elements once as they enter, then unobserve.
+  (function scrollReveal() {
+    if (!('IntersectionObserver' in window)) return;   // PE: .js-reveal-ready never added ⇒ content visible
+    var CAP = 5;
+
+    // Grids flagged for row stagger: assign --reveal-i by visual row (breakpoint-robust; transforms
+    // don't affect offsetTop, so hidden state doesn't skew the measurement).
+    document.querySelectorAll('[data-reveal-stagger="row"]').forEach(function (grid) {
+      var rows = [];
+      Array.prototype.slice.call(grid.querySelectorAll('.reveal')).forEach(function (el) {
+        var top = el.offsetTop, row = -1;
+        for (var i = 0; i < rows.length; i++) { if (Math.abs(rows[i] - top) < 8) { row = i; break; } }
+        if (row === -1) { rows.push(top); row = rows.length - 1; }
+        el.style.setProperty('--reveal-i', Math.min(row, CAP));
+      });
+    });
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0 });
+
+    document.querySelectorAll('[data-reveal]').forEach(function (el) { io.observe(el); });
+  })();
+
+  // Mobile menu toggle (open panel + dark scrim; hamburger ↔ X)
+  var burger = document.getElementById('burger');
+  var scrim = document.getElementById('scrim');
+  var menu = document.getElementById('menu');
+  function setNav(open) {
+    document.body.classList.toggle('nav-open', open);
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  }
+  burger.addEventListener('click', function () { setNav(!document.body.classList.contains('nav-open')); });
+  scrim.addEventListener('click', function () { setNav(false); });
+  menu.addEventListener('click', function (e) { if (e.target.closest('a')) setNav(false); });
+
+  // FAQ accordion (single-open; animates max-height for a smooth expand/collapse)
+  var faqButtons = document.querySelectorAll('.faq-item__q');
+  faqButtons.forEach(function (btn) {
+    var panel = btn.nextElementSibling;
+    btn.addEventListener('click', function () {
+      var isOpen = btn.getAttribute('aria-expanded') === 'true';
+      // close all
+      faqButtons.forEach(function (b) {
+        b.setAttribute('aria-expanded', 'false');
+        b.nextElementSibling.style.maxHeight = null;
+      });
+      // open this one (unless it was already open → acts as toggle)
+      if (!isOpen) {
+        btn.setAttribute('aria-expanded', 'true');
+        panel.style.maxHeight = panel.scrollHeight + 'px';
+      }
+    });
+  });
+
+  // Testimonial carousel: seamless infinite loop (…1·2·3·1·2·3…); centred card is focused.
+  (function reviews() {
+    var vp = document.getElementById('reviewsViewport');
+    var dotsWrap = document.getElementById('reviewsDots');
+    if (!vp || !dotsWrap) return;
+    var track = vp.querySelector('.reviews__track');
+    var originals = Array.prototype.slice.call(track.children);
+    var N = originals.length;
+    if (N < 2) return;
+
+    // Clone one full set before and one after → [A][real][C], so there's always a card either side.
+    originals.map(function (c) { return c.cloneNode(true); }).forEach(function (c) { track.insertBefore(c, originals[0]); });
+    originals.map(function (c) { return c.cloneNode(true); }).forEach(function (c) { track.appendChild(c); });
+    var all = Array.prototype.slice.call(track.children);
+
+    var dots = originals.map(function (_, i) {
+      var d = document.createElement('button');
+      d.className = 'reviews__dot'; d.type = 'button';
+      d.setAttribute('role', 'tab'); d.setAttribute('aria-label', 'Go to review ' + (i + 1));
+      d.addEventListener('click', function () { center(N + i, true); });
+      dotsWrap.appendChild(d); return d;
+    });
+
+    function mid(el) { return el.offsetLeft + el.offsetWidth / 2; }
+    function center(i, smooth) { vp.scrollTo({ left: Math.round(mid(all[i]) - vp.clientWidth / 2), behavior: smooth ? 'smooth' : 'auto' }); }
+    function setW() { return N * (all[1].offsetLeft - all[0].offsetLeft); }
+    function nearest() {
+      var c = vp.scrollLeft + vp.clientWidth / 2, best = 0, bd = Infinity;
+      all.forEach(function (el, i) { var d = Math.abs(mid(el) - c); if (d < bd) { bd = d; best = i; } });
+      return best;
+    }
+    function paint(idx) {
+      all.forEach(function (el, i) {
+        var on = i === idx;
+        el.classList.toggle('is-active', on);
+        var cta = el.querySelector('.review-card__cta');
+        if (cta) cta.classList.toggle('is-disabled', !on);
+      });
+      var real = ((idx % N) + N) % N;
+      dots.forEach(function (d, i) { d.classList.toggle('is-active', i === real); });
+    }
+
+    var raf, settle;
+    vp.addEventListener('scroll', function () {
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(function () { paint(nearest()); });
+      // once the scroll settles, if we've drifted into a clone set, hop back to the real set silently
+      clearTimeout(settle);
+      settle = setTimeout(function () {
+        var idx = nearest();
+        if (idx < N) vp.scrollLeft += setW();
+        else if (idx >= 2 * N) vp.scrollLeft -= setW();
+        paint(nearest());
+      }, 130);
+    });
+
+    var ro;
+    window.addEventListener('resize', function () {
+      clearTimeout(ro);
+      ro = setTimeout(function () { var real = ((nearest() % N) + N) % N; center(N + real); paint(N + real); }, 150);
+    });
+
+    requestAnimationFrame(function () { center(N + 1); paint(N + 1); });
+  })();
+</script>
+</body>
+</html>

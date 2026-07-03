@@ -1,0 +1,63 @@
+/* ==========================================================================
+   Handiwork — Input
+   Depends on tokens (primitives.css + semantic.css). Tokens only — no raw values.
+   Colours pulled directly from Semantic__Color Input/* (bg, border, placeholder,
+   text). Focus per COMPONENT-BUILD-RULES. Disabled uses the confirmed generic
+   Border/disabled + Text/disabled semantic tokens.
+
+     <input class="hw-input" type="text" placeholder="Search by role, skills or keywords">
+
+   States: default · :focus-visible · disabled/.is-disabled
+   Notes:
+   - No hover state by design — Input/* has no hover token; focus-visible is the
+     interaction feedback for this field (accepted pattern, not a gap).
+   - No error state yet — no confirmed Figma Input/error token; deferred until a
+     screen needs it (will be cited from that screen's tokens).
+   - Input/bg 2 (Semantic__Color): Light == Input/bg (#FFFFFF), diverges in Dark
+     (#001A13). Purpose UNRESOLVED (TOKEN-GOVERNANCE §3) — intentionally NOT
+     referenced here. Do not wire it in until its use is confirmed in Figma.
+   ========================================================================== */
+
+.hw-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--hw-space-m) var(--hw-space-l);     /* 12 / 16 */
+  border: var(--hw-border-width-xs) solid var(--hw-input-border);
+  border-radius: var(--hw-radius-none);
+  background: var(--hw-input-bg);
+  color: var(--hw-input-text);
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-l);
+  line-height: var(--hw-line-height-l);
+  -webkit-appearance: none;
+  appearance: none;
+  transition: outline-color var(--hw-duration-fast) var(--hw-ease-standard),
+              border-color var(--hw-duration-fast) var(--hw-ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hw-input { transition-duration: 0.01ms; }
+}
+
+.hw-input::placeholder { color: var(--hw-input-placeholder); }
+
+/* strip native search-field chrome so type=search matches other inputs */
+.hw-input::-webkit-search-decoration,
+.hw-input::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+/* ----- Focus (COMPONENT-BUILD-RULES: Border/focus, 2px outline, 2px offset) ----- */
+.hw-input:focus-visible {
+  outline: var(--hw-border-width-m) solid var(--hw-border-focus);
+  outline-offset: var(--hw-space-2xs);
+}
+
+/* ----- Disabled (generic semantic disabled tokens) ----- */
+.hw-input:disabled,
+.hw-input.is-disabled {
+  border-color: var(--hw-border-disabled);
+  color: var(--hw-text-disabled);
+  cursor: not-allowed;
+}
+.hw-input:disabled::placeholder,
+.hw-input.is-disabled::placeholder { color: var(--hw-text-disabled); }

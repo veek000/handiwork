@@ -4,11 +4,9 @@ Thumbs.db
 desktop.ini
 *.log
 
-# Temp / build
-.tmp_figma/
+# Temp / build (scratch dirs: figma renders, token exports+generator, screenshots)
+.tmp_*/
 node_modules/
 
 # Vercel
-.vercel
-
 .vercel

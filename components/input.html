@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Handiwork — Input</title>
+<link rel="stylesheet" href="../assets/css/tokens.css" />
+<link rel="stylesheet" href="../assets/css/typography.css" />
+<link rel="stylesheet" href="../assets/css/input.css" />
+<script src="../assets/icons/hw-icons.js"></script>
+<style>
+  body { margin: 0; background: var(--hw-bg-default); color: var(--hw-text-primary); }
+  .page { max-width: 560px; margin: 0 auto; padding: 40px 24px 100px; }
+  .lead { color: var(--hw-text-secondary); margin: 4px 0 32px; }
+  .field { margin-bottom: 20px; }
+  .field label { display: block; font: 700 13px var(--hw-font-body); color: var(--hw-text-secondary); margin-bottom: 6px; }
+  .field small { display: block; color: var(--hw-text-tertiary); font: 400 11px var(--hw-font-body); margin-top: 6px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1 class="hw-heading-l">Input</h1>
+  <p class="lead hw-text-l">Text field built on <code>Semantic__Color</code> Input tokens. Click / tab into a field to see the focus ring.</p>
+
+  <div class="field">
+    <label for="i1">Default</label>
+    <input id="i1" class="hw-input" type="text" placeholder="Search by role, skills or keywords">
+    <small>bg Input/bg · border Input/border · placeholder Input/placeholder · text Input/text</small>
+  </div>
+
+  <div class="field">
+    <label for="i2">Filled</label>
+    <input id="i2" class="hw-input" type="text" value="Plumber">
+    <small>text Input/text (Gray/900)</small>
+  </div>
+
+  <div class="field">
+    <label for="i3">Focus</label>
+    <input id="i3" class="hw-input" type="text" placeholder="Tab or click to focus me" autofocus>
+    <small>outline Border/focus (#50C878), 2px, 2px offset</small>
+  </div>
+
+  <div class="field">
+    <label for="i4">Disabled</label>
+    <input id="i4" class="hw-input" type="text" placeholder="Unavailable" disabled>
+    <small>border Border/disabled · text Text/disabled</small>
+  </div>
+</div>
+</body>
+</html>

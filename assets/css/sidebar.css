@@ -24,12 +24,12 @@
 
 .hw-sidebar {
   /* component-local tokens (fall back to global design tokens) */
-  --_bg:          var(--hw-primary-dark, #001A13);
-  --_active-bg:   rgba(223, 241, 225, 0.10);   /* Background/primary-alpha */
-  --_active-fg:   #B6E3BD;                      /* Buttons/primary/bg/pressed */
-  --_default-fg:  var(--hw-gray-500, #9E9E9E);  /* Text/placeholder */
-  --_divider:     rgba(255, 255, 255, 0.10);
-  --_logout:      var(--hw-danger, #DC3545);
+  --_bg:          var(--hw-color-brand-primary-900);         /* #001A13 — brand dark surface. Backlog: candidate for a shared --hw-surface-brand-strong role co-used with Button, rather than each surface picking brand/900 directly. */
+  --_active-bg:   var(--hw-color-brand-primary-light-alpha);  /* rgba(223,241,225,0.1) — brand primary/100 @ 10% */
+  --_active-fg:   var(--hw-color-brand-primary-200);          /* #B6E3BD — brand primary/200 */
+  --_default-fg:  var(--hw-text-placeholder);                 /* #9E9E9E */
+  --_divider:     rgba(255, 255, 255, 0.10);                  /* white @ 10% — no matching token (dark-surface divider) */
+  --_logout:      var(--hw-feedback-error-text);              /* #DC3545 */
 
   display: flex;
   flex-direction: column;
@@ -86,7 +86,8 @@
   text-align: left;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color .12s ease, color .12s ease;
+  transition: background-color var(--hw-duration-base) var(--hw-ease-standard),
+              color var(--hw-duration-base) var(--hw-ease-standard);
 }
 .hw-nav-item hw-icon { flex: 0 0 auto; color: currentColor; }  /* icons follow text color */
 .hw-nav-item > span { white-space: nowrap; }
@@ -101,16 +102,24 @@
   background: var(--_active-bg);
   color: var(--_active-fg);
 }
-/* 2px left accent bar on the active item */
-.hw-nav-item.is-active::before {
+/* 2px left accent bar — always present, scales in on active (Option B: animated) */
+.hw-nav-item::before {
   content: "";
   position: absolute;
   left: 0;
   top: 50%;
-  transform: translateY(-50%);
   width: 2px;
   height: 24px;
   background: var(--_active-fg);
+  transform: translateY(-50%) scaleY(0);
+  transform-origin: center;
+  transition: transform var(--hw-duration-base) var(--hw-ease-standard);
+}
+.hw-nav-item.is-active::before { transform: translateY(-50%) scaleY(1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hw-nav-item,
+  .hw-nav-item::before { transition-duration: 0.01ms; }
 }
 
 /* ----------------------------------------------------------------- Footer */
@@ -141,7 +150,7 @@
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: var(--hw-white, #fff);
+  color: var(--hw-color-default-white);
   cursor: pointer;
 }
 .hw-sidebar__close:hover { background: rgba(255, 255, 255, 0.08); }
@@ -176,12 +185,12 @@
   font-size: 16px;
   line-height: 24px;
   letter-spacing: -0.5px;
-  color: #F5F5F5;
+  color: var(--hw-text-inverse);   /* #F5F5F5 — light text on dark */
 }
 .hw-profile__email {
   margin: 2px 0 0;
   font: 400 12px/16px var(--hw-font-body, system-ui, sans-serif);
-  color: var(--hw-gray-400, #BDBDBD);
+  color: var(--hw-color-gray-400);   /* #BDBDBD */
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -193,7 +202,7 @@
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: var(--hw-white, #fff);
+  color: var(--hw-color-default-white);
   cursor: pointer;
 }
 .hw-profile__chevron:hover { background: rgba(255, 255, 255, 0.08); }
