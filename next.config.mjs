@@ -12,12 +12,19 @@ const nextConfig = {
   // The completed static pages live in public/ and are served verbatim.
   // Each rewrite maps a clean route to its public HTML file. No app/ route
   // owns these paths — a matching page would silently override the rewrite.
+  //
+  // beforeFiles (not the default afterFiles): applied before filesystem/route
+  // resolution. Required for source:"/" on Vercel — an afterFiles "/" rewrite
+  // is dropped when no index page/function exists, yielding a 404 in prod even
+  // though `next start` honours it locally.
   async rewrites() {
-    return [
-      { source: '/', destination: '/landing.html' },
-      { source: '/faq', destination: '/faq.html' },
-      { source: '/contact', destination: '/contact.html' },
-    ];
+    return {
+      beforeFiles: [
+        { source: '/', destination: '/landing.html' },
+        { source: '/faq', destination: '/faq.html' },
+        { source: '/contact', destination: '/contact.html' },
+      ],
+    };
   },
 };
 
