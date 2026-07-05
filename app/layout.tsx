@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Analytics } from "@vercel/analytics/next";
 
 // Minimal root layout. The three completed pages (/, /faq, /contact) are
 // served verbatim from public/ via rewrites in next.config.mjs and never pass
@@ -12,7 +13,10 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
