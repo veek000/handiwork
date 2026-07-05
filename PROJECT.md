@@ -445,6 +445,13 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   the sides *and* the base (equal gap, per Figma). Tokens only. `npx tsc --noEmit` + `next build`
   pass (17 routes).
 
+- **Landing auth CTAs wired (2026-07-05)** — Linked the marketing chrome to the app: every
+  **Log In / Login → `/login`** and **Get Started → `/signup`** across `landing.html`, `faq.html`,
+  and `contact.html` (desktop header + mobile drawer; landing also covers the hero + the three
+  section CTAs). Absolute paths so they hit the Next app routes directly, not the `/` rewrite.
+  Out of scope, still `#`: landing "Contact Us" and the "Read Customer Story" testimonial cards.
+  `next build` passes.
+
 ## Locked decisions for future phases (not yet built)
 
 - **Auth + backend (Phase 6):** Convex for both — Convex Auth for authentication, Convex as
