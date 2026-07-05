@@ -1,0 +1,571 @@
+/* =========================================================================
+   Auth screens (Login / Signup) — layout + auth-only components.
+   Mobile-first; two-column at --hw-bp-l (1024px). Fills the viewport exactly
+   (height: 100vh, no page scroll — the form column scrolls internally if the
+   viewport is short). Tokens only, sharp corners per the design system.
+   ========================================================================= */
+
+/* ----- Shell: brand panel + form column --------------------------------- */
+.hw-auth {
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr; /* mobile: single column, panel hidden */
+  background: var(--hw-color-default-white);
+}
+
+.hw-auth__panel {
+  display: none; /* hidden below --hw-bp-l */
+}
+
+.hw-auth__main {
+  position: relative;
+  height: 100%;
+  overflow-y: auto; /* form scrolls here on short viewports; page never scrolls */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--hw-space-2xl) var(--hw-space-xl);
+}
+
+.hw-auth__mobile-logo {
+  width: 180px;
+  height: auto;
+  /* Explicit gap to the form below — the form's `margin: auto` collapses to 0 when
+     the content is taller than the viewport, which otherwise leaves the logo flush
+     against the role toggle. */
+  margin-bottom: var(--hw-space-2xl);
+}
+
+/* Form column inner width mirrors the Figma form (512px). Split into __top (fields)
+   and __foot (button + everything under it). Mobile: the form fills the column and
+   `space-between` pins __foot to the bottom. Desktop: centred (see media query). */
+.hw-auth__form {
+  width: 100%;
+  max-width: 512px;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--hw-space-xl);
+}
+.hw-auth__top,
+.hw-auth__foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-xl);
+}
+
+.hw-auth__intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-2xs);
+  text-align: center; /* mobile: centred (reset to left on desktop) */
+}
+
+.hw-auth__subtitle {
+  margin: 0; /* <p> default margin would otherwise swamp the flex gap */
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-l);
+  line-height: var(--hw-line-height-l);
+  color: var(--hw-text-secondary);
+}
+
+.hw-auth__forgot {
+  align-self: flex-end;
+}
+
+.hw-auth__signup {
+  margin: 0;
+  text-align: center;
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  color: var(--hw-text-secondary);
+}
+
+/* Sits below the form in normal flow. The form's `margin: auto 0` pushes this to
+   the bottom when there's room; on a short viewport the column scrolls instead of
+   overlapping (no more absolute positioning under the sign-up line). */
+.hw-auth__footer {
+  flex: none;
+  margin: 0;
+  padding-top: var(--hw-space-xl);
+  text-align: center;
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  color: var(--hw-text-tertiary);
+}
+
+/* ----- Form field pattern ------------------------------------------------
+   Mirrors .hw-field in site.css (used by the static contact page). Duplicated
+   here so the app is self-contained; consolidate into a shared form stylesheet
+   when the next app form (Signup) lands. */
+.hw-field { display: flex; flex-direction: column; gap: var(--hw-space-xs); }
+.hw-field > label {
+  font-family: var(--hw-font-body); font-weight: var(--hw-weight-bold); color: var(--hw-text-primary);
+  font-size: var(--hw-size-m); line-height: var(--hw-line-height-m);
+}
+
+/* ----- Brand panel (>= --hw-bp-l) --------------------------------------- */
+@media (min-width: 1024px) {
+  .hw-auth { grid-template-columns: 36% 1fr; }
+
+  /* No panel padding — the glove pattern bleeds to the panel edges. The logo and
+     tagline carry their own padding instead. */
+  .hw-auth__panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    background-color: var(--hw-color-brand-primary-900);
+  }
+
+  .hw-auth__panel-logo {
+    flex: none;
+    align-self: flex-start; /* keep it left-aligned, not stretched/centered */
+    height: 24px; /* match the sidebar logo (.hw-sidebar__logo) */
+    width: auto;
+    box-sizing: content-box; /* height is the logo itself; padding sits outside it */
+    padding: var(--hw-space-4xl) var(--hw-space-4xl) var(--hw-space-l);
+  }
+
+  /* Middle band: full-bleed glove pattern with the illustration bottom-aligned so
+     the pattern's base and the illustration's base share the same line (per Figma).
+     Grows to fill the space between the logo and the tagline. */
+  .hw-auth__panel-body {
+    position: relative;
+    flex: 1 1 auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .hw-auth__panel-body::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Exactly three seamless tiles, no cut-off. A 720px-wide tile renders ~155.6px
+       tall (720 x 268/1240), so this region = 3 tiles (3 x 155.6 ≈ 467px). Bottom-
+       anchored so the base band aligns with the illustration's base; repeat-y fills
+       the region and the fixed height stops it at three. */
+    height: 467px;
+    background-image: url("/assets/illustration/Handiwork Pattern Tile.svg");
+    background-repeat: repeat-y;
+    background-size: 720px auto;
+    background-position: bottom center;
+    pointer-events: none;
+  }
+
+  .hw-auth__panel-art {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 250px;
+    height: auto;
+  }
+
+  .hw-auth__panel-copy {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--hw-space-2xs);
+    padding: var(--hw-space-xl) var(--hw-space-4xl) var(--hw-space-4xl);
+  }
+
+  .hw-auth__panel-title {
+    font-family: var(--hw-font-heading);
+    font-size: var(--hw-size-5xl);
+    line-height: var(--hw-line-height-5xl); /* same treatment as the Login heading */
+    letter-spacing: var(--hw-letter-spacing-s);
+    color: var(--hw-text-inverse);
+  }
+
+  .hw-auth__panel-sub {
+    margin: 0;
+    font-family: var(--hw-font-body);
+    font-size: var(--hw-size-l);
+    line-height: var(--hw-line-height-l);
+    color: var(--hw-text-inverse);
+    opacity: 0.72;
+  }
+
+  /* Mobile logo is redundant once the panel is visible. */
+  .hw-auth__mobile-logo { display: none; }
+
+  .hw-auth__main { padding: var(--hw-space-4xl); }
+
+  /* Desktop: the form is centred as a block (no viewport-fill / bottom-pinning). */
+  .hw-auth__form { flex: 0 0 auto; margin: auto 0; justify-content: flex-start; }
+
+  /* Login heading + subtitle are centred on mobile; left-aligned on desktop. */
+  .hw-auth__intro { text-align: left; }
+}
+
+/* ----- Segmented role toggle -------------------------------------------- */
+.hw-segment {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--hw-space-2xs);
+  padding: var(--hw-space-xs);
+  background: var(--hw-bg-default);
+}
+
+.hw-segment__option {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: var(--hw-space-s) var(--hw-space-l);
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  line-height: var(--hw-line-height-m);
+  color: var(--hw-text-placeholder);
+  transition: background var(--hw-duration-fast) var(--hw-ease-standard),
+              color var(--hw-duration-fast) var(--hw-ease-standard);
+}
+
+.hw-segment__option.is-active {
+  background: var(--hw-input-bg);
+  color: var(--hw-text-primary);
+  font-weight: var(--hw-weight-bold);
+  /* Shadow/Small from Figma */
+  box-shadow: 0 0 8px rgba(20, 20, 20, 0.08), 0 0 1px rgba(20, 20, 20, 0.04);
+}
+
+.hw-segment__option:focus-visible {
+  outline: 2px solid var(--hw-border-focus);
+  outline-offset: -2px;
+}
+
+/* ----- Password input with show/hide ------------------------------------ */
+.hw-password { position: relative; display: flex; }
+.hw-password .hw-input { width: 100%; padding-right: var(--hw-space-5xl); }
+/* Hide the browser's built-in reveal/clear control (Edge) — we provide our own eye. */
+.hw-password .hw-input::-ms-reveal,
+.hw-password .hw-input::-ms-clear { display: none; }
+
+.hw-password__toggle {
+  position: absolute;
+  right: var(--hw-space-m);
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--hw-text-placeholder);
+  padding: var(--hw-space-2xs);
+  transition: color var(--hw-duration-fast) var(--hw-ease-standard);
+}
+
+.hw-password__toggle:hover { color: var(--hw-text-secondary); }
+.hw-password__toggle:focus-visible {
+  outline: 2px solid var(--hw-border-focus);
+  outline-offset: 2px;
+}
+
+/* ----- Labelled divider ("Or Login with") ------------------------------- */
+.hw-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--hw-space-l);
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  color: var(--hw-text-secondary);
+}
+.hw-divider::before,
+.hw-divider::after {
+  content: "";
+  flex: 1 1 0;
+  height: 1px;
+  background: var(--hw-border-divider);
+}
+
+/* ----- Social buttons ---------------------------------------------------- */
+.hw-social {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--hw-space-s);
+}
+
+.hw-social-btn {
+  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--hw-input-border);
+  background: var(--hw-color-default-white);
+  cursor: pointer;
+  transition: border-color var(--hw-duration-fast) var(--hw-ease-standard),
+              background var(--hw-duration-fast) var(--hw-ease-standard);
+}
+.hw-social-btn:hover { background: var(--hw-bg-default); }
+.hw-social-btn:focus-visible {
+  outline: 2px solid var(--hw-border-focus);
+  outline-offset: 2px;
+}
+.hw-social-btn img { width: 24px; height: 24px; display: block; }
+
+/* ----- Text link ("Forgot password?", "Sign up") ------------------------ */
+.hw-link {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--hw-font-body);
+  font-weight: var(--hw-weight-bold);
+  font-size: var(--hw-size-m);
+  color: var(--hw-text-primary);
+  text-decoration: none;
+}
+.hw-link:hover { text-decoration: underline; }
+.hw-link:focus-visible {
+  outline: 2px solid var(--hw-border-focus);
+  outline-offset: 2px;
+}
+
+/* ----- Signup: Back / Proceed actions ----------------------------------- */
+.hw-auth__actions { display: grid; grid-template-columns: 1fr; gap: var(--hw-space-m); }
+
+/* Paired fields (State + Area): stacked on mobile, side-by-side on desktop. */
+.hw-field-row { display: grid; grid-template-columns: 1fr; gap: var(--hw-space-l); }
+
+/* ----- Select (custom dropdown — contained in-page, no native OS popup) -- */
+.hw-select { position: relative; }
+.hw-select__control {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  padding-right: var(--hw-space-5xl);
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-l);
+  color: var(--hw-input-text);
+  cursor: pointer;
+}
+.hw-select__control > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hw-select__placeholder { color: var(--hw-input-placeholder); }
+.hw-select__chevron {
+  position: absolute;
+  right: var(--hw-space-m);
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  color: var(--hw-text-placeholder);
+  pointer-events: none;
+  transition: transform var(--hw-duration-fast) var(--hw-ease-standard);
+}
+.hw-select.is-open .hw-select__chevron { transform: translateY(-50%) rotate(180deg); }
+.hw-select__list {
+  position: absolute;
+  top: calc(100% + var(--hw-space-2xs));
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: 240px;
+  overflow-y: auto;
+  margin: 0;
+  padding: var(--hw-space-2xs) 0;
+  list-style: none;
+  background: var(--hw-input-bg);
+  border: 1px solid var(--hw-input-border);
+  box-shadow: 0 0 8px rgba(20, 20, 20, 0.08), 0 0 1px rgba(20, 20, 20, 0.04);
+}
+.hw-select__option {
+  padding: var(--hw-space-s) var(--hw-space-l);
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-l);
+  color: var(--hw-input-text);
+  cursor: pointer;
+}
+.hw-select__option:hover { background: var(--hw-bg-default); }
+.hw-select__option.is-selected {
+  background: var(--hw-color-brand-primary-light-alpha);
+  font-weight: var(--hw-weight-bold);
+}
+
+/* ----- Phone (country code + number) ------------------------------------ */
+.hw-phone { display: grid; grid-template-columns: 116px 1fr; gap: var(--hw-space-s); }
+.hw-phone__code { min-width: 0; }
+/* Narrower code select ⇒ less right padding so "+234" + chevron aren't clipped. */
+.hw-phone__code .hw-select__control { padding-right: var(--hw-space-2xl); }
+
+/* ----- OTP -------------------------------------------------------------- */
+.hw-otp { display: flex; gap: var(--hw-space-m); }
+.hw-otp__box {
+  flex: 1 1 0; /* boxes fill the form width — same span as the Back/Confirm row */
+  min-width: 0;
+  aspect-ratio: 1; /* square: height tracks the width */
+  text-align: center;
+  font-family: var(--hw-font-heading);
+  font-size: var(--hw-size-5xl);
+  color: var(--hw-input-text);
+  background: var(--hw-input-bg);
+  border: 1px solid var(--hw-input-border);
+  transition: border-color var(--hw-duration-fast) var(--hw-ease-standard);
+}
+.hw-otp__box:focus-visible {
+  outline: none;
+  border-color: var(--hw-border-focus);
+  box-shadow: 0 0 0 1px var(--hw-border-focus);
+}
+
+/* ----- Resend timer ----------------------------------------------------- */
+.hw-resend {
+  margin: 0;
+  text-align: center;
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  color: var(--hw-text-secondary);
+}
+.hw-resend__time { color: var(--hw-text-primary); font-weight: var(--hw-weight-bold); }
+
+/* ----- Avatar upload (static) ------------------------------------------- */
+.hw-avatar-upload { position: relative; align-self: center; width: 96px; height: 96px; }
+.hw-avatar-upload__circle {
+  width: 96px;
+  height: 96px;
+  border-radius: var(--hw-radius-circle);
+  background: var(--hw-bg-subtle);
+  color: var(--hw-color-green-800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hw-avatar-upload__badge {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--hw-radius-circle);
+  background: var(--hw-color-brand-primary-900);
+  color: var(--hw-text-inverse);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--hw-duration-fast) var(--hw-ease-standard);
+}
+.hw-avatar-upload__badge:hover { background: var(--hw-color-green-800); }
+.hw-avatar-upload__badge:focus-visible { outline: 2px solid var(--hw-border-focus); outline-offset: 2px; }
+
+/* ----- Mobile step progress (desktop uses the Stepper panel) ------------- */
+.hw-step-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--hw-space-s);
+}
+.hw-step-progress__bar { display: flex; gap: var(--hw-space-s); width: 120px; }
+.hw-step-progress__seg { flex: 1 1 0; height: 6px; background: var(--hw-bg-subtle); }
+.hw-step-progress__seg.is-active { background: var(--hw-color-brand-primary-900); }
+.hw-step-progress__label {
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  color: var(--hw-text-secondary);
+}
+
+/* ----- Desktop stepper panel (signup steps 2-3) ------------------------- */
+.hw-stepper { display: none; }
+
+@media (min-width: 1024px) {
+  .hw-step-progress { display: none; } /* desktop shows the Stepper panel instead */
+
+  .hw-stepper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--hw-space-4xl);
+    padding: var(--hw-space-4xl);
+  }
+  .hw-stepper .hw-auth__panel-logo { padding: 0; }
+  .hw-stepper__title {
+    margin: 0;
+    font-family: var(--hw-font-heading);
+    font-size: var(--hw-size-5xl);
+    line-height: var(--hw-line-height-5xl);
+    letter-spacing: var(--hw-letter-spacing-s);
+    color: var(--hw-text-inverse);
+  }
+  .hw-stepper__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--hw-space-xl);
+  }
+  .hw-stepper__step { position: relative; display: flex; gap: var(--hw-space-m); align-items: flex-start; }
+  /* Vertical connector from each step's number down to the next step's number. */
+  .hw-stepper__step:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: 13px; /* centre of the 28px number badge */
+    top: 28px;
+    bottom: calc(-1 * var(--hw-space-xl)); /* reach the next number (list gap) */
+    width: 2px;
+    background: var(--hw-color-brand-primary-500);
+  }
+  .hw-stepper__num {
+    position: relative; /* paint over the connector line */
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--hw-radius-circle);
+    border: none;
+    background: var(--hw-color-gray-800); /* inactive: grey filled (per design) */
+    color: var(--hw-color-gray-300);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--hw-font-body);
+    font-size: var(--hw-size-m);
+    font-weight: var(--hw-weight-bold);
+  }
+  .hw-stepper__step.is-active .hw-stepper__num,
+  .hw-stepper__step.is-done .hw-stepper__num {
+    background: var(--hw-color-brand-primary-500);
+    border-color: var(--hw-color-brand-primary-500);
+    color: var(--hw-color-default-white);
+  }
+  .hw-stepper__text { display: flex; flex-direction: column; gap: var(--hw-space-2xs); }
+  .hw-stepper__label {
+    font-family: var(--hw-font-body);
+    font-weight: var(--hw-weight-bold);
+    color: var(--hw-text-inverse);
+  }
+  .hw-stepper__desc {
+    font-family: var(--hw-font-body);
+    font-size: var(--hw-size-m);
+    color: var(--hw-text-inverse);
+    opacity: 0.6;
+  }
+  .hw-stepper__step:not(.is-active):not(.is-done) .hw-stepper__label { opacity: 0.5; }
+
+  /* Desktop: Back/Proceed and State/Area go side-by-side; resend left-aligned. */
+  .hw-auth__actions { grid-template-columns: 1fr 1fr; }
+  .hw-field-row { grid-template-columns: 1fr 1fr; }
+  .hw-resend { text-align: left; }
+}
+
+/* ----- Reduced motion ---------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .hw-segment__option,
+  .hw-password__toggle,
+  .hw-social-btn,
+  .hw-otp__box,
+  .hw-avatar-upload__badge,
+  .hw-select__chevron { transition-duration: 0.01ms; }
+}

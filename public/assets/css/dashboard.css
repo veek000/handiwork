@@ -1,0 +1,437 @@
+/* =========================================================================
+   Dashboard chrome + Customer Home. Tokens only. Desktop-first for the shell
+   (the sidebar is a fixed rail); below --hw-bp-l (1024px) the sidebar becomes an
+   off-canvas drawer and the content grids collapse.
+   ========================================================================= */
+
+/* ----- Shell ------------------------------------------------------------ */
+/* Viewport-locked shell: fixed header, the main content scrolls internally. This lets
+   the notification page pin its top + pager while only its list scrolls. */
+.hw-dash { display: flex; height: 100vh; overflow: hidden; background: var(--hw-color-default-white); }
+.hw-dash__col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; height: 100%; }
+.hw-dash__main { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: var(--hw-space-2xl) var(--hw-space-3xl); }
+.hw-dash__scrim { position: fixed; inset: 0; z-index: 40; background: rgba(0, 0, 0, 0.5); }
+
+/* Sidebar is a full-height rail (fixed drawer on mobile). */
+.hw-sidebar { height: 100%; flex: none; overflow-y: auto; }
+
+/* Hidden scrollbars (scrolling still works) on the app's scroll areas. */
+.hw-dash__main,
+.hw-sidebar,
+.hw-notif-scroll,
+.hw-select__list {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* legacy Edge */
+}
+.hw-dash__main::-webkit-scrollbar,
+.hw-sidebar::-webkit-scrollbar,
+.hw-notif-scroll::-webkit-scrollbar,
+.hw-select__list::-webkit-scrollbar { width: 0; height: 0; }
+
+/* ----- Avatar (initials) ------------------------------------------------ */
+.hw-ava {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--hw-radius-circle);
+  background: var(--hw-color-brand-primary-900);
+  color: var(--hw-text-inverse);
+  font-family: var(--hw-font-heading);
+  line-height: 1;
+  overflow: hidden;
+  flex: none;
+}
+.hw-ava img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ----- Dashboard header ------------------------------------------------- */
+.hw-dash-header {
+  display: flex;
+  align-items: center;
+  gap: var(--hw-space-l);
+  padding: var(--hw-space-l) var(--hw-space-3xl);
+  background: var(--hw-color-default-white);
+  border-bottom: 1px solid var(--hw-border-divider);
+}
+.hw-dash-header__menu,
+.hw-dash-header__logo { display: none; } /* mobile only */
+/* Location tag — desktop header (left) + mobile row (below header). */
+.hw-loc { display: flex; align-items: center; gap: var(--hw-space-s); min-width: 0; }
+.hw-loc__pin { display: inline-flex; color: var(--hw-text-primary); } /* solid dark pin, ~28px */
+.hw-loc__text { display: flex; flex-direction: column; min-width: 0; }
+.hw-loc__label { font-size: var(--hw-size-s); line-height: 1.3; color: var(--hw-text-tertiary); }
+.hw-loc__value {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hw-space-s); /* room before the edit pencil */
+  font-size: var(--hw-size-m);
+  line-height: 1.3;
+  font-weight: var(--hw-weight-bold);
+  color: var(--hw-text-primary);
+  white-space: nowrap;
+}
+.hw-loc__value hw-icon { color: var(--hw-text-tertiary); } /* pencil stays muted */
+.hw-dash-mobiloc { display: none; } /* mobile-only location row (flex row when shown) */
+
+/* Messages shortcut (envelope + unread badge) in the mobile location row. */
+.hw-msgbtn {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--hw-border-default);
+  background: var(--hw-color-default-white);
+  color: var(--hw-text-primary);
+}
+.hw-msgbtn__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 3px;
+  box-sizing: border-box;
+  border: 2px solid var(--hw-color-default-white);
+  border-radius: var(--hw-radius-pill);
+  background: #ff2c20;
+  color: #fff;
+  font-family: var(--hw-font-body);
+  font-size: 10px;
+  font-weight: var(--hw-weight-bold);
+  line-height: 13px;
+  text-align: center;
+}
+.hw-dash-header__right { margin-left: auto; display: flex; align-items: center; gap: var(--hw-space-l); }
+.hw-dash-header__user { display: flex; align-items: center; gap: var(--hw-space-s); cursor: pointer; }
+.hw-dash-header__user-info { display: flex; flex-direction: column; min-width: 0; }
+.hw-dash-header__user-name { font-family: var(--hw-font-body); font-weight: var(--hw-weight-bold); font-size: var(--hw-size-m); line-height: 1.3; color: var(--hw-text-primary); }
+.hw-dash-header__user-email { font-size: var(--hw-size-s); line-height: 1.3; color: var(--hw-text-tertiary); }
+
+/* ----- Notification bell + panel ---------------------------------------- */
+.hw-bell { position: relative; }
+.hw-bell__btn { position: relative; display: inline-flex; border: none; background: transparent; color: var(--hw-text-primary); cursor: pointer; padding: var(--hw-space-2xs); }
+.hw-bell__btn--mobile { display: none; } /* desktop: dropdown trigger only; mobile swaps to the page link */
+.hw-bell__badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 3px;
+  box-sizing: border-box;
+  border: 2px solid var(--hw-color-default-white); /* ring separates it from the bell */
+  border-radius: var(--hw-radius-pill);
+  background: #ff2c20; /* notification-badge colour (Figma) */
+  color: #fff;
+  font-family: var(--hw-font-body);
+  font-size: 10px;
+  font-weight: var(--hw-weight-bold);
+  line-height: 13px;
+  text-align: center;
+}
+.hw-notif-panel {
+  position: absolute;
+  top: calc(100% + var(--hw-space-m));
+  right: 0;
+  z-index: 30;
+  width: 360px;
+  max-width: calc(100vw - 2 * var(--hw-space-l));
+  padding: var(--hw-space-m);
+  background: var(--hw-color-default-white);
+  border: 1px solid var(--hw-border-divider);
+  box-shadow: 0 12px 8px rgba(16, 24, 40, 0.08), 0 4px 3px rgba(16, 24, 40, 0.03);
+}
+/* Pointer arrow (the Figma "Tooltip" pointer) toward the bell. */
+.hw-notif-panel::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  right: 16px;
+  width: 12px;
+  height: 12px;
+  background: var(--hw-color-default-white);
+  border-top: 1px solid var(--hw-border-divider);
+  border-left: 1px solid var(--hw-border-divider);
+  transform: rotate(45deg);
+}
+.hw-notif-panel__head { display: flex; align-items: center; gap: var(--hw-space-s); padding-bottom: var(--hw-space-m); }
+.hw-notif-panel__title { flex: 1 1 auto; font-family: var(--hw-font-heading); font-size: var(--hw-size-l); color: var(--hw-color-brand-primary-900); }
+.hw-notif-panel__mark { font-size: var(--hw-size-m); color: var(--hw-text-tertiary); font-weight: var(--hw-weight-regular); }
+.hw-notif-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--hw-space-2xs);
+  margin-bottom: var(--hw-space-m);
+  padding: var(--hw-space-xs);
+  background: var(--hw-bg-default);
+}
+.hw-notif-tabs__tab {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: var(--hw-space-xs);
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  color: var(--hw-text-placeholder);
+}
+.hw-notif-tabs__tab.is-active {
+  background: var(--hw-input-bg);
+  color: var(--hw-text-primary);
+  font-weight: var(--hw-weight-bold);
+  box-shadow: 0 0 8px rgba(20, 20, 20, 0.08), 0 0 1px rgba(20, 20, 20, 0.04);
+}
+.hw-notif-scroll { max-height: 380px; overflow-y: auto; }
+.hw-notif-group { margin: 0 0 var(--hw-space-m); font-size: var(--hw-size-l); font-weight: var(--hw-weight-bold); color: #979797; }
+.hw-notif-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--hw-space-m); }
+.hw-notif-empty { padding: var(--hw-space-2xl) var(--hw-space-xl) var(--hw-space-2xl); display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-l); text-align: center; }
+.hw-notif-empty__art { width: 124px; height: 128px; }
+.hw-notif-empty__title { margin: 0; font-family: var(--hw-font-heading); font-size: var(--hw-size-2xl); color: var(--hw-color-brand-primary-900); }
+.hw-notif-empty__text { margin: 0; max-width: 260px; font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); color: rgba(0, 0, 0, 0.7); }
+
+/* Notification item — read: white box + border; unread: green box, dark icon square. */
+.hw-notif { display: flex; gap: var(--hw-space-m); padding: var(--hw-space-m); border: 1px solid var(--hw-border-default); }
+.hw-notif.is-unread { background: var(--hw-color-brand-primary-200); border-color: transparent; }
+.hw-notif__icon {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  background: var(--hw-color-brand-primary-100); /* light square, dark icon (read) */
+  color: var(--hw-color-brand-primary-900);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hw-notif.is-unread .hw-notif__icon { background: var(--hw-color-brand-primary-900); color: var(--hw-color-brand-primary-200); } /* dark square, light icon */
+.hw-notif__body { min-width: 0; display: flex; flex-direction: column; gap: var(--hw-space-xs); }
+.hw-notif__title { margin: 0; font-family: var(--hw-font-heading); font-size: var(--hw-size-l); letter-spacing: var(--hw-letter-spacing-s); color: var(--hw-text-primary); }
+.hw-notif__text { margin: 0; font-size: var(--hw-size-m); line-height: var(--hw-line-height-m); color: var(--hw-text-tertiary); }
+.hw-notif__time { font-size: var(--hw-size-m); font-weight: var(--hw-weight-bold); color: var(--hw-text-secondary); }
+
+/* ----- Notification page (full screen, reached from the mobile bell) ----- */
+/* Full-height page: __head + tabs pinned at the top, only the list scrolls, pager
+   pinned at the base. */
+.hw-notifpage { display: flex; flex-direction: column; height: 100%; min-height: 0; max-width: 720px; }
+.hw-notifpage__head { flex: none; display: flex; flex-direction: column; gap: var(--hw-space-l); padding-bottom: var(--hw-space-l); }
+.hw-notifpage__back { display: inline-flex; align-items: center; gap: var(--hw-space-2xs); align-self: flex-start; color: var(--hw-color-brand-primary-500); }
+.hw-notifpage__crumbs { display: flex; align-items: center; gap: var(--hw-space-s); font-size: var(--hw-size-s); color: var(--hw-text-tertiary); }
+.hw-notifpage__crumb { color: var(--hw-text-tertiary); text-decoration: none; }
+.hw-notifpage__crumb.is-current { color: var(--hw-text-primary); }
+.hw-notifpage__title { margin: 0; font-family: var(--hw-font-heading); font-size: var(--hw-size-3xl); letter-spacing: var(--hw-letter-spacing-s); color: var(--hw-text-primary); }
+
+/* NotificationList fills the middle; its tabs stay put, its list scrolls. */
+.hw-notifpage .hw-notif-body { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+.hw-notifpage .hw-notif-tabs { flex: none; }
+.hw-notifpage .hw-notif-scroll { flex: 1 1 0; min-height: 0; max-height: none; overflow-y: auto; }
+.hw-notifpage .hw-notif-empty { flex: 1 1 0; justify-content: center; }
+
+.hw-notifpage__pager { flex: none; display: flex; align-items: center; justify-content: space-between; gap: var(--hw-space-m); padding-top: var(--hw-space-l); }
+.hw-notifpage__pgbtn { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 1px solid var(--hw-border-default); background: var(--hw-color-default-white); color: var(--hw-text-primary); cursor: pointer; }
+.hw-notifpage__pginfo { flex: 1 1 0; text-align: center; font-size: var(--hw-size-m); color: var(--hw-text-secondary); }
+
+/* ----- Star rating ------------------------------------------------------ */
+.hw-rating { display: inline-flex; align-items: center; gap: var(--hw-space-2xs); font-size: var(--hw-size-s); }
+.hw-rating__value { font-weight: var(--hw-weight-bold); color: var(--hw-text-primary); }
+.hw-rating__stars { display: inline-flex; color: #ffae43; } /* amber (Warning/500) */
+.hw-rating__count { color: var(--hw-text-tertiary); }
+
+/* ----- Category tile (illustration in a sharp light-green square) -------- */
+.hw-cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: var(--hw-space-l); }
+.hw-cat { display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-xs); border: none; background: transparent; padding: 0; cursor: pointer; }
+.hw-cat__icon {
+  width: 100%;
+  aspect-ratio: 1; /* square box (equal width & height), desktop + mobile */
+  background: var(--hw-button-secondary-bg-default); /* #dff1e1 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.hw-cat__icon img { width: 48px; height: 48px; object-fit: contain; display: block; }
+.hw-cat__label { font-family: var(--hw-font-body); font-size: var(--hw-size-s); color: var(--hw-text-primary); text-align: center; }
+
+/* ----- Service card ----------------------------------------------------- */
+.hw-svc-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--hw-space-l); } /* 5 cards fill the width */
+.hw-svc { display: flex; flex-direction: column; gap: var(--hw-space-m); } /* borderless */
+.hw-svc__media { aspect-ratio: 218 / 128; background: var(--hw-bg-default); overflow: hidden; }
+.hw-svc__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hw-svc__body { display: flex; flex-direction: column; gap: var(--hw-space-xs); }
+.hw-svc__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--hw-space-s); }
+.hw-svc__title { margin: 0; font-family: var(--hw-font-heading); font-size: var(--hw-size-l); color: var(--hw-text-primary); }
+.hw-svc__fav {
+  flex: none;
+  border: none;
+  background: transparent;
+  color: var(--hw-text-primary);
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  transition: color var(--hw-duration-fast) var(--hw-ease-standard);
+}
+.hw-svc__fav.is-active { color: var(--hw-feedback-error-text); }
+.hw-svc__price {
+  align-self: flex-start;
+  padding: 4px var(--hw-space-s);
+  background: var(--hw-button-secondary-bg-default);
+  color: var(--hw-color-brand-primary-900);
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-s);
+}
+.hw-svc__desc {
+  margin: 0;
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-s);
+  line-height: var(--hw-line-height-s);
+  color: var(--hw-text-tertiary);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.hw-svc__action { margin-top: auto; } /* pins the button to the bottom so cards align */
+
+/* ----- Search bar ------------------------------------------------------- */
+.hw-search { display: flex; align-items: stretch; gap: var(--hw-space-s); width: 100%; max-width: 640px; }
+.hw-search__input { flex: 1 1 0; min-width: 0; } /* the established .hw-input (default/focus/disabled states) */
+.hw-search__btn { flex: none; }
+
+/* ----- Home layout ------------------------------------------------------ */
+.hw-home { display: flex; flex-direction: column; gap: var(--hw-space-2xl); }
+
+.hw-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--hw-color-brand-primary-900);
+  padding: var(--hw-space-6xl) var(--hw-space-3xl);
+}
+/* Glove pattern layer. */
+.hw-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: url("/assets/illustration/Handiwork Pattern Tile.svg") center / 520px auto repeat;
+  pointer-events: none;
+}
+/* Radial gradient darkening the centre behind the text, over the pattern (like the
+   landing CTA banner glow) — pattern stays visible at the edges. */
+.hw-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(ellipse 70% 135% at 50% 42%,
+    var(--hw-color-brand-primary-900) 0%,
+    rgba(0, 26, 19, 0.55) 40%,
+    rgba(0, 26, 19, 0) 78%);
+  pointer-events: none;
+}
+.hw-hero__inner { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-l); text-align: center; }
+.hw-hero__title { margin: 0; font-family: var(--hw-font-heading); font-size: var(--hw-size-7xl); line-height: var(--hw-line-height-7xl); letter-spacing: var(--hw-letter-spacing-s); color: var(--hw-text-inverse); }
+.hw-hero__sub { margin: 0; display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--hw-space-s); font-family: var(--hw-font-body); color: rgba(245, 245, 245, 0.85); }
+.hw-hero__tag {
+  display: inline-block;
+  padding: 4px var(--hw-space-s);
+  background: var(--hw-button-secondary-bg-default);
+  color: var(--hw-color-brand-primary-900);
+  font-weight: var(--hw-weight-bold);
+}
+
+.hw-section { display: flex; flex-direction: column; gap: var(--hw-space-l); }
+.hw-section__head { display: flex; align-items: center; justify-content: space-between; }
+.hw-section__title { margin: 0; font-family: var(--hw-font-heading); font-size: var(--hw-size-3xl); letter-spacing: var(--hw-letter-spacing-s); color: var(--hw-text-primary); }
+
+.hw-invite { display: grid; grid-template-columns: 1fr 1fr; gap: var(--hw-space-l); }
+.hw-invite__card {
+  position: relative;
+  overflow: hidden;
+  min-height: 164px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--hw-space-l);
+  padding: var(--hw-space-l) var(--hw-space-xl);
+}
+.hw-invite__card--light { background: var(--hw-color-brand-primary-100); } /* #DFF1E1 */
+.hw-invite__card--dark { background: #155d3e; } /* Figma invite card colour (buttons/primary/bg/pressed) */
+.hw-invite__text {
+  position: relative;
+  z-index: 1;
+  max-width: calc(100% - 128px); /* leave room for the illustration */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--hw-space-s);
+}
+/* Illustration anchored to the bottom-right, touching the base of the card. */
+.hw-invite__art { position: absolute; right: 0; bottom: 0; width: 140px; height: auto; display: block; }
+.hw-invite__title { margin: 0; font-family: var(--hw-font-heading); font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl); letter-spacing: var(--hw-letter-spacing-s); }
+.hw-invite__sub { margin: 0; font-family: var(--hw-font-body); font-size: var(--hw-size-m); }
+.hw-invite__card--light .hw-invite__title { color: var(--hw-text-primary); }
+.hw-invite__card--light .hw-invite__sub { color: var(--hw-text-secondary); }
+.hw-invite__card--dark .hw-invite__title { color: var(--hw-text-inverse); }
+.hw-invite__card--dark .hw-invite__sub { color: var(--hw-color-gray-400); }
+.hw-invite__text .hw-button { gap: var(--hw-space-2xs); }
+/* Naira card uses the secondary Button variant as-is (keeps hover/active/disabled
+   states). Card 1 uses the primary Button — both retain their component states. */
+
+/* ----- Drawer-only chrome + responsive ---------------------------------- */
+.hw-sidebar__drawer-only { display: none; } /* desktop: hidden (mobile shows close + profile) */
+
+@media (max-width: 1023.98px) {
+  /* Sidebar becomes an off-canvas drawer */
+  .hw-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 277px; /* drawer width (per the sidebar.css --drawer variant) */
+    height: 100%;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform var(--hw-duration-base) var(--hw-ease-standard);
+  }
+  .hw-sidebar.is-open { transform: translateX(0); box-shadow: 0 0 40px rgba(0, 0, 0, 0.4); }
+  .hw-sidebar__drawer-only { display: block; }
+  .hw-sidebar__header { display: none; } /* logo header hidden; profile shows instead */
+
+  /* Header: hamburger + centred logo + bell; user + location move out of the header */
+  .hw-dash-header { padding: var(--hw-space-m) var(--hw-space-l); gap: var(--hw-space-m); }
+  .hw-dash-header__menu { display: inline-flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--hw-text-primary); cursor: pointer; padding: var(--hw-space-2xs); }
+  .hw-dash-header__logo { display: block; height: 22px; width: auto; margin: 0 auto; } /* centred */
+  .hw-dash-header__right { margin-left: 0; }
+  .hw-dash-header__user { display: none; }
+  .hw-dash-header__location { display: none; } /* location moves to the row below */
+  .hw-dash-mobiloc {
+    flex: none; /* fixed row — don't shrink */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--hw-space-m);
+    padding: var(--hw-space-m) var(--hw-space-l); /* bottom padding so content below isn't flush/clipped */
+    border-bottom: 1px solid var(--hw-border-divider);
+  }
+  .hw-nav-item--mobile-hidden { display: none; } /* Messages → envelope shortcut instead */
+
+  .hw-dash__main { padding: var(--hw-space-l); }
+  .hw-invite { grid-template-columns: 1fr; }
+  .hw-svc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } /* 2 per row on mobile */
+  .hw-hero { padding: var(--hw-space-3xl) var(--hw-space-l); }
+  .hw-hero__title { font-size: var(--hw-size-5xl); line-height: var(--hw-line-height-5xl); }
+
+  /* Bell becomes a link to the full notification page (not a dropdown). */
+  .hw-bell__btn--desktop { display: none; }
+  .hw-bell__btn--mobile { display: inline-flex; }
+
+  /* Search stacks (input over a full-width button); the hero sub wraps so the
+     Carpenter tag drops onto its own line. */
+  .hw-search { flex-direction: column; align-items: stretch; }
+  .hw-search__btn { width: 100%; }
+  .hw-hero__sub { flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hw-sidebar { transition-duration: 0.01ms; }
+  .hw-svc__fav { transition-duration: 0.01ms; }
+}

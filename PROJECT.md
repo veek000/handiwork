@@ -279,6 +279,137 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   `index.html` + `components/*.html` deliberately left **out** of `public/` (internal
   style-guide tools, not production routes).
 
+- **App layer — component wrappers + dashboard scaffolding (Phase 1)** — Added the React
+  app layer over the design system, no redesign: thin wrappers whose props map 1:1 onto the
+  existing BEM modifiers. **5 components** — `Button` (`.hw-button` + `--primary/--secondary/--block`
+  + icon slot), `Input` (`.hw-input` passthrough), `Sidebar` (client component; role nav from the
+  `sidebar.css` docs — Customer 4 items / Vendor 7 items — active item via `usePathname()` → `.is-active`),
+  `DashboardShell` (server component; flex shell = 220px sidebar + fluid main, `DashboardShell.module.css`),
+  and `Placeholder` (page stub). **11 pages** across two parenthesised route groups (add no URL
+  segment): `(customer)` → `/customer{,/jobs,/messages,/support}`, `(vendor)` →
+  `/vendor{,/services,/orders,/messages,/reviews,/analytics,/support}`. **3 layouts** — root
+  (`app/layout.tsx`, wires the DS stylesheets via `<link>` + loads `hw-icons.js` at
+  `strategy="afterInteractive"`) plus one per group (each renders `DashboardShell` with its role).
+  **1 type declaration** (`types/hw-icon.d.ts`, JSX intrinsic element for `<hw-icon>`). Design-system
+  CSS is `<link>`ed from `public/` (same files the static pages use — no duplication/drift). `npx tsc
+  --noEmit` passes with zero errors; both route groups verified in-browser (correct role sidebar, icons,
+  active-item highlighting). The residual hydration attribute warning was traced to a **browser wallet
+  extension injecting `<html>` attributes pre-hydration** (Bybit) — an environment artifact, not an app
+  bug; no code change. Foundation only — no real dashboard screen content yet (Phase 2 = data types).
+
+- **Data-shape types (Phase 2)** — Plain TypeScript interfaces derived screen-by-screen
+  from the Customer + Vendor desktop Figma flows (16 screens inspected); no DB, no mock
+  data, no components. Split by domain + barrel: `types/{user,service,job,review,message,
+  notification,wallet}.ts` + `types/index.ts`. **User** is a role-discriminated union
+  (`CustomerUser | VendorUser`, `role` discriminator from the signup "Looking to Hire /
+  Provide a Service" toggle); vendor-only fields (bio, yearsOfExperience, jobsCompleted,
+  rating aggregate, availability) come off the Vendor Profile. **Job** is the core
+  customer⇄vendor transaction (the vendor "My Orders" section is just a label — every field
+  says Job); `JobStatus = pending | quoted | in_progress | completed | cancelled | rejected`
+  ("rejected" = vendor declined, distinct from customer "cancelled"). **Service** carries
+  `price` (whole-naira NGN) + `priceUnit` (`hr|day|wk`). **Review** uses a strict
+  `Rating = 1|2|3|4|5` (aggregate averages stay `number`). Timestamps are ISO strings
+  formatted at render (proven by the same job showing "2025-09-20 | 10:30 AM" on one screen
+  and "Requested 5 min Ago" on another). **Conversation** is fully evidenced; **Message** is
+  included but explicitly commented as speculative — no chat-thread screen exists yet.
+  Deliberately not modelled: analytics counts (derived from Job filters) and favourites
+  (no screen). `npx tsc --noEmit` passes. Next: mock data, then real dashboard screens.
+
+- **Mock data (Phase 2.5)** — Plain fixture arrays in `mocks/` (kept separate from `types/`
+  so the layer is swappable for a real source later), one file per domain + `index.ts`
+  barrel: categories, users, services, reviews, jobs, conversations, wallets, notifications.
+  **Referential integrity verified programmatically** (throwaway tsx script): every
+  `Job.{customerId,vendorId,serviceId}`, `Review.{serviceId,vendorId}`, `Service.providerId`,
+  wallet key and `Conversation.participantName` resolves; each job's vendor matches its
+  service's provider; vendor/service `ratingAverage`+`reviewCount` aggregates are recomputed
+  from the reviews array (not the Figma "20" placeholder). Counts: 10 users (5 customers /
+  5 vendors), 9 services, 13 reviews, 14 jobs, 5 conversations, 5 notifications, 5 wallets.
+  **Edge cases covered:** zero-job customer (Kristin), many-job customer (Jane, 10 → paginates),
+  zero-review vendor (Grace), all six `JobStatus` values present, a conversation with
+  `unreadCount>0` and one with `isTyping:true`. **Message left unmocked** (still speculative —
+  only `Conversation.lastMessagePreview` carries message-shaped content). Realistic
+  Lagos/Nigerian content + NGN pricing, not placeholder filler. Service imagery uses a single
+  shared `public/assets/img/service-placeholder.png`; user avatars omitted (UI falls back to
+  initials like the "VD" header). `npx tsc --noEmit` passes.
+
+- **Customer Login screen (first real app screen)** — Built `/login` from Figma Customer
+  Login `289:3541` (desktop + mobile are the same flow; the frames originally linked were
+  the vendor variant — identical layout, differing only in active toggle + subtitle). One
+  role-agnostic screen: the `RoleToggle` switches role + subtitle and submit routes to
+  `/customer` or `/vendor` (UI only — no auth until Phase 6; email/password/role are local
+  state, not tied to the `User` type). New **`(auth)` route group** with a shared
+  `AuthShell` layout (dark brand panel + centered form; panel hidden below `--hw-bp-l`
+  1024px, replaced by a top logo). Net-new reusable components (token-built, shared with
+  Signup later): `AuthShell`, `RoleToggle`, `PasswordInput` (composes `Input` + eye
+  show/hide, `eye`/`eye-slash` hw-icons), `SocialButton` (facebook/google/apple), plus
+  `.hw-link` + `.hw-divider` utilities — all in `assets/css/auth.css`, linked in the root
+  layout. Assets added: `icons/social/{google,apple,facebook}.svg` (user-supplied brand
+  marks), `illustration/illustration-28.svg` (verified-worker, user-supplied),
+  `img/service-placeholder.png`. Mobile-first, focus-visible via `--hw-border-focus`,
+  `--hw-duration-fast` transitions, reduced-motion guarded. `npx tsc --noEmit` passes.
+  Debt: `.hw-field` form pattern is duplicated (site.css for static pages, auth.css for the
+  app) — consolidate into a shared form stylesheet when Signup lands.
+  - **Polish pass (signed off):** viewport-locked shell (`100vh`, only the form column
+    scrolls); base reset (`box-sizing` + `body{margin:0}`) added to typography.css since the
+    app doesn't load site.css; `<p>` subtitles zeroed (their default margin was swamping the
+    flex gaps); footer moved to normal flow (form `margin:auto 0`) so it can't overlap the
+    sign-up line; mobile logo given an explicit bottom gap (auto-margin collapses when the
+    form overflows a short viewport); panel logo matched to the sidebar (`height:24px`,
+    left-aligned); Login heading + subtitle centred on mobile, left-aligned on desktop.
+    Brand-panel glove pattern: the exported `Handiwork Pattern.svg` is a 1240×312 strip whose
+    rows sit on a 134px period (2.33 periods tall) so it can't tile seamlessly — cropped a
+    **2-period (268px) seamless tile → `Handiwork Pattern Tile.svg`**, rendered `720px` wide,
+    bottom-anchored in a fixed-height region (`3 × ~155.6px ≈ 467px`) so exactly three clean
+    bands stack, base-aligned with the illustration, nothing cut off. Login screen approved.
+
+- **Signup wizard (second real screen)** — Built `/signup` from Figma desktop `289:6498` +
+  mobile `363:12614` (same flow, two sizes). One client route, three steps: **Sign Up**
+  (account: email + create/confirm password) → **Personal Information** → **Confirmation**
+  (the step indicator counts only the two onboarding steps, not Sign Up). Role-agnostic like
+  login; submit routes to `/customer` or `/vendor` (UI only, Phase 6 for real auth).
+  **AuthShell extended** with a swappable `panel` + `mobileHeader` — login/signup-step-1 use
+  the brand panel; steps 2–3 use the desktop `StepperPanel` (vertical numbered stepper w/
+  connecting line, active = green `#50c878`, inactive = grey-filled) and the mobile
+  `StepProgress` bar. Both login and signup pages now own their `AuthShell` (the `(auth)`
+  layout is a passthrough). New reusable components: `Select` (**custom in-page dropdown** —
+  native `<select>` was replaced because its OS popup spilled outside the window),
+  `PhoneInput`, `OtpInput` (4 square boxes, auto-advance), `AvatarUpload` (static),
+  `StepperPanel`, `StepProgress`, `ResendTimer`. Reference data in `data/locations.ts` (real
+  36 states + FCT; real Lagos areas — other states out of scope, commented). Input-section
+  icons are outlined (`hollow` eye + chevron); native password reveal hidden. Layout: each
+  form splits into `__top` (fields) + `__foot` (button + everything under it) — on mobile the
+  form fills the viewport and pins `__foot` to the base; desktop stays centred. State/Area
+  side-by-side on desktop; email prefilled across steps (single value). `npx tsc --noEmit`
+  passes. Signup approved.
+
+- **Customer Home + Notification (first data-backed screen)** — Built `/customer` (Figma
+  desktop `291:35211` / mobile `290:3862`), the first screen driven by real mock data. Fills
+  the existing Phase-1 placeholder inside `DashboardShell`. Confirmed Customer (Book a True
+  Professional, category browse, Popular Services, no wallet). **Shell rework:** the top bar
+  is shared chrome, so `DashboardShell` (server) now picks the signed-in mock user by role
+  (**customer → Jane Doe**, vendor → Veek) + mock notifications/messages count and renders a
+  client `DashboardChrome` (owns the mobile-drawer state) → `DashboardHeader` + main. Shell is
+  **viewport-locked** (fixed header, main scrolls internally) so screens like the notification
+  page can pin their own top/bottom. `Sidebar` gained the real `sidebar.css` **mobile drawer**
+  (close + `.hw-avatar`/`.hw-profile__*`); Messages is `mobileHidden` (envelope shortcut
+  instead). **Reusable components:** `DashboardHeader`, `LocationTag`, `Avatar` (initials),
+  `StarRating`, `CategoryTile`, `ServiceCard` (action slot, favourite = local UI toggle),
+  `SearchBar` (uses the `Input` component for real states), `Notification{Bell,List,Item,Page}`.
+  Notifications: desktop = dropdown "Tooltip" (pointer arrow); **mobile = a full page** at
+  `/{role}/notifications` (back + breadcrumb + heading + tabs + list + pager, with fixed
+  top/pager and only the list scrolling). Relative time via `lib/time.ts` `MOCK_REFERENCE_DATE`
+  (demo-only, commented). **Assets exported from Figma into the repo:** 12 category
+  illustrations (`illustration/category/*`), plus existing set files reused for invite cards
+  (megaphone `illustration-22`, naira `illustration-23`) and the empty-notification bell
+  (`illustration-16`); `google/apple/facebook` social icons added earlier. **Design fidelity
+  pass (many rounds):** sharp corners throughout (no radius); white main bg; hero gradient
+  glow over the glove pattern; category tiles are square light-green boxes with un-stretched
+  illustrations (`preserveAspectRatio` fixed); invite cards in two colourways with bottom-right
+  illustrations; 5 borderless service cards filling the width (5-col desktop / 2-col mobile)
+  with title/price/rating/description; mobile header = 2-line hamburger + centred logo + bell,
+  location on a row below with a messages envelope + unread badge; hidden scrollbars on scroll
+  areas. `npx tsc --noEmit` + `next build` pass (17 routes).
+
 ### Tracked debts / open decisions
 
 - **`.hw-btn` → `.hw-button` migration** — ✅ done. `landing.html` uses the canonical
