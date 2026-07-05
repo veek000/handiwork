@@ -178,6 +178,10 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
 - **Repo:** https://github.com/veek000/handiwork (GitHub ↔ Vercel connected)
 - Every `git push` to `master` **auto-deploys** to production. Branches get preview URLs.
 - Manual deploy (if ever needed): `vercel --prod` from the project root.
+- **Branching (since 2026-07-05):** day-to-day work happens on **`dev`** (branched from
+  `master`); each push to `dev` gets its own Vercel **preview** URL. **`master` is production
+  and is only updated via a deliberate merge from `dev`** — never commit feature work straight
+  to `master`. Target branch is decided per change, not defaulted.
 
 ## Progress log
 
