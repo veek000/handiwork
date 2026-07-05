@@ -452,6 +452,13 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   Out of scope, still `#`: landing "Contact Us" and the "Read Customer Story" testimonial cards.
   `next build` passes.
 
+- **Favicon (2026-07-05)** — Added the Handiwork logomark (dark hand on brand green, 143×143 PNG)
+  as the site favicon. Two placements cover the split serving model: `app/icon.png` (Next App
+  Router auto-injects `<link rel="icon">` into every app route — `/login`, `/signup`, `/customer/*`,
+  `/vendor/*`) and `public/favicon.png` referenced by an explicit `<link rel="icon" href="/favicon.png">`
+  in the static pages (`landing.html`, `faq.html`, `contact.html`, `design-system.html`) that are
+  served verbatim via rewrites. `next build` passes (now emits `/icon.png`).
+
 ## Locked decisions for future phases (not yet built)
 
 - **Auth + backend (Phase 6):** Convex for both — Convex Auth for authentication, Convex as
