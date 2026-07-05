@@ -410,6 +410,60 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   location on a row below with a messages envelope + unread badge; hidden scrollbars on scroll
   areas. `npx tsc --noEmit` + `next build` pass (17 routes).
 
+- **Data-access layer (hooks/) + governance docs restored (2026-07-05)** — Retrofitted the
+  first data-backed screen off direct `mocks/` imports onto a `hooks/` seam, before it could
+  compound across more screens. One thin hook per domain — `useCurrentUser`, `useServices`,
+  `useCategories`, `useNotifications`, `useJobs`, `useReviews`, `useConversations`, `useWallet`
+  (+ barrel) — each a plain synchronous wrapper returning the existing fixtures typed against
+  the Phase 2 types (no React state, so callable from server or client components; zero runtime
+  change today). `mocks/` is now imported in **exactly one place — `hooks/`**; Home
+  (`app/(customer)/customer/page.tsx`), `DashboardShell` (header user info + notifications +
+  messages count), and `NotificationPage` consume hooks instead of importing mocks. New standing
+  rule in `COMPONENT-BUILD-RULES.md` ("Data access — hooks only, never mocks/ directly"). This is
+  the seam that swaps to Convex at Phase 6 (`useQuery` / server fetch) without touching a single
+  consumer. Also **restored the two governance docs the repo referenced but was missing** —
+  `TOKEN-GOVERNANCE.md` and `COMPONENT-BUILD-RULES.md` — into the root (PROJECT.md already linked
+  TOKEN-GOVERNANCE.md; both were absent from the working tree). The Conversation per-Job `jobId`
+  fix (see the Chat locked decision above) landed in the same pass. `npx tsc --noEmit` +
+  `next build` pass (17 routes).
+
+- **Customer Home visual refinements (2026-07-05)** — Tightened the first data screen to the
+  mobile Figma (`290:3862` / invite row `290:4555`). **Category tiles:** the illustration now
+  scales as a share of the tile (70%) instead of a fixed 48px that looked small on mobile.
+  **Invite cards:** extracted into a client `InviteCarousel` — desktop keeps the 2-up grid;
+  mobile is a **horizontal scroll-snap row (one full-width card per view, swipe to reveal the
+  second) with sharp pagination dots that track the swipe**. Card spacing corrected to Figma
+  (4px title→sub, 24px sub→button, 16px padding); the promo CTA is now a compact card-scoped
+  `.hw-invite__btn` (Manrope 12px) rather than the heavier shared `.hw-button`; both illustrations
+  kept (light = megaphone, dark = naira); the dark-card `#155d3e` literal was retired for
+  `--hw-color-brand-primary-800`. **Popular Services:** now renders **6 on mobile (2×3), 5 on
+  desktop** (the 6th hidden ≥1024px). **Hero:** mobile padding set so the search sits 16px from
+  the sides *and* the base (equal gap, per Figma). Tokens only. `npx tsc --noEmit` + `next build`
+  pass (17 routes).
+
+## Locked decisions for future phases (not yet built)
+
+- **Auth + backend (Phase 6):** Convex for both — Convex Auth for authentication, Convex as
+  the backend/database. Version pinned in package.json (Convex Auth is beta — may have
+  breaking changes). No fallback vendor; this is a deliberate single-vendor commitment, not a
+  hedge. Role derived from the authenticated user, replacing the current local-state
+  RoleToggle.
+- **Chat (post-mock-data):** Text + read receipts + typing indicators, scoped per Job/order
+  thread (not an open inbox) — **now enforced in the type (corrected 2026-07-05).**
+  `types/message.ts` `Conversation` carries a required **`jobId`** that scopes each thread to a
+  specific Job (per the original per-order-thread decision, not an open inbox).
+  `mocks/conversations.ts` references real jobIds, and referential integrity was re-verified via
+  a throwaway script: every `jobId` resolves to a real Job whose `customerId` is the signed-in
+  viewer (Jane, `usr_jane`) and whose `vendorId` is the conversation's `participantName`. The
+  evidenced list-row fields (`participantName`/`lastMessage*`/`unreadCount`/`lastMessageStatus`)
+  are unchanged. Typing indicators via @convex-dev/presence — ephemeral/subscribed state, NOT a
+  persisted field on Conversation. Current mock `isTyping: true` is a stand-in only; do not carry
+  it forward as the real data shape when Convex wiring starts.
+- **Convex spike (prerequisite to both above):** verify sign-up/sign-in/session-persistence
+  and two-sender live message rendering in an isolated throwaway test before either gets
+  wired into the real app — **not yet run; still pending** (no Convex dependency, `convex/`
+  directory, or spike code exists in the repo — it has not been skipped, just not started).
+
 ### Tracked debts / open decisions
 
 - **`.hw-btn` → `.hw-button` migration** — ✅ done. `landing.html` uses the canonical
@@ -443,4 +497,3 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
 
 - Card / Badge / Tag components (un-specced — derive from primitives per rules).
 - A page scaffold/template that pre-links the stylesheets.
-- Decide dark-mode scope (tokens are captured, switching not wired).

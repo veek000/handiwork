@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notifications } from "@/mocks/notifications";
+import { useNotifications } from "@/hooks";
 import { NotificationList } from "./NotificationList";
 
 /**
@@ -9,6 +9,7 @@ import { NotificationList } from "./NotificationList";
  * `homeHref` is the role's dashboard root. Styling: .hw-notifpage*.
  */
 export function NotificationPage({ homeHref }: { homeHref: string }) {
+  const notifications = useNotifications();
   return (
     <div className="hw-notifpage">
       {/* Fixed top: back + breadcrumb + heading + (the tabs come from NotificationList). */}

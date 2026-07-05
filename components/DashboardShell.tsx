@@ -1,23 +1,14 @@
 import type { ReactNode } from "react";
-import { customers, vendors } from "@/mocks/users";
-import { notifications } from "@/mocks/notifications";
-import { conversations } from "@/mocks/conversations";
+import { useCurrentUser, useNotifications, useConversations } from "@/hooks";
 import { DashboardChrome } from "@/components/DashboardChrome";
-
-// Unread messages count for the mobile location-row envelope badge.
-const MESSAGES_COUNT = conversations.reduce((n, c) => n + c.unreadCount, 0);
 
 /**
  * DashboardShell — shared dashboard chrome used by the (customer) and (vendor) route
- * groups. Server component: it selects the signed-in placeholder user for the role
- * (no auth yet — customer → Jane Doe, vendor → Veek) and the mock notifications, then
- * hands them to the client DashboardChrome (which owns the drawer + header + main).
+ * groups. Server component: it pulls the signed-in user for the role, the notifications,
+ * and the unread-messages count from the data-access layer (hooks/), then hands them to
+ * the client DashboardChrome (which owns the drawer + header + main). No mocks/ import —
+ * all data comes through hooks/ (see COMPONENT-BUILD-RULES.md).
  */
-const SIGNED_IN = {
-  customer: customers.find((c) => c.id === "usr_jane")!,
-  vendor: vendors.find((v) => v.id === "usr_veek")!,
-};
-
 export function DashboardShell({
   role,
   children,
@@ -25,12 +16,17 @@ export function DashboardShell({
   role: "customer" | "vendor";
   children: ReactNode;
 }) {
+  const user = useCurrentUser(role);
+  const notifications = useNotifications();
+  // Unread messages count for the mobile location-row envelope badge.
+  const messagesCount = useConversations().reduce((n, c) => n + c.unreadCount, 0);
+
   return (
     <DashboardChrome
       role={role}
-      user={SIGNED_IN[role]}
+      user={user}
       notifications={notifications}
-      messagesCount={MESSAGES_COUNT}
+      messagesCount={messagesCount}
     >
       {children}
     </DashboardChrome>

@@ -7,7 +7,10 @@ export type DeliveryStatus = "sent" | "delivered" | "read";
 // Fully evidenced by the Messages list row.
 export interface Conversation {
   id: string;
-  participantName: string; // "Kristin Watson"
+  jobId: string; // the Job this thread is scoped to — chat is per-order, not an open
+  // inbox (see the "Chat" locked decision in PROJECT.md). Resolves to a Job whose
+  // customerId/vendorId are this conversation's two participants.
+  participantName: string; // the counterparty (from the signed-in user's side), e.g. "Veek Okonkwo"
   participantAvatarUrl?: string;
   lastMessagePreview: string; // "yah, nice design"
   lastMessageAt: string; // ISO 8601 — rendered "4:30 PM" / "Yesterday"

@@ -1,10 +1,9 @@
-import { categories } from "@/mocks/categories";
-import { services } from "@/mocks/services";
+import { useCategories, useServices } from "@/hooks";
 import { Button } from "@/components/Button";
 import { SearchBar } from "@/components/SearchBar";
 import { CategoryTile } from "@/components/CategoryTile";
 import { ServiceCard } from "@/components/ServiceCard";
-import { formatNaira } from "@/lib/time";
+import { InviteCarousel } from "@/components/InviteCarousel";
 
 // Customer Home (Figma 291:35211 desktop / 290:3862 mobile). Backed by real mock data:
 // categories → mocks/categories, services → mocks/services. The signed-in user +
@@ -12,6 +11,8 @@ import { formatNaira } from "@/lib/time";
 // invite banners and search are static/non-functional per the design scope.
 // "Popular Services" = all mock services (no popularity flag by design).
 export default function CustomerHome() {
+  const categories = useCategories();
+  const services = useServices();
   return (
     <div className="hw-home">
       {/* Hero */}
@@ -38,36 +39,8 @@ export default function CustomerHome() {
         </div>
       </section>
 
-      {/* Invite banners (static) — two colourways, each with an illustration */}
-      <section className="hw-invite">
-        <div className="hw-invite__card hw-invite__card--light">
-          <div className="hw-invite__text">
-            <p className="hw-invite__title">Invite your friends &amp; get up to {formatNaira(2000)}</p>
-            <p className="hw-invite__sub">
-              Introduce your friends to the easiest way to find and hire professionals for your needs.
-            </p>
-            <Button variant="primary">
-              Invite Friends <hw-icon suppressHydrationWarning name="angle-right" variant="hollow" size="14"></hw-icon>
-            </Button>
-          </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="hw-invite__art" src="/assets/illustration/illustration-22.svg" alt="" aria-hidden="true" />
-        </div>
-
-        <div className="hw-invite__card hw-invite__card--dark">
-          <div className="hw-invite__text">
-            <p className="hw-invite__title">Invite your friends &amp; get up to {formatNaira(2000)}</p>
-            <p className="hw-invite__sub">
-              Introduce your friends to the easiest way to find and hire professionals for your needs.
-            </p>
-            <Button variant="secondary">
-              Invite Friends <hw-icon suppressHydrationWarning name="angle-right" variant="hollow" size="14"></hw-icon>
-            </Button>
-          </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="hw-invite__art" src="/assets/illustration/illustration-23.svg" alt="" aria-hidden="true" />
-        </div>
-      </section>
+      {/* Invite banners — two colourways; horizontal swipe + dots on mobile. */}
+      <InviteCarousel />
 
       {/* Popular services */}
       <section className="hw-section">
@@ -76,7 +49,8 @@ export default function CustomerHome() {
           <a href="#" className="hw-link">View all</a>
         </div>
         <div className="hw-svc-grid">
-          {services.slice(0, 5).map((s) => (
+          {/* 6 on mobile (2×3), 5 on desktop (the 6th is hidden ≥1024px). */}
+          {services.slice(0, 6).map((s) => (
             <ServiceCard
               key={s.id}
               service={s}

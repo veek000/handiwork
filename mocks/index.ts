@@ -7,7 +7,8 @@
 //   Review.{serviceId,vendorId}         → services / users
 //   Service.providerId                  → users (vendors)
 //   wallets keys                        → users (vendors)
-//   Conversation.participantName        → users
+//   Conversation.jobId                  → jobs (per-Job scoping)
+//   Conversation.participantName        → users (the job's vendor, from Jane's side)
 //
 // Not mocked, on purpose:
 //   • Message — flagged speculative in types/message.ts; only Conversation is mocked.

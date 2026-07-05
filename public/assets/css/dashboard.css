@@ -248,11 +248,14 @@
   justify-content: center;
   overflow: hidden;
 }
-.hw-cat__icon img { width: 48px; height: 48px; object-fit: contain; display: block; }
+/* Illustration sized as a share of the tile so it scales with the box (mobile + desktop),
+   instead of a fixed 48px that looked small on small tiles. */
+.hw-cat__icon img { width: 70%; height: 70%; object-fit: contain; display: block; }
 .hw-cat__label { font-family: var(--hw-font-body); font-size: var(--hw-size-s); color: var(--hw-text-primary); text-align: center; }
 
 /* ----- Service card ----------------------------------------------------- */
 .hw-svc-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--hw-space-l); } /* 5 cards fill the width */
+.hw-svc-grid > :nth-child(6) { display: none; } /* desktop shows 5; the 6th is mobile-only */
 .hw-svc { display: flex; flex-direction: column; gap: var(--hw-space-m); } /* borderless */
 .hw-svc__media { aspect-ratio: 218 / 128; background: var(--hw-bg-default); overflow: hidden; }
 .hw-svc__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -342,39 +345,69 @@
 .hw-section__head { display: flex; align-items: center; justify-content: space-between; }
 .hw-section__title { margin: 0; font-family: var(--hw-font-heading); font-size: var(--hw-size-3xl); letter-spacing: var(--hw-letter-spacing-s); color: var(--hw-text-primary); }
 
-.hw-invite { display: grid; grid-template-columns: 1fr 1fr; gap: var(--hw-space-l); }
+.hw-invite { display: flex; flex-direction: column; gap: var(--hw-space-m); }
+.hw-invite__track { display: grid; grid-template-columns: 1fr 1fr; gap: var(--hw-space-l); } /* desktop: 2-up */
 .hw-invite__card {
   position: relative;
   overflow: hidden;
   min-height: 164px;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--hw-space-l);
-  padding: var(--hw-space-l) var(--hw-space-xl);
+  align-items: center;
+  padding: var(--hw-space-l); /* Figma: 16px all round */
 }
 .hw-invite__card--light { background: var(--hw-color-brand-primary-100); } /* #DFF1E1 */
-.hw-invite__card--dark { background: #155d3e; } /* Figma invite card colour (buttons/primary/bg/pressed) */
+.hw-invite__card--dark { background: var(--hw-color-brand-primary-800); } /* #155D3E (buttons/primary/bg/pressed) */
 .hw-invite__text {
   position: relative;
   z-index: 1;
-  max-width: calc(100% - 128px); /* leave room for the illustration */
+  max-width: calc(100% - 110px); /* leave room for the illustration */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--hw-space-s);
+  gap: var(--hw-space-xl); /* Figma: 24px from the copy block to the button */
 }
+.hw-invite__copy { display: flex; flex-direction: column; gap: var(--hw-space-xs); } /* Figma: 4px title→sub */
 /* Illustration anchored to the bottom-right, touching the base of the card. */
-.hw-invite__art { position: absolute; right: 0; bottom: 0; width: 140px; height: auto; display: block; }
+.hw-invite__art { position: absolute; right: 0; bottom: 0; width: 120px; height: auto; display: block; }
 .hw-invite__title { margin: 0; font-family: var(--hw-font-heading); font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl); letter-spacing: var(--hw-letter-spacing-s); }
-.hw-invite__sub { margin: 0; font-family: var(--hw-font-body); font-size: var(--hw-size-m); }
+.hw-invite__sub { margin: 0; font-family: var(--hw-font-body); font-size: var(--hw-size-m); line-height: var(--hw-line-height-m); }
 .hw-invite__card--light .hw-invite__title { color: var(--hw-text-primary); }
 .hw-invite__card--light .hw-invite__sub { color: var(--hw-text-secondary); }
 .hw-invite__card--dark .hw-invite__title { color: var(--hw-text-inverse); }
 .hw-invite__card--dark .hw-invite__sub { color: var(--hw-color-gray-400); }
-.hw-invite__text .hw-button { gap: var(--hw-space-2xs); }
-/* Naira card uses the secondary Button variant as-is (keeps hover/active/disabled
-   states). Card 1 uses the primary Button — both retain their component states. */
+
+/* Compact promo button (Figma: Manrope 12px, sharp) — a card-scoped micro-CTA, not the
+   shared .hw-button. Colours flip per card variant. */
+.hw-invite__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hw-space-s);
+  padding: var(--hw-space-s) var(--hw-space-m); /* ~8×12, closest tokens to Figma's 8×13 */
+  border: none;
+  cursor: pointer;
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-s);
+  line-height: var(--hw-line-height-s);
+  transition: opacity var(--hw-duration-fast) var(--hw-ease-standard);
+}
+.hw-invite__btn:hover { opacity: 0.9; }
+.hw-invite__btn:focus-visible { outline: 2px solid var(--hw-border-focus); outline-offset: 2px; }
+.hw-invite__card--light .hw-invite__btn { background: var(--hw-color-brand-primary-900); color: var(--hw-text-inverse); }
+.hw-invite__card--dark .hw-invite__btn { background: var(--hw-color-brand-primary-200); color: var(--hw-color-brand-primary-900); }
+
+/* Pagination dots — mobile only (hidden on desktop). Active = wide dark pill. */
+.hw-invite__dots { display: none; }
+.hw-invite__dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  background: var(--hw-color-brand-primary-200);
+  border-radius: var(--hw-radius-none); /* sharp edges, on-brand */
+  transition: width var(--hw-duration-base) var(--hw-ease-standard), background var(--hw-duration-base) var(--hw-ease-standard);
+}
+.hw-invite__dot.is-active { width: 32px; background: var(--hw-color-brand-primary-900); }
 
 /* ----- Drawer-only chrome + responsive ---------------------------------- */
 .hw-sidebar__drawer-only { display: none; } /* desktop: hidden (mobile shows close + profile) */
@@ -415,9 +448,27 @@
   .hw-nav-item--mobile-hidden { display: none; } /* Messages → envelope shortcut instead */
 
   .hw-dash__main { padding: var(--hw-space-l); }
-  .hw-invite { grid-template-columns: 1fr; }
+
+  /* Invite cards: horizontal swipe (one card per view, next peeking) + dots. */
+  .hw-invite__track {
+    display: flex;
+    gap: var(--hw-space-l);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+  }
+  .hw-invite__track::-webkit-scrollbar { height: 0; }
+  .hw-invite__card { flex: 0 0 100%; scroll-snap-align: start; } /* full width — swipe to reveal card 2 */
+  .hw-invite__title { font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); } /* Figma mobile: 16px */
+  .hw-invite__sub { font-size: var(--hw-size-s); line-height: var(--hw-line-height-s); } /* Figma mobile: 12px */
+  .hw-invite__dots { display: flex; justify-content: center; gap: var(--hw-space-s); }
+
   .hw-svc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } /* 2 per row on mobile */
-  .hw-hero { padding: var(--hw-space-3xl) var(--hw-space-l); }
+  .hw-svc-grid > :nth-child(6) { display: flex; } /* mobile shows the 6th card */
+
+  /* Hero: search sits 16px from the sides AND the base (Figma) — equal side/base gap. */
+  .hw-hero { padding: var(--hw-space-2xl) var(--hw-space-l) var(--hw-space-l); }
   .hw-hero__title { font-size: var(--hw-size-5xl); line-height: var(--hw-line-height-5xl); }
 
   /* Bell becomes a link to the full notification page (not a dropdown). */
