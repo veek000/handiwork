@@ -148,12 +148,13 @@
     position: absolute;
     left: 0;
     right: 0;
+    /* Fill the whole panel body so the pattern never looks short on tall/monitor
+       screens (it used to stop at a fixed 3-tile / 467px strip). The tile is seamless
+       vertically, so repeat-y stacks as many clean bands as the height needs; bottom-
+       anchored so the base band still aligns with the illustration's base (any partial
+       band lands at the top, behind the logo area). */
+    top: 0;
     bottom: 0;
-    /* Exactly three seamless tiles, no cut-off. A 720px-wide tile renders ~155.6px
-       tall (720 x 268/1240), so this region = 3 tiles (3 x 155.6 ≈ 467px). Bottom-
-       anchored so the base band aligns with the illustration's base; repeat-y fills
-       the region and the fixed height stops it at three. */
-    height: 467px;
     background-image: url("/assets/illustration/Handiwork Pattern Tile.svg");
     background-repeat: repeat-y;
     background-size: 720px auto;

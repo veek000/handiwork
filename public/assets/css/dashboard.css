@@ -240,7 +240,9 @@
 .hw-rating__count { color: var(--hw-text-tertiary); }
 
 /* ----- Category tile (illustration in a sharp light-green square) -------- */
-.hw-cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: var(--hw-space-l); }
+/* auto-fit (not auto-fill) so leftover tracks collapse and the tiles stretch to fill
+   the full width — no empty gap on the right at wide/monitor widths. Square via aspect-ratio. */
+.hw-cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: var(--hw-space-l); }
 .hw-cat { display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-xs); border: none; background: transparent; padding: 0; cursor: pointer; }
 .hw-cat__icon {
   width: 100%;
