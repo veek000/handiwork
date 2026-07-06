@@ -13,12 +13,23 @@ import { NotificationItem } from "./NotificationItem";
 export function NotificationList({
   notifications,
   withHead = false,
+  items: controlledItems,
+  onMarkAllRead,
 }: {
   notifications: Notification[];
   withHead?: boolean;
+  // Optional controlled mode: when the parent owns the read-state (the mobile page,
+  // which renders its own "Mark all as read" beside the heading), it passes items +
+  // the handler. Uncontrolled otherwise (the desktop dropdown manages its own state).
+  items?: Notification[];
+  onMarkAllRead?: () => void;
 }) {
-  const [items, setItems] = useState(notifications);
+  const [localItems, setLocalItems] = useState(notifications);
   const [tab, setTab] = useState<"all" | "unread">("all");
+
+  const items = controlledItems ?? localItems;
+  const markAllRead =
+    onMarkAllRead ?? (() => setLocalItems((list) => list.map((n) => ({ ...n, read: true }))));
 
   const unread = items.filter((n) => !n.read);
   const shown = tab === "all" ? items : unread;
@@ -31,7 +42,7 @@ export function NotificationList({
           <button
             type="button"
             className="hw-link hw-notif-panel__mark"
-            onClick={() => setItems((list) => list.map((n) => ({ ...n, read: true })))}
+            onClick={markAllRead}
           >
             Mark all as read
           </button>

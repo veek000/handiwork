@@ -218,7 +218,10 @@
 .hw-notifpage__crumbs { display: flex; align-items: center; gap: var(--hw-space-s); font-size: var(--hw-size-s); color: var(--hw-text-tertiary); }
 .hw-notifpage__crumb { color: var(--hw-text-tertiary); text-decoration: none; }
 .hw-notifpage__crumb.is-current { color: var(--hw-text-primary); }
+.hw-notifpage__titlerow { display: flex; align-items: center; justify-content: space-between; gap: var(--hw-space-m); }
 .hw-notifpage__title { margin: 0; font-family: var(--hw-font-heading); font-size: var(--hw-size-3xl); letter-spacing: var(--hw-letter-spacing-s); color: var(--hw-text-primary); }
+.hw-notifpage__mark { flex: none; font-size: var(--hw-size-m); font-weight: var(--hw-weight-regular); color: var(--hw-text-tertiary); background: none; border: none; padding: 0; cursor: pointer; }
+.hw-notifpage__mark:disabled { opacity: 0.5; cursor: default; }
 
 /* NotificationList fills the middle; its tabs stay put, its list scrolls. */
 .hw-notifpage .hw-notif-body { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
