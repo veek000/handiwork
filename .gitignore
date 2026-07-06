@@ -15,3 +15,8 @@ next-env.d.ts
 
 # Vercel
 .vercel
+
+# Convex (spike) — deployment secrets + locally-generated code (throwaway)
+.env.local
+.convex/
+convex/_generated/
