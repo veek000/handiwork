@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
@@ -17,18 +17,20 @@ import { StepperPanel } from "@/components/auth/StepperPanel";
 import { StepProgress } from "@/components/auth/StepProgress";
 import { ResendTimer } from "@/components/auth/ResendTimer";
 import { NIGERIA_STATES, LAGOS_AREAS } from "@/data/locations";
+import { useRoleRedirect } from "../useRoleRedirect";
 
 // Signup wizard: Sign Up (account) → Step 1 Personal Information → Step 2 Confirmation.
-// The step indicator counts only the two onboarding steps (not the initial Sign Up),
-// matching Figma. One /signup route holds all state — nothing to persist between
-// steps in the prototype. UI only; no real auth until Phase 6 (submit just routes).
-// Each step's form splits into __top (fields) and __foot (button + everything under
-// it); on mobile the form fills the viewport and pins __foot to the bottom.
-// Subtitle uses the mobile frame's copy (the desktop frame has a login-copy paste error).
+// Real Convex Auth (Password provider). The account is created when step 1 submits —
+// signIn(flow:"signUp") with all the profile fields — which (via verify: ResendOTP)
+// emails a code. Step 2 submits that code (flow:"email-verification"), which signs the
+// user in; useRoleRedirect then routes to their role's dashboard. Google/Facebook OAuth
+// are wired on step 0. Step 0 collects credentials only; the profile fields it needs come
+// from step 1, so account creation waits until then. Layout per step: __top + __foot.
 const INTRO_SUB = "Find the perfect professional for your next project.";
 
 export default function SignupPage() {
-  const router = useRouter();
+  const { signIn } = useAuthActions();
+  useRoleRedirect(); // routes once the account is created + verified (authenticated)
   const [step, setStep] = useState(0); // 0 Sign Up · 1 Personal Info · 2 Confirmation
   const [role, setRole] = useState<AuthRole>("customer");
   const [form, setForm] = useState({
@@ -43,14 +45,87 @@ export default function SignupPage() {
     address: "",
   });
   const [otp, setOtp] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const set = (key: keyof typeof form) => (value: string) =>
     setForm((f) => ({ ...f, [key]: value }));
 
-  function finish(event: FormEvent) {
+  // Step 0 → 1: validate credentials locally (account is created at step 1).
+  function submitAccount(event: FormEvent) {
     event.preventDefault();
-    // Phase 6 replaces this with Clerk/Convex. For now: route to the dashboard.
-    console.log("signup submit", { role, ...form, otp });
-    router.push(role === "customer" ? "/customer" : "/vendor");
+    setError(null);
+    if (form.password !== form.confirm) {
+      setError("Passwords don't match.");
+      return;
+    }
+    if (form.password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+    setStep(1);
+  }
+
+  // Create the account with the full profile; verify: ResendOTP emails the code.
+  // Shared by the step-1 submit and the "resend code" action.
+  function createAccount() {
+    return signIn("password", {
+      email: form.email,
+      password: form.password,
+      flow: "signUp",
+      role,
+      fullName: form.fullName,
+      countryCode: form.countryCode,
+      phone: form.phone,
+      state: form.state,
+      area: form.area,
+      address: form.address,
+    });
+  }
+
+  // Step 1 → 2: create the account (sends the email code), then show the OTP step.
+  async function submitPersonal(event: FormEvent) {
+    event.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      await createAccount();
+      setStep(2);
+    } catch {
+      setError("Couldn't create your account. That email may already be registered.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  // Step 2: verify the emailed code → signs the user in → useRoleRedirect navigates.
+  async function verify(event: FormEvent) {
+    event.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      await signIn("password", { email: form.email, code: otp, flow: "email-verification" });
+    } catch {
+      setError("That code isn't right or has expired. Please try again.");
+      setSubmitting(false);
+    }
+  }
+
+  async function resend() {
+    setError(null);
+    try {
+      await createAccount();
+    } catch {
+      /* resend is best-effort; ignore */
+    }
+  }
+
+  async function handleOAuth(provider: "google" | "facebook") {
+    setError(null);
+    try {
+      await signIn(provider);
+    } catch {
+      setError(`Couldn't continue with ${provider}. Please try again.`);
+    }
   }
 
   const loginLink = (
@@ -69,7 +144,7 @@ export default function SignupPage() {
     >
       {step === 0 && (
         <>
-          <form className="hw-auth__form" onSubmit={(e) => { e.preventDefault(); setStep(1); }}>
+          <form className="hw-auth__form" onSubmit={submitAccount}>
             <div className="hw-auth__top">
               <RoleToggle value={role} onChange={setRole} />
 
@@ -95,6 +170,8 @@ export default function SignupPage() {
                 <PasswordInput id="su-confirm" autoComplete="new-password" placeholder="Confirm the Password"
                   value={form.confirm} onChange={(e) => set("confirm")(e.target.value)} required />
               </div>
+
+              {error ? <p className="hw-auth__error" role="alert">{error}</p> : null}
             </div>
 
             <div className="hw-auth__foot">
@@ -103,9 +180,10 @@ export default function SignupPage() {
               <div className="hw-divider">Or Sign up with</div>
 
               <div className="hw-social">
-                <SocialButton provider="facebook" />
-                <SocialButton provider="google" />
-                <SocialButton provider="apple" />
+                <SocialButton provider="facebook" onClick={() => handleOAuth("facebook")} />
+                <SocialButton provider="google" onClick={() => handleOAuth("google")} />
+                {/* Apple deferred (paid Apple Developer account) — disabled for now. */}
+                <SocialButton provider="apple" disabled title="Apple sign-in coming soon" />
               </div>
 
               {loginLink}
@@ -117,7 +195,7 @@ export default function SignupPage() {
 
       {step === 1 && (
         <>
-          <form className="hw-auth__form" onSubmit={(e) => { e.preventDefault(); setStep(2); }}>
+          <form className="hw-auth__form" onSubmit={submitPersonal}>
             <div className="hw-auth__top">
               <header className="hw-auth__intro">
                 <h1 className="hw-heading-l">Personal Information</h1>
@@ -164,12 +242,16 @@ export default function SignupPage() {
                 <Input id="pi-address" autoComplete="street-address" placeholder="Enter Address"
                   value={form.address} onChange={(e) => set("address")(e.target.value)} required />
               </div>
+
+              {error ? <p className="hw-auth__error" role="alert">{error}</p> : null}
             </div>
 
             <div className="hw-auth__foot">
               <div className="hw-auth__actions">
                 <Button type="button" variant="secondary" block onClick={() => setStep(0)}>Back</Button>
-                <Button type="submit" variant="primary" block>Proceed</Button>
+                <Button type="submit" variant="primary" block disabled={submitting}>
+                  {submitting ? "Creating…" : "Proceed"}
+                </Button>
               </div>
 
               {loginLink}
@@ -181,7 +263,7 @@ export default function SignupPage() {
 
       {step === 2 && (
         <>
-          <form className="hw-auth__form" onSubmit={finish}>
+          <form className="hw-auth__form" onSubmit={verify}>
             <div className="hw-auth__top">
               <header className="hw-auth__intro">
                 <h1 className="hw-heading-l">Confirmation</h1>
@@ -192,13 +274,17 @@ export default function SignupPage() {
               </header>
 
               <OtpInput value={otp} onChange={setOtp} />
-              <ResendTimer seconds={30} />
+              <ResendTimer seconds={30} onResend={resend} />
+
+              {error ? <p className="hw-auth__error" role="alert">{error}</p> : null}
             </div>
 
             <div className="hw-auth__foot">
               <div className="hw-auth__actions">
                 <Button type="button" variant="secondary" block onClick={() => setStep(1)}>Back</Button>
-                <Button type="submit" variant="primary" block>Confirm</Button>
+                <Button type="submit" variant="primary" block disabled={submitting}>
+                  {submitting ? "Confirming…" : "Confirm"}
+                </Button>
               </div>
 
               {loginLink}

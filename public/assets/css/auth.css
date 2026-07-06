@@ -312,6 +312,18 @@
   outline-offset: 2px;
 }
 .hw-social-btn img { width: 24px; height: 24px; display: block; }
+.hw-social-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.hw-social-btn:disabled:hover { background: var(--hw-color-default-white); }
+
+/* Inline auth error (invalid credentials, wrong OTP, etc.). */
+.hw-auth__error {
+  margin: 0;
+  color: var(--hw-feedback-error-text);
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-s);
+  line-height: var(--hw-line-height-s);
+}
+
 
 /* ----- Text link ("Forgot password?", "Sign up") ------------------------ */
 .hw-link {

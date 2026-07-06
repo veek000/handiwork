@@ -459,6 +459,28 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   in the static pages (`landing.html`, `faq.html`, `contact.html`, `design-system.html`) that are
   served verbatim via rewrites. `next build` passes (now emits `/icon.png`).
 
+- **Real Convex Auth on /login + /signup (Phase 6 start — minimal, 2026-07-06)** — Promoted the
+  retired spike backend into real auth for the two auth screens. **Backend (`convex/`):** custom
+  `users` table (authTables + optional signup profile fields: role, fullName, phone, countryCode,
+  state, area, address); `auth.ts` = Password provider with a `profile()` mapping those fields +
+  `verify: ResendOTP`, plus Google + Facebook OAuth (Apple scaffolded/commented — paid account);
+  `ResendOTP.ts` sends a 4-digit email code (matches the 4-box OTP UI); `users:viewer` query.
+  Deployed to the reused cloud deployment (project renamed **handiwork**, same `proper-wolf-657`).
+  **Frontend:** a `(auth)`-scoped client `ConvexAuthProvider` (localStorage flow, `force-dynamic`);
+  `/login` calls `signIn("password", flow:"signIn")` + Google/Facebook `signIn(provider)`; the
+  `/signup` wizard creates the account at step 1 (`flow:"signUp"` with the full profile → emails
+  the code) and verifies at step 2 (`flow:"email-verification"`); `useRoleRedirect` routes by the
+  account's stored role (the login RoleToggle no longer drives routing — per the locked decision).
+  Build-safe via `makeFunctionReference` (no `_generated` import) + fallback URL — verified `tsc`
+  + `next build` pass with **no** `.env.local` and **no** `convex/_generated` (Vercel-safe). **Minimal
+  scope (deliberate):** client flow only — **no route protection/middleware**, and `hooks/useCurrentUser`
+  still returns the mock Jane/Veek (dashboards unchanged). **Blocked on external creds** (set via
+  `npx convex env set` when provided): `AUTH_RESEND_KEY` (signup can't send codes without it),
+  `AUTH_GOOGLE_ID/SECRET`, `AUTH_FACEBOOK_ID/SECRET` (+ register callback URLs at
+  `https://proper-wolf-657.convex.site/api/auth/callback/{google,facebook}`). Deferred to a later
+  "full" pass: middleware route protection, replacing the mock current-user, Apple OAuth, and
+  Vercel/prod env wiring.
+
 ## Locked decisions for future phases (not yet built)
 
 - **Auth + backend (Phase 6):** Convex for both — Convex Auth for authentication, Convex as
@@ -477,10 +499,11 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   are unchanged. Typing indicators via @convex-dev/presence — ephemeral/subscribed state, NOT a
   persisted field on Conversation. Current mock `isTyping: true` is a stand-in only; do not carry
   it forward as the real data shape when Convex wiring starts.
-- **Convex spike (prerequisite to both above):** verify sign-up/sign-in/session-persistence
-  and two-sender live message rendering in an isolated throwaway test before either gets
-  wired into the real app — **not yet run; still pending** (no Convex dependency, `convex/`
-  directory, or spike code exists in the repo — it has not been skipped, just not started).
+- **Convex spike (prerequisite to both above):** ✅ **done + retired (2026-07-06).** Ran an
+  isolated throwaway (`convex/` + `app/spike-convex/`) that verified sign-up/sign-in, session
+  persistence across reload + tab close/reopen, and two-sender live message rendering — all
+  passed against a real cloud deployment. The spike scaffolding has since been **promoted into
+  real auth** (see the progress-log entry) and the spike route/table deleted.
 
 ### Tracked debts / open decisions
 

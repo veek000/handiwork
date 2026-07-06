@@ -1,4 +1,4 @@
-// ⚠️ SPIKE — THROWAWAY. Registers Convex Auth's HTTP routes (token exchange etc.).
+// Registers Convex Auth's HTTP routes (OAuth callbacks, token exchange, etc.).
 import { httpRouter } from "convex/server";
 import { auth } from "./auth";
 
