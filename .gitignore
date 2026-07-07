@@ -18,5 +18,6 @@ next-env.d.ts
 
 # Convex (spike) — deployment secrets + locally-generated code (throwaway)
 .env.local
+.env.production.local
 .convex/
 convex/_generated/

@@ -481,6 +481,44 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   "full" pass: middleware route protection, replacing the mock current-user, Apple OAuth, and
   Vercel/prod env wiring.
 
+- **Dev preview deploys fixed + Preview env wiring (2026-07-07)** — Diagnosed why the auth work
+  "wasn't showing up on a dev preview": it wasn't a build failure at all. Preview deploys were
+  succeeding, but **`dev` and `master` had converged to the identical commit** (repeated
+  `merge master: Fast-forward` on dev), so dev previews were byte-identical to production — nothing
+  distinct to see. **Re-established real divergence** by committing this session's work to `dev`
+  only and pushing; `dev` is now ahead of `master` by one commit, master/production untouched.
+  **This was the first real test of the dev-first branching rule since it was written (2026-07-05)
+  — it passed** (work landed on dev, master didn't move, dev got its own green preview
+  `handiwork-4n4dlkzc9…`). **Preview env vars added** — `NEXT_PUBLIC_CONVEX_URL` +
+  `NEXT_PUBLIC_CONVEX_SITE_URL` (→ `proper-wolf-657.convex.{cloud,site}`), scoped to the **`dev`**
+  preview branch. Previously these existed only for Development + Production, so preview builds fell
+  back to the `auth-not-configured` URL. **Runtime-verified, not just build-success:** the preview
+  URL is behind Vercel Deployment Protection (SSO → `vercel.com/sso-api`, so not anonymously
+  fetchable), so verification was done by pulling the exact `preview/dev` env Vercel provides,
+  reproducing the production build locally, and grepping the compiled client bundle — the real
+  `proper-wolf-657.convex.cloud` **is** baked into `.next/static/chunks/*.js` and the
+  `auth-not-configured` fallback string is **absent**. **Deliberately NOT added to Vercel:
+  `JWT_PRIVATE_KEY`, `JWKS`, `CONVEX_DEPLOYMENT`.** Reasoning (recorded so a future session doesn't
+  "fix" this by re-adding them): the Vercel-built Next app reads **only** `NEXT_PUBLIC_CONVEX_URL`
+  (`app/(auth)/AuthConvexProvider.tsx`; no middleware, client-side localStorage flow).
+  `JWT_PRIVATE_KEY`/`JWKS` are **Convex-side** signing keys — already set on the `proper-wolf-657`
+  deployment (`npx convex env list`), used by Convex server-side, never read by the Vercel runtime.
+  `CONVEX_DEPLOYMENT` is a **local-CLI-only** pointer (`npx convex dev/deploy`); the Vercel build is
+  plain `next build` with no `convex deploy` step. Putting any of the three on Vercel would be dead
+  config (and needless secret-spread for the keys). **Also:** closed a `.gitignore` gap
+  (`.env.production.local` was untracked-but-not-ignored; a root prod build / `vercel env pull`
+  could have committed it). Logged a Tracked-debt to later diff `refs/original/refs/heads/dev`
+  (pre-filter-branch spike history) against dev.
+- **Welcome email templates committed to dev (2026-07-07)** — Customer + handyman welcome email
+  HTML (`customer_welcome.html`, `handyman_welcome.html`) plus 8 image assets, committed to `dev`
+  as the first dev-first unit of work. **Location note:** they live at **`emails/` in the repo
+  root** (with `emails/assets/`), **not** `public/assets/email/` — flagging because they were
+  referred to as being under `public/assets/email/`, which does not exist. **NOT yet tested / NOT
+  wired:** these are static template files only. The Resend/Convex test-send path (the emailed
+  welcome flow) **has not been built in this thread** — do not read this entry as verified working
+  email delivery. Sending still depends on the deferred email wiring + `AUTH_RESEND_KEY` already
+  set on Convex.
+
 ## Locked decisions for future phases (not yet built)
 
 Consolidated from the planning conversation and organized by area so it stays scannable
@@ -629,6 +667,14 @@ they don't get quietly treated as decided.
 
 ### Tracked debts / open decisions
 
+- **Verify pre-filter-branch spike history left nothing sensitive on the remote** — A
+  `git filter-branch` was run on **2026-07-06 ~08:30 WAT** (per the `dev` reflog), immediately
+  after the throwaway Convex spike commit, evidently to scrub the spike from history when it was
+  retired. It left the automatic backup ref `refs/original/refs/heads/dev` (pre-rewrite history)
+  and a duplicated spike commit. Likely benign per the reflog timing + the spike-retirement notes,
+  **but not yet confirmed by an actual diff.** Follow-up (not urgent): diff
+  `refs/original/refs/heads/dev` against current `dev` to see exactly what the rewrite removed, and
+  confirm none of it survived on the GitHub remote. Don't let this disappear unaddressed.
 - **`.hw-btn` → `.hw-button` migration** — ✅ done. `landing.html` uses the canonical
   `.hw-button`; the ad-hoc `.hw-btn` stylesheet `assets/css/buttons.css` has been **deleted**.
 - **Button `:active` scale (deferred, approved)** — Add a subtle `transform: scale(0.97)` on
