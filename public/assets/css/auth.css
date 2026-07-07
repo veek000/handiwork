@@ -554,7 +554,9 @@
     gap: var(--hw-space-xl);
   }
   .hw-stepper__step { position: relative; display: flex; gap: var(--hw-space-m); align-items: flex-start; }
-  /* Vertical connector from each step's number down to the next step's number. */
+  /* Vertical connector from each step's number down to the next step's number.
+     Matches the step's own state: grey by default, green only under an active/done
+     step (so the line below the current step is green, below inactive steps grey). */
   .hw-stepper__step:not(:last-child)::before {
     content: "";
     position: absolute;
@@ -562,6 +564,10 @@
     top: 28px;
     bottom: calc(-1 * var(--hw-space-xl)); /* reach the next number (list gap) */
     width: 2px;
+    background: var(--hw-color-gray-800); /* inactive: grey (matches inactive num) */
+  }
+  .hw-stepper__step.is-active:not(:last-child)::before,
+  .hw-stepper__step.is-done:not(:last-child)::before {
     background: var(--hw-color-brand-primary-500);
   }
   .hw-stepper__num {

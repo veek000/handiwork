@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { User } from "@/types";
 import { initialsOf } from "@/components/Avatar";
+import { LogoutButton } from "@/components/LogoutButton";
 
 /**
  * Sidebar — role nav for the dashboard shell. On desktop it's a fixed rail (logo +
@@ -102,10 +103,7 @@ export function Sidebar({
       </nav>
 
       <div className="hw-sidebar__footer">
-        <Link href="/" className="hw-nav-item hw-nav-item--logout" onClick={onClose}>
-          <hw-icon suppressHydrationWarning name="arrow-right-from-bracket" variant="filled" size="14"></hw-icon>
-          <span>Log Out</span>
-        </Link>
+        <LogoutButton onClick={onClose} />
       </div>
     </aside>
   );
