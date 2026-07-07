@@ -13,26 +13,54 @@ import { Select } from "@/components/auth/Select";
 import { PhoneInput } from "@/components/auth/PhoneInput";
 import { OtpInput } from "@/components/auth/OtpInput";
 import { AvatarUpload } from "@/components/auth/AvatarUpload";
-import { StepperPanel } from "@/components/auth/StepperPanel";
+import { DocumentUpload } from "@/components/auth/DocumentUpload";
+import { StepperPanel, type StepperStep } from "@/components/auth/StepperPanel";
 import { StepProgress } from "@/components/auth/StepProgress";
 import { ResendTimer } from "@/components/auth/ResendTimer";
 import { NIGERIA_STATES, LAGOS_AREAS } from "@/data/locations";
+import { EXPERIENCE_OPTIONS } from "@/data/experience";
+import { useCategories } from "@/hooks";
 import { useRoleRedirect } from "../useRoleRedirect";
 
-// Signup wizard: Sign Up (account) → Step 1 Personal Information → Step 2 Confirmation.
-// Real Convex Auth (Password provider). The account is created when step 1 submits —
-// signIn(flow:"signUp") with all the profile fields — which (via verify: ResendOTP)
-// emails a code. Step 2 submits that code (flow:"email-verification"), which signs the
-// user in; useRoleRedirect then routes to their role's dashboard. Google/Facebook OAuth
-// are wired on step 0. Step 0 collects credentials only; the profile fields it needs come
-// from step 1, so account creation waits until then. Layout per step: __top + __foot.
-const INTRO_SUB = "Find the perfect professional for your next project.";
+// Role-aware signup wizard. Both roles start on the account step (Sign Up), then run
+// their own onboarding sequence before Confirmation (OTP):
+//   customer: Personal Information → Confirmation
+//   vendor:   Personal Information → Business Information → Verification → Confirmation
+// The account is created at the step immediately BEFORE Confirmation (so every profile
+// field is collected first) — signIn(flow:"signUp") with the full profile, which via
+// verify: ResendOTP emails the code; Confirmation submits it (flow:"email-verification")
+// and useRoleRedirect routes to the role dashboard. UI-only for the non-persisted bits
+// (avatar, ID document); the vendor text fields DO persist (schema + auth profile).
+// The step indicator/stepper counts only the onboarding steps, never the account step.
+
+type StepName = "account" | "personal" | "business" | "verification" | "confirm";
+
+const FLOWS: Record<AuthRole, StepName[]> = {
+  customer: ["account", "personal", "confirm"],
+  vendor: ["account", "personal", "business", "verification", "confirm"],
+};
+
+// Desktop stepper labels for the vendor onboarding steps (customer uses the
+// StepperPanel default). Order matches FLOWS.vendor minus the account step.
+const VENDOR_STEPPER: StepperStep[] = [
+  { label: "Personal Information", desc: "Enter your details to create your profile" },
+  { label: "Business Information", desc: "Enter details about your business" },
+  { label: "Verification", desc: "Upload your ID to verify your identity" },
+  { label: "Confirmation", desc: "Enter the code sent to your email to confirm your account" },
+];
+
+const CUSTOMER_INTRO = "Find the perfect professional for your next project.";
+const VENDOR_INTRO =
+  "Join a community of verified professionals. Connect with clients and showcase your expertise.";
 
 export default function SignupPage() {
   const { signIn } = useAuthActions();
   useRoleRedirect(); // routes once the account is created + verified (authenticated)
-  const [step, setStep] = useState(0); // 0 Sign Up · 1 Personal Info · 2 Confirmation
+  const categories = useCategories();
+  const serviceOptions = categories.map((c) => c.name);
+
   const [role, setRole] = useState<AuthRole>("customer");
+  const [stepIndex, setStepIndex] = useState(0); // index into FLOWS[role]
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -43,30 +71,27 @@ export default function SignupPage() {
     state: "",
     area: "",
     address: "",
+    // vendor-only (Business Information + Verification)
+    service: "",
+    yearsOfExperience: "",
+    businessBio: "",
+    governmentIdNumber: "",
   });
+  const [idFileName, setIdFileName] = useState<string | undefined>(); // UI only (no upload)
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const set = (key: keyof typeof form) => (value: string) =>
     setForm((f) => ({ ...f, [key]: value }));
 
-  // Step 0 → 1: validate credentials locally (account is created at step 1).
-  function submitAccount(event: FormEvent) {
-    event.preventDefault();
-    setError(null);
-    if (form.password !== form.confirm) {
-      setError("Passwords don't match.");
-      return;
-    }
-    if (form.password.length < 8) {
-      setError("Password must be at least 8 characters.");
-      return;
-    }
-    setStep(1);
-  }
+  const flow = FLOWS[role];
+  const stepName = flow[stepIndex];
+  const onboardingTotal = flow.length - 1; // steps shown in the indicator (excludes account)
+  const nextIsConfirm = flow[stepIndex + 1] === "confirm";
 
   // Create the account with the full profile; verify: ResendOTP emails the code.
-  // Shared by the step-1 submit and the "resend code" action.
+  // Shared by the pre-Confirmation submit and the "resend code" action. Vendor fields
+  // are sent only for vendors (all optional in the schema).
   function createAccount() {
     return signIn("password", {
       email: form.email,
@@ -79,25 +104,54 @@ export default function SignupPage() {
       state: form.state,
       area: form.area,
       address: form.address,
+      ...(role === "vendor"
+        ? {
+            service: form.service,
+            yearsOfExperience: form.yearsOfExperience,
+            businessBio: form.businessBio,
+            governmentIdNumber: form.governmentIdNumber,
+          }
+        : {}),
     });
   }
 
-  // Step 1 → 2: create the account (sends the email code), then show the OTP step.
-  async function submitPersonal(event: FormEvent) {
+  // Shared submit for every step except Confirmation. Validates the account step
+  // locally; for the step just before Confirmation it creates the account (sending the
+  // OTP) before advancing; otherwise it just advances.
+  async function submitStep(event: FormEvent) {
     event.preventDefault();
     setError(null);
-    setSubmitting(true);
-    try {
-      await createAccount();
-      setStep(2);
-    } catch {
-      setError("Couldn't create your account. That email may already be registered.");
-    } finally {
-      setSubmitting(false);
+
+    if (stepName === "account") {
+      if (form.password !== form.confirm) {
+        setError("Passwords don't match.");
+        return;
+      }
+      if (form.password.length < 8) {
+        setError("Password must be at least 8 characters.");
+        return;
+      }
+      setStepIndex((i) => i + 1);
+      return;
     }
+
+    if (nextIsConfirm) {
+      setSubmitting(true);
+      try {
+        await createAccount();
+        setStepIndex((i) => i + 1);
+      } catch {
+        setError("Couldn't create your account. That email may already be registered.");
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
+    setStepIndex((i) => i + 1);
   }
 
-  // Step 2: verify the emailed code → signs the user in → useRoleRedirect navigates.
+  // Confirmation: verify the emailed code → signs the user in → useRoleRedirect navigates.
   async function verify(event: FormEvent) {
     event.preventDefault();
     setError(null);
@@ -128,6 +182,23 @@ export default function SignupPage() {
     }
   }
 
+  const back = () => setStepIndex((i) => i - 1);
+
+  const subtitle =
+    stepName === "account"
+      ? role === "vendor"
+        ? VENDOR_INTRO
+        : CUSTOMER_INTRO
+      : stepName === "personal"
+        ? role === "vendor"
+          ? "Enter your details to create your profile."
+          : CUSTOMER_INTRO
+        : stepName === "business"
+          ? "Enter details about your business"
+          : stepName === "verification"
+            ? "Upload your ID to verify your identity."
+            : null; // confirm renders its own (dynamic) subtitle
+
   const loginLink = (
     <p className="hw-auth__signup">
       Already have an account?{" "}
@@ -139,18 +210,29 @@ export default function SignupPage() {
 
   return (
     <AuthShell
-      panel={step === 0 ? undefined : <StepperPanel active={step - 1} />}
-      mobileHeader={step === 0 ? undefined : <StepProgress current={step} total={2} />}
+      panel={
+        stepName === "account" ? undefined : (
+          <StepperPanel
+            active={stepIndex - 1}
+            steps={role === "vendor" ? VENDOR_STEPPER : undefined}
+          />
+        )
+      }
+      mobileHeader={
+        stepName === "account" ? undefined : (
+          <StepProgress current={stepIndex} total={onboardingTotal} />
+        )
+      }
     >
-      {step === 0 && (
+      {stepName === "account" && (
         <>
-          <form className="hw-auth__form" onSubmit={submitAccount}>
+          <form className="hw-auth__form" onSubmit={submitStep}>
             <div className="hw-auth__top">
               <RoleToggle value={role} onChange={setRole} />
 
               <header className="hw-auth__intro">
                 <h1 className="hw-heading-l">Sign Up</h1>
-                <p className="hw-auth__subtitle">{INTRO_SUB}</p>
+                <p className="hw-auth__subtitle">{subtitle}</p>
               </header>
 
               <div className="hw-field">
@@ -193,13 +275,13 @@ export default function SignupPage() {
         </>
       )}
 
-      {step === 1 && (
+      {stepName === "personal" && (
         <>
-          <form className="hw-auth__form" onSubmit={submitPersonal}>
+          <form className="hw-auth__form" onSubmit={submitStep}>
             <div className="hw-auth__top">
               <header className="hw-auth__intro">
                 <h1 className="hw-heading-l">Personal Information</h1>
-                <p className="hw-auth__subtitle">{INTRO_SUB}</p>
+                <p className="hw-auth__subtitle">{subtitle}</p>
               </header>
 
               <AvatarUpload />
@@ -248,9 +330,9 @@ export default function SignupPage() {
 
             <div className="hw-auth__foot">
               <div className="hw-auth__actions">
-                <Button type="button" variant="secondary" block onClick={() => setStep(0)}>Back</Button>
+                <Button type="button" variant="secondary" block onClick={back}>Back</Button>
                 <Button type="submit" variant="primary" block disabled={submitting}>
-                  {submitting ? "Creating…" : "Proceed"}
+                  {submitting && nextIsConfirm ? "Creating…" : "Proceed"}
                 </Button>
               </div>
 
@@ -261,7 +343,85 @@ export default function SignupPage() {
         </>
       )}
 
-      {step === 2 && (
+      {stepName === "business" && (
+        <>
+          <form className="hw-auth__form" onSubmit={submitStep}>
+            <div className="hw-auth__top">
+              <header className="hw-auth__intro">
+                <h1 className="hw-heading-l">Business Information</h1>
+                <p className="hw-auth__subtitle">{subtitle}</p>
+              </header>
+
+              <div className="hw-field">
+                <label htmlFor="bi-service">Service</label>
+                <Select id="bi-service" ariaLabel="Service" placeholder="Choose the service you offer"
+                  value={form.service} onChange={set("service")} options={serviceOptions} />
+              </div>
+
+              <div className="hw-field">
+                <label htmlFor="bi-experience">Years of Experience</label>
+                <Select id="bi-experience" ariaLabel="Years of Experience" placeholder="e.g 3 years"
+                  value={form.yearsOfExperience} onChange={set("yearsOfExperience")} options={EXPERIENCE_OPTIONS} />
+              </div>
+
+              <div className="hw-field">
+                <label htmlFor="bi-bio">Business Bio</label>
+                <textarea id="bi-bio" className="hw-input" placeholder="Enter Description of your business…"
+                  value={form.businessBio} onChange={(e) => set("businessBio")(e.target.value)} />
+              </div>
+
+              {error ? <p className="hw-auth__error" role="alert">{error}</p> : null}
+            </div>
+
+            <div className="hw-auth__foot">
+              <div className="hw-auth__actions">
+                <Button type="button" variant="secondary" block onClick={back}>Back</Button>
+                <Button type="submit" variant="primary" block>Proceed</Button>
+              </div>
+
+              {loginLink}
+            </div>
+          </form>
+          <p className="hw-auth__footer">© Handiwork 2025</p>
+        </>
+      )}
+
+      {stepName === "verification" && (
+        <>
+          <form className="hw-auth__form" onSubmit={submitStep}>
+            <div className="hw-auth__top">
+              <header className="hw-auth__intro">
+                <h1 className="hw-heading-l">Verification</h1>
+                <p className="hw-auth__subtitle">{subtitle}</p>
+              </header>
+
+              <DocumentUpload fileName={idFileName} onFile={setIdFileName} />
+
+              <div className="hw-field">
+                <label htmlFor="ve-id">Government ID Number</label>
+                <Input id="ve-id" placeholder="Enter Government ID Number"
+                  value={form.governmentIdNumber} onChange={(e) => set("governmentIdNumber")(e.target.value)} />
+              </div>
+
+              {error ? <p className="hw-auth__error" role="alert">{error}</p> : null}
+            </div>
+
+            <div className="hw-auth__foot">
+              <div className="hw-auth__actions">
+                <Button type="button" variant="secondary" block onClick={back}>Back</Button>
+                <Button type="submit" variant="primary" block disabled={submitting}>
+                  {submitting && nextIsConfirm ? "Creating…" : "Proceed"}
+                </Button>
+              </div>
+
+              {loginLink}
+            </div>
+          </form>
+          <p className="hw-auth__footer">© Handiwork 2025</p>
+        </>
+      )}
+
+      {stepName === "confirm" && (
         <>
           <form className="hw-auth__form" onSubmit={verify}>
             <div className="hw-auth__top">
@@ -281,7 +441,7 @@ export default function SignupPage() {
 
             <div className="hw-auth__foot">
               <div className="hw-auth__actions">
-                <Button type="button" variant="secondary" block onClick={() => setStep(1)}>Back</Button>
+                <Button type="button" variant="secondary" block onClick={back}>Back</Button>
                 <Button type="submit" variant="primary" block disabled={submitting}>
                   {submitting ? "Confirming…" : "Confirm"}
                 </Button>

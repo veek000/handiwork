@@ -31,5 +31,11 @@ export default defineSchema({
     state: v.optional(v.string()),
     area: v.optional(v.string()),
     address: v.optional(v.string()),
+    // --- Vendor-only signup fields (Business Information + Verification steps) ---
+    // All optional: customers never set them, and OAuth accounts have no role yet.
+    service: v.optional(v.string()),
+    yearsOfExperience: v.optional(v.string()),
+    businessBio: v.optional(v.string()),
+    governmentIdNumber: v.optional(v.string()),
   }).index("email", ["email"]),
 });

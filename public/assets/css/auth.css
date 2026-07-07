@@ -474,6 +474,39 @@
 .hw-avatar-upload__badge:hover { background: var(--hw-color-green-800); }
 .hw-avatar-upload__badge:focus-visible { outline: 2px solid var(--hw-border-focus); outline-offset: 2px; }
 
+/* ----- Document uploader (Verification step) ---------------------------- */
+/* Dashed card holding the ID document prompt + a "Select Image" secondary button.
+   Client-side pick only (no real upload yet). Sharp corners per the system. */
+.hw-uploader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-l);
+  padding: var(--hw-space-l);
+  border: var(--hw-border-width-xs) dashed var(--hw-border-default);
+  border-radius: var(--hw-radius-none);
+  background: var(--hw-input-bg);
+}
+.hw-uploader__input { display: none; }
+.hw-uploader__row { display: flex; align-items: center; gap: var(--hw-space-m); }
+.hw-uploader__icon { flex: none; color: var(--hw-text-secondary); display: flex; }
+.hw-uploader__text { display: flex; flex-direction: column; gap: var(--hw-space-2xs); min-width: 0; }
+.hw-uploader__title {
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-l);
+  font-weight: var(--hw-weight-bold);
+  color: var(--hw-text-primary);
+}
+.hw-uploader__subtitle {
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-s);
+  color: var(--hw-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The Figma "Select Image" button is shorter than a standard form button. */
+.hw-uploader__btn { padding-top: var(--hw-space-s); padding-bottom: var(--hw-space-s); }
+
 /* ----- Mobile step progress (desktop uses the Stepper panel) ------------- */
 .hw-step-progress {
   display: flex;

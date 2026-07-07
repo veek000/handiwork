@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
   <title>Welcome to Handiwork</title>
   <!--[if mso]>
     <style>
@@ -21,11 +23,20 @@
     </noscript>
   <![endif]-->
   <style>
+    /* Real fonts load only in clients that honour @import (e.g. Apple Mail); everywhere
+       else the stacks below take over. Headings fall back to a heavy system sans to
+       approximate Changa One's weight; body falls back to Arial/Helvetica. */
     @import url('https://fonts.googleapis.com/css2?family=Changa+One&family=Manrope:wght@400;700&display=swap');
+    :root { color-scheme: light; supported-color-schemes: light; }
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
     table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
     img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
-    body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; font-family: 'Manrope', Arial, sans-serif; }
+    body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; font-family: 'Manrope', Arial, Helvetica, sans-serif; }
+    /* Hold the intended light palette even where clients try to auto-invert (Gmail dark theme, etc.) */
+    @media (prefers-color-scheme: dark) {
+      body, table, td { background-color: inherit !important; color: inherit !important; }
+    }
+    u + .body .heading-font { font-family: 'Changa One', 'Arial Black', Arial, sans-serif; }
   </style>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f5f5f5;">
@@ -55,7 +66,7 @@
         <!-- INTRO TEXT -->
         <tr>
           <td align="left" style="background-color: #dff1e1; padding: 16px 40px 24px 40px;">
-            <h1 style="margin: 0 0 8px 0; font-family: 'Changa One', Arial, sans-serif; font-size: 48px; line-height: 56px; color: #0a442d; font-weight: normal;">Welcome to Handiwork</h1>
+            <h1 style="margin: 0 0 8px 0; font-family: 'Changa One', 'Arial Black', Arial, sans-serif; font-size: 48px; line-height: 56px; color: #0a442d; font-weight: normal;">Welcome to Handiwork</h1>
             <p style="margin: 0; font-family: 'Manrope', Arial, sans-serif; font-size: 20px; line-height: 32px; color: #0a442d;">Your next job could be a few taps away. Let's get your profile ready so customers can find you.</p>
           </td>
         </tr>
@@ -63,7 +74,7 @@
         <!-- STEPS TITLE -->
         <tr>
           <td align="left" style="background-color: #ffffff; padding: 48px 40px 12px 40px;">
-            <h2 style="margin: 0; font-family: 'Changa One', Arial, sans-serif; font-size: 24px; line-height: 32px; color: #0d0e10; font-weight: normal;">Here's how you can get started with Handiwork:</h2>
+            <h2 style="margin: 0; font-family: 'Changa One', 'Arial Black', Arial, sans-serif; font-size: 24px; line-height: 32px; color: #0d0e10; font-weight: normal;">Here's how you can get started with Handiwork:</h2>
           </td>
         </tr>
 
@@ -105,7 +116,7 @@
             <table role="presentation" cellspacing="0" cellpadding="0" border="0">
               <tr>
                 <td style="border-radius: 0; background: #001a13; text-align: center;">
-                  <a href="#" style="background: #001a13; border: 1px solid #001a13; font-family: 'Changa One', Arial, sans-serif; font-size: 20px; line-height: 32px; text-decoration: none; padding: 15px 33px; color: #50c878; display: block;">Set up your profile</a>
+                  <a href="#" style="background: #001a13; border: 1px solid #001a13; font-family: 'Changa One', 'Arial Black', Arial, sans-serif; font-size: 20px; line-height: 32px; text-decoration: none; padding: 15px 33px; color: #50c878; display: block;">Set up your profile</a>
                 </td>
               </tr>
             </table>

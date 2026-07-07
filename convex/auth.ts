@@ -34,6 +34,12 @@ const HandiworkPassword = Password<DataModel>({
       state: params.state as string | undefined,
       area: params.area as string | undefined,
       address: params.address as string | undefined,
+      // Vendor-only fields (Business Information + Verification signup steps).
+      // Customers omit them; the schema marks all optional.
+      service: params.service as string | undefined,
+      yearsOfExperience: params.yearsOfExperience as string | undefined,
+      businessBio: params.businessBio as string | undefined,
+      governmentIdNumber: params.governmentIdNumber as string | undefined,
     };
   },
   verify: ResendOTP,

@@ -7,6 +7,7 @@ desktop.ini
 # Temp / build (scratch dirs: figma renders, token exports+generator, screenshots)
 .tmp_*/
 node_modules/
+scripts/test-welcome-email.mjs
 
 # Next.js
 .next/

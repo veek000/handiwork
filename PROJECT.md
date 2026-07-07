@@ -519,6 +519,34 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   email delivery. Sending still depends on the deferred email wiring + `AUTH_RESEND_KEY` already
   set on Convex.
 
+- **Vendor/handyman signup flow (2026-07-07)** — Built the vendor branch of `/signup` from Figma
+  desktop `289:8175` + mobile `363:12218`. The signup wizard is now **role-aware**: both roles share
+  the account step (Sign Up), then run their own onboarding sequence before Confirmation (OTP) —
+  **customer** = Personal Information → Confirmation (unchanged, 2 onboarding steps); **vendor** =
+  Personal Information → **Business Information** → **Verification** → Confirmation (4 onboarding
+  steps). Kept as the single role-aware page per the "never fork per role" decision — a `FLOWS` map
+  (`Record<AuthRole, StepName[]>`) drives the step sequence; `stepName` (not a numeric step) gates
+  each screen, so `stepIndex` maps into the role's own flow. Account creation still happens at the
+  step **immediately before** Confirmation (now computed as `nextIsConfirm`, not hardcoded to step 1)
+  so every profile field — including the vendor ones — is collected before `signIn(flow:"signUp")`
+  fires the OTP email. **Net-new screens:** Business Information (Service dropdown from `useCategories`,
+  Years of Experience dropdown from new `data/experience.ts`, Business Bio `textarea.hw-input`) and
+  Verification (DocumentUpload + Government ID Number). **Net-new component:** `DocumentUpload`
+  (`components/auth/DocumentUpload.tsx` + `.hw-uploader*` in `auth.css`) — dashed card, `image`
+  hw-icon, Upload Document title + formats subtitle, "Select Image" secondary button opening a hidden
+  `<input type="file">`; **client-side pick only** (shows the chosen filename, nothing uploaded —
+  consistent with the static AvatarUpload; real file storage deferred to the backend file pass).
+  `StepperPanel` made role-aware (accepts a `steps` array; defaults to the 2-step customer flow, so
+  existing callers are unchanged) and given the 4-step vendor list; `StepProgress`/`StepperPanel`
+  both count only onboarding steps (`flow.length - 1`). **Persistence (decided this session):** the
+  vendor **text** fields (`service`, `yearsOfExperience`, `businessBio`, `governmentIdNumber`) were
+  added as **optional** fields to `convex/schema.ts` users + the `auth.ts` Password `profile()`, sent
+  only for `role === "vendor"` — a `convex deploy` is required for them to take effect. **Figma note:**
+  the mobile Personal Information frame reads "Step 1 of 2" — a copy-paste leftover from the customer
+  flow; desktop + the other three mobile frames all say "of 4", which is authoritative and what was
+  built. Tokens only; `npx tsc --noEmit` + `next build` pass (16 routes). Not yet visually QA'd in a
+  live browser this session; not yet committed.
+
 ## Locked decisions for future phases (not yet built)
 
 Consolidated from the planning conversation and organized by area so it stays scannable
