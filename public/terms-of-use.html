@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<title>Terms of Use — Handiwork</title>
+<link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/typography.css" />
+<link rel="stylesheet" href="assets/css/button.css" />
+<link rel="stylesheet" href="assets/css/site.css" />
+<script src="assets/icons/hw-icons.js"></script>
+<script>
+  if ('IntersectionObserver' in window) document.documentElement.classList.add('js-reveal-ready');
+</script>
+<style>
+  /* Legal document — single readable column, tokens only. Shared by terms + privacy. */
+  .legal { max-width: 820px; margin: var(--hw-space-4xl) auto 0; }
+  .legal__meta { margin: 0 0 var(--hw-space-2xl); font-family: var(--hw-font-body); color: var(--hw-text-tertiary); font-size: var(--hw-size-m); line-height: var(--hw-line-height-m); }
+  .legal__section { display: flex; flex-direction: column; gap: var(--hw-space-s); margin-top: var(--hw-space-3xl); }
+  .legal__section:first-of-type { margin-top: 0; }
+  .legal h2 {
+    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-color-brand-primary-900);
+    font-size: var(--hw-size-3xl); line-height: var(--hw-line-height-3xl); letter-spacing: var(--hw-letter-spacing-s);
+  }
+  .legal h3 {
+    margin: var(--hw-space-s) 0 0; font-family: var(--hw-font-body); font-weight: var(--hw-weight-bold);
+    color: var(--hw-text-primary); font-size: var(--hw-size-xl); line-height: var(--hw-line-height-xl);
+  }
+  .legal p { margin: 0; font-family: var(--hw-font-body); color: var(--hw-text-secondary); font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+  .legal p + p { margin-top: var(--hw-space-s); }
+  .legal ul { margin: var(--hw-space-2xs) 0 0; padding-left: var(--hw-space-l); display: flex; flex-direction: column; gap: var(--hw-space-xs); }
+  .legal li { font-family: var(--hw-font-body); color: var(--hw-text-secondary); font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+  .legal strong { color: var(--hw-text-primary); font-weight: var(--hw-weight-bold); }
+  .legal a { color: var(--hw-color-brand-primary-600); text-decoration: none; }
+  .legal a:hover { text-decoration: underline; }
+
+  /* Bracketed placeholder — must read as an unfilled fill-in, never a real value. */
+  .legal__ph {
+    font-family: var(--hw-font-body); font-weight: var(--hw-weight-bold);
+    color: var(--hw-feedback-warning-text); background: var(--hw-feedback-warning-bg);
+    padding: 0 var(--hw-space-2xs);
+  }
+
+  /* Draft notice — informational tone (blue feedback tokens), not error-red. */
+  .legal-notice {
+    display: flex; gap: var(--hw-space-s); align-items: flex-start;
+    max-width: 820px; margin: var(--hw-space-2xl) auto 0;
+    padding: var(--hw-space-m) var(--hw-space-l);
+    background: var(--hw-feedback-info-bg);
+    border: var(--hw-border-width-xs) solid var(--hw-feedback-info-border);
+    border-left-width: var(--hw-border-width-l);
+  }
+  .legal-notice__icon { flex: none; margin-top: 2px; color: var(--hw-feedback-info-text); }
+  .legal-notice__text { margin: 0; font-family: var(--hw-font-body); color: var(--hw-feedback-info-text); font-size: var(--hw-size-m); line-height: var(--hw-line-height-m); }
+  .legal-notice__text strong { font-weight: var(--hw-weight-bold); }
+
+  @media (max-width: 900px) {
+    .legal { margin-top: var(--hw-space-2xl); }
+    .legal__section { margin-top: var(--hw-space-2xl); }
+    .legal h2 { font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl); }
+  }
+</style>
+</head>
+<body>
+
+<header class="lp-header">
+  <div class="lp-header__inner">
+    <nav class="lp-nav">
+      <a href="landing.html#top">Home</a>
+      <a href="faq.html">FAQs</a>
+      <a href="contact.html">Contacts</a>
+    </nav>
+    <a class="lp-logo" href="landing.html" aria-label="Handiwork home">
+      <img src="assets/logo/horizontal-dark.svg" alt="Handiwork" />
+    </a>
+    <div class="lp-actions">
+      <a class="hw-button hw-button--secondary" href="/login"><span class="hw-button__label">Log In</span></a>
+      <a class="hw-button hw-button--primary" href="/signup"><span class="hw-button__label">Get Started</span></a>
+    </div>
+    <button class="lp-burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
+      <svg class="ic-open" viewBox="0 0 24 24" fill="none"><path d="M3 8h18M3 16h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <svg class="ic-close" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <nav class="lp-menu" id="menu" aria-label="Mobile">
+    <div class="lp-menu__links">
+      <a href="landing.html#top">Home</a>
+      <a href="faq.html">FAQs</a>
+      <a href="contact.html">Contact Us</a>
+    </div>
+    <div class="lp-menu__actions">
+      <a class="hw-button hw-button--secondary hw-button--block" href="/login"><span class="hw-button__label">Login</span></a>
+      <a class="hw-button hw-button--primary hw-button--block" href="/signup"><span class="hw-button__label">Get Started</span></a>
+    </div>
+  </nav>
+  <div class="lp-scrim" id="scrim"></div>
+</header>
+
+<main>
+  <section class="page">
+    <div class="page__inner">
+      <div class="page-head" data-reveal>
+        <span class="page-badge reveal" style="--reveal-i:0">Legal</span>
+        <div class="page-heading">
+          <h1 class="page-title reveal" style="--reveal-i:1">Terms of Use</h1>
+          <p class="page-sub reveal" style="--reveal-i:2">Welcome to Handiwork. These Terms of Use ("Terms") govern your access to and use of the Handiwork platform. By creating an account, you agree to these Terms.</p>
+        </div>
+      </div>
+
+      <!-- Visible draft notice — the source markdown's HTML comment is invisible to visitors; this is not. -->
+      <aside class="legal-notice reveal" data-reveal style="--reveal-i:0" role="note" aria-label="Draft document notice">
+        <svg class="legal-notice__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 11v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="8" r="1.25" fill="currentColor"/>
+        </svg>
+        <p class="legal-notice__text"><strong>Draft — pending legal review.</strong> This document is a working draft provided for review only. It is not final, not a binding agreement, and does not yet reflect reviewed legal advice. Bracketed values (e.g. <span class="legal__ph">[DATE]</span>) are placeholders awaiting real information before this goes live.</p>
+      </aside>
+
+      <article class="legal">
+        <p class="legal__meta reveal" data-reveal style="--reveal-i:0"><strong>Last updated:</strong> <span class="legal__ph">[DATE]</span></p>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">1. Acceptance of Terms</h2>
+          <p class="reveal" style="--reveal-i:1">By registering as a Customer or Vendor, you confirm you have read, understood, and agree to be bound by these Terms and our Privacy Policy.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">2. Description of Service</h2>
+          <p class="reveal" style="--reveal-i:1">Handiwork is a marketplace platform that connects Customers seeking local services with independent Vendors who provide them. <strong>Handiwork is not a party to the service agreement between a Customer and a Vendor</strong> — the actual service performed, its quality, and its scope are a direct arrangement between Customer and Vendor. Handiwork does, however, act as the payment facilitator for the transaction via a licensed third-party payment processor, as described in Section 7.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">3. Eligibility</h2>
+          <p class="reveal" style="--reveal-i:1">You must be at least 18 years old to create an account.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">4. Accounts &amp; Roles</h2>
+          <p class="reveal" style="--reveal-i:1">You may register as a Customer, a Vendor, or both. You agree to provide accurate information and to keep your account credentials confidential. Each account is for a single individual or business entity; account sharing is not permitted.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">5. Vendor Responsibilities</h2>
+          <p class="reveal" style="--reveal-i:1">Vendors are independent contractors, not employees, agents, or representatives of Handiwork. Vendors are solely responsible for the quality, safety, legality, and completion of services they offer, and for any licenses, permits, or insurance their trade requires. Handiwork does not vet, certify, or guarantee any Vendor's work.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">6. Customer Responsibilities</h2>
+          <p class="reveal" style="--reveal-i:1">Customers are responsible for evaluating Vendors before engaging them and for agreeing on job scope, price, and terms directly with the Vendor.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">7. Payments</h2>
+          <p class="reveal" style="--reveal-i:1">Payments are processed through Flutterwave, a licensed third-party payment processor. When a Customer pays for a service, funds are <strong>held in escrow</strong> by Flutterwave and released to the Vendor once the job is confirmed complete, subject to Handiwork's dispute process (Section 13).</p>
+          <h3 class="reveal" style="--reveal-i:2">Fees</h3>
+          <p class="reveal" style="--reveal-i:2">Each transaction includes two components, disclosed to the Customer before payment (see our Fee Schedule at <span class="legal__ph">[LINK]</span>):</p>
+          <ul class="reveal" style="--reveal-i:2">
+            <li>A <strong>service fee</strong>, currently 2% of the job value, retained by Handiwork.</li>
+            <li>A <strong>payment processing fee</strong>, passed through at the rate charged by Flutterwave, which Handiwork does not mark up.</li>
+          </ul>
+          <h3 class="reveal" style="--reveal-i:3">Cancellations and refunds</h3>
+          <p class="reveal" style="--reveal-i:3">Refund treatment depends on the job stage and who cancelled:</p>
+          <ul class="reveal" style="--reveal-i:3">
+            <li><strong>Cancelled while the job is still pending (Vendor has not yet accepted), or the Vendor declines the job:</strong> full refund to the Customer — service fee and processing fee both returned in full.</li>
+            <li><strong>Cancelled by the Customer after the Vendor has accepted or started the job:</strong> the service fee is retained by Handiwork as a cancellation fee, disclosed as such (not blended into the processing fee). The processing fee remains non-refundable per Flutterwave's policy.</li>
+            <li><strong>Cancelled, not completed, or no-show caused by the Vendor, at any stage:</strong> full refund to the Customer, including the service fee. The Customer is never charged a fee for a job the Vendor failed to deliver.</li>
+          </ul>
+          <p class="reveal" style="--reveal-i:4"><strong>Handiwork does not store your card or bank details</strong> — these are handled directly by Flutterwave. Handiwork is not responsible for delays, outages, or errors caused by Flutterwave or the Customer's or Vendor's bank, though we will assist in good faith to resolve payment issues raised through the platform.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">8. Platform Communication</h2>
+          <p class="reveal" style="--reveal-i:1">Handiwork provides in-app chat to help Customers and Vendors coordinate a specific job. This channel must not be used for harassment, spam, or unlawful activity. We may monitor communications for safety, fraud prevention, and platform integrity purposes, consistent with our Privacy Policy.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">9. Reviews &amp; Ratings</h2>
+          <p class="reveal" style="--reveal-i:1">Reviews must reflect genuine experiences. Fake, retaliatory, or fraudulent reviews may be removed, and accounts may be suspended for abuse of this feature.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">10. Prohibited Conduct</h2>
+          <p class="reveal" style="--reveal-i:1">You agree not to: misrepresent your identity or qualifications; use the platform for any unlawful purpose; attempt to circumvent platform safety features; or harass, threaten, or defraud other users.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">11. Disclaimer of Warranties</h2>
+          <p class="reveal" style="--reveal-i:1">Handiwork is provided "as is." We do not guarantee the availability, quality, safety, or legality of services listed by Vendors, or that any Customer or Vendor will fulfill their obligations to the other.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">12. Limitation of Liability</h2>
+          <p class="reveal" style="--reveal-i:1">To the maximum extent permitted by law, Handiwork is not liable for any damages arising from a service performed, or a payment made or withheld, between a Customer and a Vendor. Our total liability for any claim related to the platform is limited to <span class="legal__ph">[AMOUNT / TBD]</span>.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">13. Disputes Between Users</h2>
+          <p class="reveal" style="--reveal-i:1">Disputes about the quality or completion of a job are between the Customer and Vendor; Handiwork is not obligated to mediate or arbitrate the underlying service dispute. However, because payment is held in escrow, either party may raise a payment dispute within <span class="legal__ph">[X]</span> days of job completion; funds remain held during review, and Handiwork will make a release/refund decision based on evidence provided by both parties. <span class="legal__ph">[Full dispute process to be defined — this is a placeholder pending a real policy decision, not a final process.]</span></p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">14. Termination</h2>
+          <p class="reveal" style="--reveal-i:1">We may suspend or terminate any account that violates these Terms, at our discretion, with or without notice.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">15. Governing Law</h2>
+          <p class="reveal" style="--reveal-i:1">These Terms are governed by the laws of the Federal Republic of Nigeria.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">16. Changes to These Terms</h2>
+          <p class="reveal" style="--reveal-i:1">We may update these Terms as the platform evolves. Continued use after an update constitutes acceptance of the revised Terms.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">17. Contact</h2>
+          <p class="reveal" style="--reveal-i:1">Questions about these Terms: <span class="legal__ph">[CONTACT EMAIL]</span></p>
+        </section>
+      </article>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="closing__inner">
+      <footer class="footer reveal" data-reveal style="--reveal-i:0">
+        <div class="footer__row">
+          <a class="footer__logo" href="landing.html" aria-label="Handiwork home"><img src="assets/logo/horizontal-dark.svg" alt="Handiwork" /></a>
+          <nav class="footer__nav" aria-label="Footer">
+            <a class="footer__link" href="faq.html">FAQs</a>
+            <a class="footer__link" href="contact.html">Contact Us</a>
+          </nav>
+          <div class="footer__social">
+            <a href="#" aria-label="Handiwork on Facebook"><img src="assets/icons/social/facebook.svg" alt="Facebook" /></a>
+            <a href="#" aria-label="Handiwork on Instagram"><img src="assets/icons/social/instagram.svg" alt="Instagram" /></a>
+          </div>
+        </div>
+        <div class="footer__legal-row">
+          <p class="footer__copy">© 2025. Handiwork All Rights Reserved.</p>
+          <nav class="footer__legal" aria-label="Legal">
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms" aria-current="page">Terms of Use</a>
+          </nav>
+        </div>
+      </footer>
+    </div>
+  </section>
+</main>
+
+<script src="assets/js/site.js"></script>
+</body>
+</html>

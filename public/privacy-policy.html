@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<title>Privacy Policy — Handiwork</title>
+<link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/typography.css" />
+<link rel="stylesheet" href="assets/css/button.css" />
+<link rel="stylesheet" href="assets/css/site.css" />
+<script src="assets/icons/hw-icons.js"></script>
+<script>
+  if ('IntersectionObserver' in window) document.documentElement.classList.add('js-reveal-ready');
+</script>
+<style>
+  /* Legal document — single readable column, tokens only. Shared by terms + privacy. */
+  .legal { max-width: 820px; margin: var(--hw-space-4xl) auto 0; }
+  .legal__meta { margin: 0 0 var(--hw-space-2xl); font-family: var(--hw-font-body); color: var(--hw-text-tertiary); font-size: var(--hw-size-m); line-height: var(--hw-line-height-m); }
+  .legal__section { display: flex; flex-direction: column; gap: var(--hw-space-s); margin-top: var(--hw-space-3xl); }
+  .legal__section:first-of-type { margin-top: 0; }
+  .legal h2 {
+    margin: 0; font-family: var(--hw-font-heading); color: var(--hw-color-brand-primary-900);
+    font-size: var(--hw-size-3xl); line-height: var(--hw-line-height-3xl); letter-spacing: var(--hw-letter-spacing-s);
+  }
+  .legal h3 {
+    margin: var(--hw-space-s) 0 0; font-family: var(--hw-font-body); font-weight: var(--hw-weight-bold);
+    color: var(--hw-text-primary); font-size: var(--hw-size-xl); line-height: var(--hw-line-height-xl);
+  }
+  .legal p { margin: 0; font-family: var(--hw-font-body); color: var(--hw-text-secondary); font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+  .legal p + p { margin-top: var(--hw-space-s); }
+  .legal ul { margin: var(--hw-space-2xs) 0 0; padding-left: var(--hw-space-l); display: flex; flex-direction: column; gap: var(--hw-space-xs); }
+  .legal li { font-family: var(--hw-font-body); color: var(--hw-text-secondary); font-size: var(--hw-size-l); line-height: var(--hw-line-height-l); }
+  .legal strong { color: var(--hw-text-primary); font-weight: var(--hw-weight-bold); }
+  .legal a { color: var(--hw-color-brand-primary-600); text-decoration: none; }
+  .legal a:hover { text-decoration: underline; }
+
+  /* Bracketed placeholder — must read as an unfilled fill-in, never a real value. */
+  .legal__ph {
+    font-family: var(--hw-font-body); font-weight: var(--hw-weight-bold);
+    color: var(--hw-feedback-warning-text); background: var(--hw-feedback-warning-bg);
+    padding: 0 var(--hw-space-2xs);
+  }
+
+  /* Draft notice — informational tone (blue feedback tokens), not error-red. */
+  .legal-notice {
+    display: flex; gap: var(--hw-space-s); align-items: flex-start;
+    max-width: 820px; margin: var(--hw-space-2xl) auto 0;
+    padding: var(--hw-space-m) var(--hw-space-l);
+    background: var(--hw-feedback-info-bg);
+    border: var(--hw-border-width-xs) solid var(--hw-feedback-info-border);
+    border-left-width: var(--hw-border-width-l);
+  }
+  .legal-notice__icon { flex: none; margin-top: 2px; color: var(--hw-feedback-info-text); }
+  .legal-notice__text { margin: 0; font-family: var(--hw-font-body); color: var(--hw-feedback-info-text); font-size: var(--hw-size-m); line-height: var(--hw-line-height-m); }
+  .legal-notice__text strong { font-weight: var(--hw-weight-bold); }
+
+  @media (max-width: 900px) {
+    .legal { margin-top: var(--hw-space-2xl); }
+    .legal__section { margin-top: var(--hw-space-2xl); }
+    .legal h2 { font-size: var(--hw-size-2xl); line-height: var(--hw-line-height-2xl); }
+  }
+</style>
+</head>
+<body>
+
+<header class="lp-header">
+  <div class="lp-header__inner">
+    <nav class="lp-nav">
+      <a href="landing.html#top">Home</a>
+      <a href="faq.html">FAQs</a>
+      <a href="contact.html">Contacts</a>
+    </nav>
+    <a class="lp-logo" href="landing.html" aria-label="Handiwork home">
+      <img src="assets/logo/horizontal-dark.svg" alt="Handiwork" />
+    </a>
+    <div class="lp-actions">
+      <a class="hw-button hw-button--secondary" href="/login"><span class="hw-button__label">Log In</span></a>
+      <a class="hw-button hw-button--primary" href="/signup"><span class="hw-button__label">Get Started</span></a>
+    </div>
+    <button class="lp-burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
+      <svg class="ic-open" viewBox="0 0 24 24" fill="none"><path d="M3 8h18M3 16h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <svg class="ic-close" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <nav class="lp-menu" id="menu" aria-label="Mobile">
+    <div class="lp-menu__links">
+      <a href="landing.html#top">Home</a>
+      <a href="faq.html">FAQs</a>
+      <a href="contact.html">Contact Us</a>
+    </div>
+    <div class="lp-menu__actions">
+      <a class="hw-button hw-button--secondary hw-button--block" href="/login"><span class="hw-button__label">Login</span></a>
+      <a class="hw-button hw-button--primary hw-button--block" href="/signup"><span class="hw-button__label">Get Started</span></a>
+    </div>
+  </nav>
+  <div class="lp-scrim" id="scrim"></div>
+</header>
+
+<main>
+  <section class="page">
+    <div class="page__inner">
+      <div class="page-head" data-reveal>
+        <span class="page-badge reveal" style="--reveal-i:0">Legal</span>
+        <div class="page-heading">
+          <h1 class="page-title reveal" style="--reveal-i:1">Privacy Policy</h1>
+          <p class="page-sub reveal" style="--reveal-i:2">This Privacy Policy explains how Handiwork ("Handiwork," "we," "us") collects, uses, and protects information when you use our platform to connect as a Customer or a Vendor for local services.</p>
+        </div>
+      </div>
+
+      <!-- Visible draft notice — the source markdown's HTML comment is invisible to visitors; this is not. -->
+      <aside class="legal-notice reveal" data-reveal style="--reveal-i:0" role="note" aria-label="Draft document notice">
+        <svg class="legal-notice__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 11v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="8" r="1.25" fill="currentColor"/>
+        </svg>
+        <p class="legal-notice__text"><strong>Draft — pending legal review.</strong> This document is a working draft provided for review only. It is not final, not a binding agreement, and does not yet reflect reviewed legal advice. Bracketed values (e.g. <span class="legal__ph">[DATE]</span>) are placeholders awaiting real information before this goes live.</p>
+      </aside>
+
+      <article class="legal">
+        <p class="legal__meta reveal" data-reveal style="--reveal-i:0"><strong>Last updated:</strong> <span class="legal__ph">[DATE]</span></p>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">1. Scope</h2>
+          <p class="reveal" style="--reveal-i:1">This policy applies to the Handiwork web application and any associated services. It does not apply to third-party sites you may reach through links on the platform (e.g. a vendor's external portfolio).</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">2. Information We Collect</h2>
+          <p class="reveal" style="--reveal-i:1"><strong>Account information:</strong> name, email address, phone number, password (stored hashed, never in plain text), and account role (Customer or Vendor).</p>
+          <p class="reveal" style="--reveal-i:1"><strong>Vendor-specific information (if you register as a Vendor):</strong> service listings, pricing, bio, years of experience, and availability, which are displayed publicly to Customers.</p>
+          <p class="reveal" style="--reveal-i:1"><strong>Job and communication data:</strong> job/service requests, order status, chat messages exchanged between Customer and Vendor within the platform, and reviews/ratings you submit or receive.</p>
+          <p class="reveal" style="--reveal-i:1"><strong>Usage and device data:</strong> log data (IP address, browser type, pages visited) collected automatically for security and reliability purposes.</p>
+          <p class="reveal" style="--reveal-i:1"><strong>Payment and transaction information:</strong> job/payment amount, service fee, processing fee, escrow status, and Vendor payout account details (for settlement purposes). <strong>We do not collect or store your card or bank credentials directly</strong> — these are entered and held by Flutterwave. See Section 5.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">3. How We Use Information</h2>
+          <p class="reveal" style="--reveal-i:1">We use collected information to: operate and maintain your account; connect Customers with Vendors for requested services; enable in-app communication between Customer and Vendor for a given job; display Vendor profiles, listings, and reviews; send account-related notifications (e.g. a welcome email on signup); and maintain platform security and prevent abuse.</p>
+          <p class="reveal" style="--reveal-i:2">We do not sell your personal information to third parties.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">4. Third-Party Service Providers</h2>
+          <p class="reveal" style="--reveal-i:1">We rely on the following third-party providers to operate the platform. Each processes data only as needed to provide their service to us:</p>
+          <ul class="reveal" style="--reveal-i:1">
+            <li><strong>Convex</strong> — database and backend infrastructure; stores account, job, and message data.</li>
+            <li><strong>Convex Auth</strong> — authentication; manages login credentials and sessions.</li>
+            <li><strong>Resend</strong> — transactional email delivery (e.g. welcome emails).</li>
+            <li><strong>Flutterwave</strong> — payment processing and escrow; handles Customer payment and Vendor payout details directly. Flutterwave's own privacy policy governs how they process this data.</li>
+          </ul>
+          <p class="reveal" style="--reveal-i:2">This list will be updated if additional providers are introduced.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">5. Payments</h2>
+          <p class="reveal" style="--reveal-i:1">Payments are processed by Flutterwave, a licensed third-party payment processor. Funds are held in escrow and released to the Vendor once a job is confirmed complete. Handiwork retains a service fee (currently 2%) from each completed transaction; a separate processing fee is passed through to Flutterwave at cost. Refund treatment (full refund vs. a retained cancellation fee) depends on the job stage and who cancelled — see the Terms of Use, Section 7, for the full policy. Handiwork does not directly collect or store your card or bank credentials.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">6. Data Retention</h2>
+          <p class="reveal" style="--reveal-i:1">We retain account and job data for as long as your account is active. Chat messages are retained for the duration of the associated job and a limited period afterward for support purposes. You may request deletion at any time (Section 7).</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">7. Your Rights</h2>
+          <p class="reveal" style="--reveal-i:1">If you are located in Nigeria, you have rights under the Nigeria Data Protection Act (NDPA) 2023, including the right to access, correct, or request deletion of your personal data, and to object to certain processing. To exercise these rights, contact us at <span class="legal__ph">[PRIVACY CONTACT EMAIL]</span>.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">8. Data Security</h2>
+          <p class="reveal" style="--reveal-i:1">We use reasonable technical and organizational measures (e.g. hashed passwords, access controls via our infrastructure providers) to protect your information. No system is completely secure, and we cannot guarantee absolute security.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">9. Children's Privacy</h2>
+          <p class="reveal" style="--reveal-i:1">Handiwork is not intended for individuals under 18. We do not knowingly collect information from minors.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">10. Governing Law</h2>
+          <p class="reveal" style="--reveal-i:1">This policy is governed by the laws of the Federal Republic of Nigeria, including the Nigeria Data Protection Act 2023.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">11. Changes to This Policy</h2>
+          <p class="reveal" style="--reveal-i:1">We may update this policy as the platform evolves. Material changes will be noted with an updated "Last updated" date.</p>
+        </section>
+
+        <section class="legal__section" data-reveal>
+          <h2 class="reveal" style="--reveal-i:0">12. Contact</h2>
+          <p class="reveal" style="--reveal-i:1">Questions about this policy: <span class="legal__ph">[CONTACT EMAIL]</span></p>
+        </section>
+      </article>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="closing__inner">
+      <footer class="footer reveal" data-reveal style="--reveal-i:0">
+        <div class="footer__row">
+          <a class="footer__logo" href="landing.html" aria-label="Handiwork home"><img src="assets/logo/horizontal-dark.svg" alt="Handiwork" /></a>
+          <nav class="footer__nav" aria-label="Footer">
+            <a class="footer__link" href="faq.html">FAQs</a>
+            <a class="footer__link" href="contact.html">Contact Us</a>
+          </nav>
+          <div class="footer__social">
+            <a href="#" aria-label="Handiwork on Facebook"><img src="assets/icons/social/facebook.svg" alt="Facebook" /></a>
+            <a href="#" aria-label="Handiwork on Instagram"><img src="assets/icons/social/instagram.svg" alt="Instagram" /></a>
+          </div>
+        </div>
+        <div class="footer__legal-row">
+          <p class="footer__copy">© 2025. Handiwork All Rights Reserved.</p>
+          <nav class="footer__legal" aria-label="Legal">
+            <a href="/privacy" aria-current="page">Privacy Policy</a>
+            <a href="/terms">Terms of Use</a>
+          </nav>
+        </div>
+      </footer>
+    </div>
+  </section>
+</main>
+
+<script src="assets/js/site.js"></script>
+</body>
+</html>

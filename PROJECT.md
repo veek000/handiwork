@@ -483,27 +483,149 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
 
 ## Locked decisions for future phases (not yet built)
 
-- **Auth + backend (Phase 6):** Convex for both — Convex Auth for authentication, Convex as
-  the backend/database. Version pinned in package.json (Convex Auth is beta — may have
-  breaking changes). No fallback vendor; this is a deliberate single-vendor commitment, not a
-  hedge. Role derived from the authenticated user, replacing the current local-state
-  RoleToggle.
-- **Chat (post-mock-data):** Text + read receipts + typing indicators, scoped per Job/order
-  thread (not an open inbox) — **now enforced in the type (corrected 2026-07-05).**
-  `types/message.ts` `Conversation` carries a required **`jobId`** that scopes each thread to a
-  specific Job (per the original per-order-thread decision, not an open inbox).
-  `mocks/conversations.ts` references real jobIds, and referential integrity was re-verified via
-  a throwaway script: every `jobId` resolves to a real Job whose `customerId` is the signed-in
-  viewer (Jane, `usr_jane`) and whose `vendorId` is the conversation's `participantName`. The
-  evidenced list-row fields (`participantName`/`lastMessage*`/`unreadCount`/`lastMessageStatus`)
-  are unchanged. Typing indicators via @convex-dev/presence — ephemeral/subscribed state, NOT a
-  persisted field on Conversation. Current mock `isTyping: true` is a stand-in only; do not carry
-  it forward as the real data shape when Convex wiring starts.
-- **Convex spike (prerequisite to both above):** ✅ **done + retired (2026-07-06).** Ran an
-  isolated throwaway (`convex/` + `app/spike-convex/`) that verified sign-up/sign-in, session
-  persistence across reload + tab close/reopen, and two-sender live message rendering — all
-  passed against a real cloud deployment. The spike scaffolding has since been **promoted into
-  real auth** (see the progress-log entry) and the spike route/table deleted.
+Consolidated from the planning conversation and organized by area so it stays scannable
+as it grows. Items marked **Open** are *not* settled — they are logged deliberately so
+they don't get quietly treated as decided.
+
+### Design system
+
+- **Breakpoints:** S=393, M=768, L=1024, XL=1440 — exact Figma names, never renamed.
+  Mobile-first, `min-width` media queries only, no intermediate breakpoints.
+- **Token naming transform:** Figma path → lowercase, spaces/slashes → hyphens, `hw-`
+  prefix (e.g. `Buttons/primary/bg/hover` → `--hw-button-primary-bg-hover`).
+- **Two-layer architecture:** `primitives.css` (raw values) → `semantic.css` (role
+  tokens referencing primitives). Legacy `tokens.css` kept as a 2-line `@import` shim so
+  old `<link>`s still work.
+- **Fonts:** Changa One for headings, Manrope for body — **both breakpoints, one font
+  system, not two.** Mobile headings use the same Changa One family as desktop, just at
+  smaller sizes (verified against `Semantic__Type/Mobile.tokens.json`). Fixed at the
+  Figma source, not just downstream.
+- **Dark mode:** tokens captured (Light + Dark both exist), switching NOT wired.
+  Explicitly deferred to v2 — decided, not still open.
+- **Button/Input states** sourced directly from Figma `Semantic Color` tokens, never
+  invented. **Focus-visible uses the existing `Border/focus` token (`#50C878`, present in
+  both Light and Dark modes) — already in the token export, not invented** (2px
+  outline/offset).
+- **Component docs:** single consolidated Components tab in `index.html` (stacked
+  sections) + standalone demo pages in `components/` kept for deep links. `sidebar.html`
+  stays as-is, no migration.
+
+### Landing & static routes
+
+- Landing page stays static HTML — never ported to JSX.
+- Served via Next.js rewrites: `/`→`/landing.html`, `/faq`→`/faq.html`,
+  `/contact`→`/contact.html`. No `app/` page may own these paths (would silently override
+  the rewrite).
+- Assets moved into `public/` once — no sync script (single-person project; sync scripts
+  solve a multi-team problem this doesn't have).
+
+### Repo architecture
+
+- Single Next.js app, not a monorepo — one repo, one deploy, one domain.
+- `<hw-icon>` web component kept in Next.js (not converted to SVGR) — verified in-browser;
+  a hydration warning was traced to a browser wallet extension, not a real bug.
+- Shared shell: `(customer)`/`(vendor)` route groups, one `Sidebar` component fed by
+  role-based nav config — never forked per role.
+- Build order: UI first (mock data, real screens) before backend wiring — not
+  backend-first.
+
+### Backend
+
+- **Convex over Firebase** — official AI-friendly tooling (`ai-files install`, MCP server,
+  published guidelines/evals) outweighs the general newer-framework hallucination risk.
+- **Auth + backend (Phase 6): Convex only, for both auth and backend — no fallback
+  vendor.** Convex Auth for authentication, Convex as the backend/database. A deliberate
+  single-vendor commitment, not a hedge. Convex Auth is officially beta (accepted risk);
+  mitigations (mandatory): pin the exact version in `package.json`, and test the full auth
+  flow in an isolated spike before real screens depend on it. Role derived from the
+  authenticated user, replacing the current local-state RoleToggle.
+- **Convex spike (prerequisite to the above):** ✅ **done + retired (2026-07-06).** Ran an
+  isolated throwaway (`convex/` + `app/spike-convex/`) that verified sign-up/sign-in,
+  session persistence across reload + tab close/reopen, and two-sender live message
+  rendering — all passed against a real cloud deployment. The spike scaffolding has since
+  been **promoted into real auth** (see the progress-log entry) and the spike route/table
+  deleted.
+- **Chat (post-mock-data):** text + read receipts + typing indicators, scoped per
+  Job/order thread (not an open inbox) — **now enforced in the type (corrected
+  2026-07-05).** `types/message.ts` `Conversation` carries a required **`jobId`** that
+  scopes each thread to a specific Job. `mocks/conversations.ts` references real jobIds,
+  and referential integrity was re-verified via a throwaway script: every `jobId` resolves
+  to a real Job whose `customerId` is the signed-in viewer (Jane, `usr_jane`) and whose
+  `vendorId` is the conversation's `participantName`. Typing indicators via the official
+  `@convex-dev/presence` component — ephemeral/subscribed state, NOT a persisted field on
+  Conversation. Current mock `isTyping: true` is a stand-in only; do not carry it forward
+  as the real data shape when Convex wiring starts.
+- **Email:** `@convex-dev/resend` (official component) — not SES/Postmark/SendGrid. Stay
+  on the free tier (3,000/mo); no reason to pay or switch providers at current volume.
+  - **Categories (decided):** welcome (signup); login alert (new device/location only —
+    never routine logins); transactional (job lifecycle: vendor accepted/declined, job
+    completed, cancelled by either party); review prompts (post-completion, both
+    directions); vendor payout notification (distinct from a generic "transaction");
+    password-changed confirmation; email-changed confirmation; OTP (email verification
+    only); password-reset (magic link).
+  - **Explicitly excluded:** promotional/marketing email — reputation risk to
+    transactional deliverability (OTP/reset), and against Resend's transactional-plan
+    terms. Revisit only with a dedicated sending subdomain and real consent management,
+    once there's an actual audience to market to.
+- **OTP scope:** email verification only, at signup. NOT used for phone (phone is
+  intentionally unverified — see Trust & Safety) and NOT used for password reset.
+- **Password reset:** magic link, not OTP. Reason: OTPs are readable-aloud, the exact
+  mechanism behind common Nigerian fintech phone-scam fraud ("read me the code"); a magic
+  link has no dictatable secret, closing that vector. If OTP is ever reconsidered for
+  reset: 10-min expiry, 5-attempt lock, explicit "we will never call asking for this code"
+  warning in the email, notify-on-request even if not the account owner, and invalidate
+  all active sessions on successful reset.
+
+### Payments (Flutterwave escrow)
+
+- **Flutterwave over Paystack** — has an actual hold-then-release escrow API; Paystack's
+  split is instant, not a true escrow pattern.
+- **Fee structure — split, not blended:** 2% service fee (Handiwork's margin) +
+  Flutterwave's processing fee passed through at cost (~1.4–1.5%, no markup). Fee lives in
+  a referenced Fee Schedule, not hardcoded into ToS prose.
+- **Refund/cancellation — tiered by stage and who cancelled:**
+  - Before vendor accepts / vendor declines → full refund, both fees.
+  - Customer cancels after vendor accepted/started → service fee retained as a disclosed
+    cancellation fee; processing fee non-refundable.
+  - Vendor cancels/no-shows at any stage → full refund to Customer, always, no fee charged.
+  - Rejected explicitly: a blanket non-refundable fee regardless of cancellation cause
+    (chargeback + disclosure risk).
+- **Open, not yet decided:** dispute window length, evidence-review process, and who makes
+  the final release/refund call. Currently a bracketed placeholder in the Terms of Use —
+  not a real policy yet.
+
+### Legal documents
+
+- Privacy Policy + Terms of Use: real draft content (not honest-placeholder, not
+  layout-only) — written to reflect actual current practices, marked
+  `<!-- DRAFT: pending legal review -->` in source until reviewed.
+- Named sub-processors: Convex, Convex Auth, Resend, Flutterwave.
+- **Open:** liability cap left bracketed `[TBD]` — a real decision, not a placeholder to
+  auto-fill.
+- **Open, flagged but not actioned:** CAC business registration and tax obligations
+  (FIRS/VAT) once real commission revenue exists — required before real launch, not before
+  portfolio display.
+
+### Trust & Safety
+
+- Phone number is collected but **intentionally NOT verified** — its purpose is scoped
+  narrowly to coordination between Customer and Vendor (arrival time, address details), not
+  identity/trust vetting. A deliberate, purpose-matched decision, not an oversight — do not
+  "fix" it later by demanding verification for a purpose it was never meant to serve.
+- UI implication: no copy near the phone number should imply it's verified or
+  guaranteed-reachable (e.g. no "verified contact" language).
+- **Open — known gap, logged on purpose, not yet actioned:** if this becomes a real
+  platform with real jobs happening in person, an unverified/wrong phone number becomes a
+  real trust-and-safety failure at the worst moment (day-of-job coordination). Revisit
+  before real launch — SMS OTP via Termii or Africa's Talking (better Nigerian
+  coverage/pricing than Twilio) if phone verification is ever added.
+
+### Scope boundary — explicitly not yet decided
+
+- "Sellable real platform" (payments licensing exposure, KYC, production security
+  hardening, dispute arbitration) was raised as an ambition but has **NOT** been scoped as
+  a committed project. Treat as a separate future conversation, not something to assume is
+  in progress.
 
 ### Tracked debts / open decisions
 
