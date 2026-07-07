@@ -695,6 +695,24 @@ they don't get quietly treated as decided.
 
 ### Tracked debts / open decisions
 
+- **Two Convex deployments exist — `npx convex deploy` targets the WRONG one (2026-07-07)** — The
+  account has two Convex projects/deployments: **`proper-wolf-657`** (project now shown as `handiwork`,
+  the **dev** deployment — this is the one the app actually uses: `.env.local` `CONVEX_DEPLOYMENT=dev:proper-wolf-657`
+  + `NEXT_PUBLIC_CONVEX_URL=https://proper-wolf-657.convex.cloud`, and the Vercel Preview/Prod env vars
+  point here too per the 2026-07-07 preview-env entry), and **`effervescent-poodle-398`** (a separate
+  `handiwork` **production** deployment that **nothing in the app references**). Consequence: plain
+  **`npx convex deploy` deploys to `effervescent-poodle-398` (unused)** — schema/function changes made
+  that way never reach the deployment the app reads/writes. **To push backend changes to the deployment
+  the app uses, run `npx convex dev --once`** (targets `CONVEX_DEPLOYMENT` = `proper-wolf-657`), NOT
+  `convex deploy`. This was hit live when deploying the vendor signup schema fields: the first
+  `convex deploy` landed on `effervescent-poodle-398`; re-running `convex dev --once` correctly pushed
+  the schema to `proper-wolf-657`. Not currently dangerous (the Vercel build is plain `next build` with
+  **no** `convex deploy` step, so CI never touches the wrong deployment), but a manual `convex deploy`
+  will silently no-op against the real app. Also note the stale `.env.local` comment still says
+  `project: handiwork-spike` — the deployment ID `proper-wolf-657` is correct; only the comment is stale.
+  **Open:** decide whether to delete/retire the unused `effervescent-poodle-398` project to remove the
+  footgun entirely, or promote `proper-wolf-657` work into it as a real prod deployment. Not yet decided.
+
 - **Welcome email testing is blocked on a dev→master merge** — The welcome email templates
   (`public/assets/email/{customer,handyman}_welcome.html`) reference their 8 images via absolute
   **production** URLs (`https://handiworkv1.vercel.app/assets/email/assets/*.png`). Those assets
