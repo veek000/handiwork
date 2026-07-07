@@ -40,7 +40,8 @@ export function DocumentUpload({
       />
       <div className="hw-uploader__row">
         <span className="hw-uploader__icon" aria-hidden="true">
-          <hw-icon suppressHydrationWarning name="image" variant="hollow" size="28"></hw-icon>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/assets/icons/upload-document.svg" alt="" aria-hidden="true" width={33} height={40} />
         </span>
         <div className="hw-uploader__text">
           <span className="hw-uploader__title">Upload Document</span>

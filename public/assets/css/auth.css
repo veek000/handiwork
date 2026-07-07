@@ -488,7 +488,7 @@
 }
 .hw-uploader__input { display: none; }
 .hw-uploader__row { display: flex; align-items: center; gap: var(--hw-space-m); }
-.hw-uploader__icon { flex: none; color: var(--hw-text-secondary); display: flex; }
+.hw-uploader__icon { flex: none; display: flex; }
 .hw-uploader__text { display: flex; flex-direction: column; gap: var(--hw-space-2xs); min-width: 0; }
 .hw-uploader__title {
   font-family: var(--hw-font-body);
