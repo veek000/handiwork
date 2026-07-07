@@ -667,6 +667,21 @@ they don't get quietly treated as decided.
 
 ### Tracked debts / open decisions
 
+- **Welcome email testing is blocked on a dev→master merge** — The welcome email templates
+  (`public/assets/email/{customer,handyman}_welcome.html`) reference their 8 images via absolute
+  **production** URLs (`https://handiworkv1.vercel.app/assets/email/assets/*.png`). Those assets
+  currently live only on `dev`, so **the images only resolve once `dev` is merged to `master` and
+  production redeploys.** Pointing them at the dev preview instead (so a test-send would render in
+  isolation pre-merge) was investigated and rejected: Vercel Deployment Protection is
+  `ssoProtection: all_except_custom_domains` — every preview/generated URL, including the stable
+  `handiwork-git-dev-…vercel.app` branch alias, 302-redirects to Vercel SSO (verified); only the
+  production domain is exempt (`handiworkv1.vercel.app` verified 200/public). Per-branch SSO
+  exclusion isn't available on this plan (deploymentType-based, not branch-based; un-gating would
+  drop protection from **all** previews). A Protection Bypass token is generatable but would bake a
+  project-wide bypass secret into committed, user-facing email HTML (sent to every recipient) —
+  rejected as a secret-leak footgun. **Consequence:** the not-yet-built Resend/Convex welcome
+  send path can't visually verify email images on `dev` alone — image rendering is only testable
+  after the merge. Not urgent (the send path doesn't exist yet), but the dependency is real.
 - **Verify pre-filter-branch spike history left nothing sensitive on the remote** — A
   `git filter-branch` was run on **2026-07-06 ~08:30 WAT** (per the `dev` reflog), immediately
   after the throwaway Convex spike commit, evidently to scrub the spike from history when it was
