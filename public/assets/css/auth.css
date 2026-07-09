@@ -133,37 +133,46 @@
   /* Middle band: full-bleed glove pattern with the illustration bottom-aligned so
      the pattern's base and the illustration's base share the same line (per Figma).
      Grows to fill the space between the logo and the tagline. */
+  /* Both the illustration and the pattern SVG are position:absolute inside here,
+     so this is purely a sized stacking container — no flex alignment needed. */
   .hw-auth__panel-body {
     position: relative;
     flex: 1 1 auto;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
     min-height: 0;
     overflow: hidden;
   }
 
-  .hw-auth__panel-body::before {
-    content: "";
+  /* Measurement wrapper — fills panel body, gives ResizeObserver a stable target. */
+  .hw-auth__pattern-wrap {
     position: absolute;
-    left: 0;
-    right: 0;
-    /* Fill the whole panel body so the pattern never looks short on tall/monitor
-       screens (it used to stop at a fixed 3-tile / 467px strip). The tile is seamless
-       vertically, so repeat-y stacks as many clean bands as the height needs; bottom-
-       anchored so the base band still aligns with the illustration's base (any partial
-       band lands at the top, behind the logo area). */
-    top: 0;
-    bottom: 0;
-    background-image: url("/assets/illustration/Handiwork Pattern Tile.svg");
-    background-repeat: repeat-y;
-    background-size: 720px auto;
-    background-position: bottom center;
+    inset: 0;
     pointer-events: none;
   }
 
+  /* SVG anchored to the bottom so only complete 76px rows render; any
+     sub-row remainder is empty space at the top rather than a clipped row
+     at the bottom (near the illustration where completeness matters most).
+     Height is set via inline style (JS-computed multiple of 76px). */
+  .hw-auth__pattern {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    /* Figma spec: fill #DFF1E1 (brand-primary-light) at 10% layer opacity.
+       Separated to match Figma's model — solid currentColor + opacity — so
+       the SVG fill inherits a plain hex and opacity handles the fade. */
+    color: var(--hw-color-brand-primary-light);
+    opacity: 0.1;
+  }
+
+  /* Absolutely positioned so its bottom: 0 shares the exact same anchor as
+     the pattern SVG's bottom: 0 — both relative to panel-body. Using flex-end
+     alignment as a substitute introduced subpixel drift between the two. */
   .hw-auth__panel-art {
-    position: relative;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 1;
     width: 100%;
     max-width: 250px;
