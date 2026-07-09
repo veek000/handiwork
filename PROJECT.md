@@ -580,6 +580,39 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   human functional pass only (signup → OTP email → Google login on `handiworkv1.vercel.app`; prod is a fresh
   DB so dev test accounts don't exist). Full steps + rollback in `CONVEX-PROD-WIRING-RUNBOOK.md`.
 
+- **Auth brand-panel background pattern — rework (2026-07-09)** — Reworked the glove-glyph
+  background pattern on the auth screens (login + signup). Two original issues: ① the
+  `background-image: url(…)` approach triggered an external HTTP fetch, causing the pattern
+  to pop in after load; ② `background-repeat: repeat-y` only repeated vertically, so the
+  pattern was cut off and misaligned at larger viewport heights. Replaced entirely with a
+  fully inline SVG `<pattern>` in `AuthShell.tsx` (no HTTP request, tiles in both axes).
+  Color corrected to `--hw-color-brand-primary-light` (`#DFF1E1`) at `opacity: 0.1` on the
+  SVG element (Figma spec: "Background/primary alpha" — separated into solid `currentColor` +
+  opacity so the SVG fill inherits a plain hex and the fade is uniform). Tile: 76 × 76 px
+  cells (native glyph frame, zero gap), two-row 76 × 152 px tile with a 50% horizontal brick
+  stagger (x=38 on the offset row). `glove-glyph.svg` added to `public/assets/illustration/`
+  as the source reference; path data is inlined in `AuthShell.tsx`.
+  **Additional fixes made after the initial implementation:**
+  - **Offset-row half-glove fix:** the staggered glyph at x=38 overflows the tile's right
+    edge — SVG `<pattern>` clips overflow instead of wrapping it — leaving a clipped
+    half-glyph visible. Fix: draw the glyph twice in the offset row, at x=+38 and x=−38
+    (one tile-width apart). The −38 copy's right half and the +38 copy's left half together
+    always render a complete glyph wherever the tile repeats, with no overlap within a single
+    tile (the two copies are exactly 76 px apart, matching the tile width).
+  - **Complete-rows-only edge rendering:** a `ResizeObserver` on the pattern wrapper div
+    measures the panel-body height at runtime (varies by viewport / content — not
+    hardcoded per breakpoint) and computes `Math.floor(h / 76) * 76`. The pattern SVG is
+    set to exactly that height via inline style, anchored `position: absolute; bottom: 0` —
+    any leftover sub-row space sits at the **top** of the panel, keeping the bottom edge
+    (adjacent to the illustration and copy) flush with complete rows. Recalculates on every
+    resize via the ResizeObserver callback; cleans up on unmount.
+  - **Shared baseline:** the illustration was re-anchored from `flex-end` flex alignment to
+    `position: absolute; bottom: 0; left: 50%; transform: translateX(−50%)`, sharing the
+    exact same positioning mechanism and containing block as the pattern SVG, eliminating
+    subpixel drift between the two paths. Panel-body simplified to a plain stacking container
+    (flex row layout removed now that both children are absolutely positioned).
+  **Status: Closed — verified on localhost, merged to dev.**
+
 ## Locked decisions for future phases (not yet built)
 
 Consolidated from the planning conversation and organized by area so it stays scannable
