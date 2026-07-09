@@ -4,9 +4,13 @@
 (`effervescent-poodle-398`) while Vercel **Preview (dev + branches)** keeps using the Convex
 **dev** deployment (`proper-wolf-657`). This is the canonical Convex + Vercel setup.
 
-**Status (2026-07-07):** Both sides **DONE** — Convex prod provisioning (Steps 1–4 + backend deploy) **and**
-Vercel config (Step 5). **The only thing left is activation + Step 6 functional verify, which happen on the
-next `dev → master` merge** (see the ⚠ in Step 5). The currently-running production is untouched until then.
+**Status (2026-07-07):** **COMPLETE + ACTIVATED + VERIFIED.** Both sides wired (Convex prod Steps 1–4 +
+backend deploy; Vercel Step 5), then activated by merging `dev → master` (fast-forward) and pushing. The
+resulting production deploy ran `npx convex deploy --cmd 'npm run build'` successfully (● Ready, ~32s vs the
+~25s of prior `next build`-only deploys — the delta is the backend push). **Build-level verify passed:** the
+production `/login` bundle contains the prod URL `effervescent-poodle-398` and NOT `proper-wolf-657` or
+`auth-not-configured`. Only the human functional pass remains (signup → OTP email → Google login on
+`handiworkv1.vercel.app`).
 
 **Done so far (this session):**
 - Step 1 — prod deploy key generated (you) ✅
@@ -183,25 +187,27 @@ Applied against project `handiwork` (`prj_THp85FvSStMuC3Yk4smNDLZYA3DD`, team
 **Verified final state** (`GET /v9/projects/{id}/env`): `CONVEX_DEPLOY_KEY` (production, sensitive) +
 `NEXT_PUBLIC_CONVEX_URL` (preview/dev) + `NEXT_PUBLIC_CONVEX_URL` (development); build command as above.
 
-> ⚠ **Not yet activated — activation must be a deliberate `dev → master` merge, not a master redeploy.**
-> These settings apply on the *next production build*. That build runs `npx convex deploy` against
-> **master's** `convex/` code — and the current Convex/auth code lives on **`dev`**, ahead of `master`.
-> Redeploying the current master HEAD would deploy master's *older* `convex/` to prod. So activate by
-> merging `dev → master` (per the branching rule) and letting the resulting production deploy run. The
-> currently-running production is untouched until then.
+> ✅ **Activated 2026-07-07** by a `dev → master` fast-forward merge (4 commits: vendor signup, logout fix,
+> document icon, convex footgun record) + push. The production deploy ran the env-branching build command's
+> production path (`npx convex deploy --cmd 'npm run build'`) and went ● Ready. Docs were kept off that merge
+> (committed to `dev` afterward) so the merge carried only real app code. This was a true fast-forward
+> (`dev` was 4 ahead, zero divergence).
 
 ---
 
-## Step 6 — Verify  **[ME] build-level, [YOU] functional**
+## Step 6 — Verify
 
-- **Build-level (me):** reproduce the prod build locally with the prod env and grep the client bundle —
-  `effervescent-poodle-398.convex.cloud` should be baked into `.next/static/chunks/*.js`, and both
-  `proper-wolf-657` and `auth-not-configured` should be **absent**. (Same technique used for the
-  2026-07-07 preview-env verification.)
-- **Functional (you), on the production domain `handiworkv1.vercel.app` after deploy:**
+- **Build-level ✅ DONE (2026-07-07):** grepped the **live** production bundle instead of a local rebuild —
+  fetched `https://handiworkv1.vercel.app/login`, pulled every `/_next/static/chunks/*.js`, and counted
+  Convex URLs: `effervescent-poodle-398` **present (1)**, `proper-wolf-657` **absent (0)**,
+  `auth-not-configured` **absent (0)**. Confirms the prod build injected the prod URL and neither the dev URL
+  nor the fallback leaked in.
+- **Functional (you), on `handiworkv1.vercel.app` — STILL TODO:**
   1. Sign up a fresh account → confirm the OTP email arrives (proves `AUTH_RESEND_KEY` + JWT on prod).
   2. Complete OTP → lands in the app (proves JWT_PRIVATE_KEY/JWKS present — Step 3 worked).
-  3. Google + Facebook sign-in each complete without redirect-uri-mismatch (proves Step 2).
+  3. Google sign-in completes without redirect-uri-mismatch (proves Step 2). *(Facebook is dormant — not
+     configured; skip.)*
+  - Note: prod is a **fresh database** — your dev test accounts don't exist here; create a new one.
 
 ---
 
