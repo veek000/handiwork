@@ -547,6 +547,34 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   built. Tokens only; `npx tsc --noEmit` + `next build` pass (16 routes). Not yet visually QA'd in a
   live browser this session; not yet committed.
 
+- **Convex production deployment provisioned — Convex side of the dev/prod split (2026-07-07)** — Wired the
+  first half of the canonical Convex + Vercel dev/prod mapping: **Vercel prod (master) → Convex prod
+  (`effervescent-poodle-398`)**, **Vercel preview (dev) → Convex dev (`proper-wolf-657`)**. **Topology
+  reconfirmed** (was mis-recorded as "two projects"): `npx convex deploy` output shows
+  `asuquo-victor:handiwork:production` = `effervescent-poodle-398` — same team/project as dev, standard
+  dev/prod pair. **What was done on the Convex prod deployment** (via a prod deploy key +
+  `CONVEX_DEPLOY_KEY=… npx convex env set`, so no local config switched off dev): a **fresh** RS256
+  `JWT_PRIVATE_KEY`/`JWKS` keypair generated with `jose` and set on prod only (**dev keeps its own — true
+  isolation**, Option B); `AUTH_RESEND_KEY` + `AUTH_GOOGLE_ID`/`SECRET` copied from dev (account-/app-level,
+  same values); `SITE_URL` set **fresh** to `https://handiworkv1.vercel.app` (**not** copied — dev's is
+  `http://localhost:3000`, which would send prod OAuth redirects to localhost); then `convex deploy` pushed
+  the backend (schema + functions + auth/OAuth http routes) to prod so the Google callback on the prod
+  `.site` domain resolves. **Facebook deliberately skipped** — `AUTH_FACEBOOK_*` don't exist on dev either
+  (never configured); the `Facebook` provider stays listed-but-dormant in `auth.ts` (proven harmless — dev
+  runs identically). Gotcha logged: `convex env set JWT_PRIVATE_KEY` needs a `-- ` separator (the value
+  starts with `-----BEGIN`, parsed as an option otherwise). **Vercel half also done (same session, via the
+  Vercel REST API using the CLI's cached token):** because Vercel's build command is a single project-wide
+  setting (can't be production-only), set it to an **environment-branching** command —
+  `if [ "$VERCEL_ENV" = "production" ]; then npx convex deploy --cmd 'npm run build'; else npm run build; fi`
+  — so Production deploys the backend + gets the prod URL injected while Preview/Development stay on plain
+  `next build` against the Preview-scoped `NEXT_PUBLIC_CONVEX_URL` (`proper-wolf-657`, unchanged). Added
+  `CONVEX_DEPLOY_KEY` (Production, sensitive); deleted the Production `NEXT_PUBLIC_CONVEX_URL` (deploy injects
+  it) and the dead `NEXT_PUBLIC_CONVEX_SITE_URL`; kept Preview's + the Development one. **Not yet activated —
+  and activation must be a deliberate `dev → master` merge, NOT a master redeploy:** the production build runs
+  `convex deploy` against **master's** `convex/`, which is older than dev's — a redeploy of current master
+  would push stale backend to prod. Current production is untouched until the merge. Full steps + rollback in
+  `CONVEX-PROD-WIRING-RUNBOOK.md`. Not yet committed.
+
 ## Locked decisions for future phases (not yet built)
 
 Consolidated from the planning conversation and organized by area so it stays scannable
@@ -695,23 +723,47 @@ they don't get quietly treated as decided.
 
 ### Tracked debts / open decisions
 
-- **Two Convex deployments exist — `npx convex deploy` targets the WRONG one (2026-07-07)** — The
-  account has two Convex projects/deployments: **`proper-wolf-657`** (project now shown as `handiwork`,
-  the **dev** deployment — this is the one the app actually uses: `.env.local` `CONVEX_DEPLOYMENT=dev:proper-wolf-657`
-  + `NEXT_PUBLIC_CONVEX_URL=https://proper-wolf-657.convex.cloud`, and the Vercel Preview/Prod env vars
-  point here too per the 2026-07-07 preview-env entry), and **`effervescent-poodle-398`** (a separate
-  `handiwork` **production** deployment that **nothing in the app references**). Consequence: plain
-  **`npx convex deploy` deploys to `effervescent-poodle-398` (unused)** — schema/function changes made
-  that way never reach the deployment the app reads/writes. **To push backend changes to the deployment
-  the app uses, run `npx convex dev --once`** (targets `CONVEX_DEPLOYMENT` = `proper-wolf-657`), NOT
-  `convex deploy`. This was hit live when deploying the vendor signup schema fields: the first
-  `convex deploy` landed on `effervescent-poodle-398`; re-running `convex dev --once` correctly pushed
-  the schema to `proper-wolf-657`. Not currently dangerous (the Vercel build is plain `next build` with
-  **no** `convex deploy` step, so CI never touches the wrong deployment), but a manual `convex deploy`
-  will silently no-op against the real app. Also note the stale `.env.local` comment still says
-  `project: handiwork-spike` — the deployment ID `proper-wolf-657` is correct; only the comment is stale.
-  **Open:** decide whether to delete/retire the unused `effervescent-poodle-398` project to remove the
-  footgun entirely, or promote `proper-wolf-657` work into it as a real prod deployment. Not yet decided.
+- **ONE Convex project, two deployments — `npx convex deploy` targets the prod one (2026-07-07, corrected 2026-07-07)** —
+  **Topology confirmed (was previously mis-recorded as "two separate projects"):** there is **one**
+  Convex project with the standard **dev/prod deployment pair** — **`proper-wolf-657`** (the **dev**
+  deployment) and **`effervescent-poodle-398`** (this same project's **default production** deployment,
+  currently unused by the app). **How this was verified:** `npx convex dashboard --prod --no-open`
+  resolves *"this project's default production deployment"* **relative to the configured project**
+  (`.env.local` → `CONVEX_DEPLOYMENT=dev:proper-wolf-657`) and returned `effervescent-poodle-398` — a
+  `--prod` lookup can only reach a deployment inside the *same* project, so they are one project, not two.
+  The earlier "two projects / separate `handiwork` production project" wording was wrong; disregard it.
+  **The app uses only the dev deployment today:** `.env.local` `CONVEX_DEPLOYMENT=dev:proper-wolf-657`
+  + `NEXT_PUBLIC_CONVEX_URL=https://proper-wolf-657.convex.cloud`; the Vercel Preview/Prod
+  `NEXT_PUBLIC_CONVEX_URL` also points here (per the 2026-07-07 preview-env entry). `effervescent-poodle-398`
+  exists but **nothing references it**. Consequence: plain **`npx convex deploy` deploys to
+  `effervescent-poodle-398`** — schema/function changes made that way never reach the deployment the app
+  reads/writes. **To push backend changes to the deployment the app uses, run `npx convex dev --once`**
+  (targets `CONVEX_DEPLOYMENT` = `proper-wolf-657`), NOT `convex deploy`. This was hit live when deploying
+  the vendor signup schema fields: the first `convex deploy` landed on `effervescent-poodle-398`; re-running
+  `convex dev --once` correctly pushed the schema to `proper-wolf-657`. Not currently dangerous (the Vercel
+  build is plain `next build` with **no** `convex deploy` step, so CI never touches prod), but a manual
+  `convex deploy` will silently no-op against the real app. Also note the stale `.env.local` comment still
+  says `project: handiwork-spike` — the deployment ID `proper-wolf-657` is correct; only the comment is stale.
+  **Resolution direction (decided 2026-07-07):** don't retire `effervescent-poodle-398` — **wire it as real
+  production** so Vercel prod (master) uses it and Vercel preview (dev) keeps `proper-wolf-657`. Once prod
+  builds via `npx convex deploy --cmd 'npm run build'` + a prod deploy key, `convex deploy` becomes the
+  *correct* prod-push in CI (the local footgun narrows but persists: bare local `convex deploy` still hits
+  prod). Step-by-step in **`CONVEX-PROD-WIRING-RUNBOOK.md`**. **Fully wired 2026-07-07** — Convex prod
+  provisioned (env + fresh keypair + backend deployed to `effervescent-poodle-398`) **and** Vercel
+  reconfigured (env-branching build command, `CONVEX_DEPLOY_KEY` on Production, dead vars removed).
+  **Not yet activated:** the new settings apply on the next production build, which must be a deliberate
+  **`dev → master` merge** — NOT a master redeploy (master's `convex/` is older than dev's; a redeploy
+  would push stale backend to prod). Current production is untouched until then. See the progress-log
+  entry below.
+
+- **`NEXT_PUBLIC_CONVEX_SITE_URL` is dead config (2026-07-07)** — This var is set in `.env.local` and
+  scoped on Vercel **Preview** (per the 2026-07-07 preview-env entry), but **no code reads it** — grep for
+  `NEXT_PUBLIC_CONVEX_SITE_URL` across the repo returns only `.env.local` and PROJECT.md, zero source
+  references. The only Convex URL the app actually reads is `NEXT_PUBLIC_CONVEX_URL`
+  (`app/(auth)/AuthConvexProvider.tsx`). The *server-side* `CONVEX_SITE_URL` used in `convex/auth.config.ts`
+  is a **Convex-side, auto-injected, per-deployment** var — unrelated to the `NEXT_PUBLIC_` one and not
+  something we set. **Action:** drop `NEXT_PUBLIC_CONVEX_SITE_URL` from Vercel (and stop replicating it) when
+  re-provisioning for prod — see the runbook. Harmless today, just noise/secret-spread.
 
 - **Welcome email testing is blocked on a dev→master merge** — The welcome email templates
   (`public/assets/email/{customer,handyman}_welcome.html`) reference their 8 images via absolute
