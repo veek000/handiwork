@@ -24,3 +24,27 @@ export function formatRelativeTime(iso: string, reference: Date = MOCK_REFERENCE
 export function formatNaira(amount: number): string {
   return `NGN${amount.toLocaleString("en-US")}`;
 }
+
+/** Chat list / bubble clock — "4:30 PM" or "Yesterday" relative to mock ref. */
+export function formatChatTime(iso: string, reference: Date = MOCK_REFERENCE_DATE): string {
+  const d = new Date(iso);
+  const sameDay =
+    d.getFullYear() === reference.getFullYear() &&
+    d.getMonth() === reference.getMonth() &&
+    d.getDate() === reference.getDate();
+  if (sameDay) {
+    return d.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  }
+  const yday = new Date(reference);
+  yday.setDate(yday.getDate() - 1);
+  const isYday =
+    d.getFullYear() === yday.getFullYear() &&
+    d.getMonth() === yday.getMonth() &&
+    d.getDate() === yday.getDate();
+  if (isYday) return "Yesterday";
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+}

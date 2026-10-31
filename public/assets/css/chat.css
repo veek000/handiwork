@@ -1,0 +1,672 @@
+/* =========================================================================
+   Messages + Quotation flow (customer + vendor).
+   Figma: customer 291:46191 / 290:11000 · vendor 300:11629 / 300:26058.
+   Tokens only. Desktop split list+thread; mobile full-page thread.
+   ========================================================================= */
+
+/* ----- Messages shell --------------------------------------------------- */
+/*
+  Figma desktop (291:47200): horizontal flex, items-start, gap 32.
+  Left column = Back + Messages title + list (tops at page content start).
+  Right column = chat thread — same top edge as the Back button (NOT below
+  a full-width page header).
+*/
+.hw-msg {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+.hw-msg__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hw-space-2xs); /* Figma 4px */
+  flex: none;
+  height: 40px; /* match Figma back row height so columns share a top line */
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  font-weight: var(--hw-weight-bold);
+  color: var(--hw-icon-primary); /* green back, per Figma icon/primary */
+  text-decoration: none;
+}
+.hw-msg__back:focus-visible {
+  outline: var(--hw-border-width-m) solid var(--hw-border-focus);
+  outline-offset: var(--hw-space-2xs);
+}
+.hw-msg__title {
+  margin: 0;
+  flex: none;
+  font-family: var(--hw-font-heading);
+  font-size: var(--hw-size-3xl);
+  line-height: var(--hw-line-height-3xl);
+  letter-spacing: var(--hw-letter-spacing-s);
+  color: var(--hw-text-primary);
+}
+
+/* Desktop: list rail + thread pane — align-items stretch; both columns top-align */
+.hw-msg__layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 361px) minmax(0, 1fr);
+  gap: var(--hw-space-2xl); /* 32px — Figma gap */
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+/* Left: Back → title → list (Figma 361px column) */
+.hw-msg__list-pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: var(--hw-space-l); /* 16px between back / title / list */
+  overflow: hidden;
+  background: var(--hw-color-default-white);
+}
+/* Right: chat — top edge lines up with list pane (and Back) */
+.hw-msg__thread-pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  border: 1px solid var(--hw-border-default);
+  background: var(--hw-color-default-white);
+  /* Figma thread starts with pt 32 so header content breathes; top of box
+     still aligns with the left column’s top (Back row). */
+  padding-top: var(--hw-space-2xl);
+}
+/* Empty chat pane — Figma “No Chat Selected” (illustration-29) */
+.hw-msg__empty {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--hw-space-l); /* 16 between art block and copy stack */
+  padding: var(--hw-space-3xl) var(--hw-space-2xl);
+  text-align: center;
+  box-sizing: border-box;
+}
+.hw-msg__empty-art {
+  display: block;
+  width: 160px; /* Figma empty art ~128–160 in the right pane */
+  height: 160px;
+  object-fit: contain;
+  flex: none;
+}
+.hw-msg__empty-title {
+  margin: 0;
+  font-family: var(--hw-font-heading);
+  font-size: var(--hw-size-3xl); /* 24 — Figma “No Chat Selected” */
+  line-height: var(--hw-line-height-3xl);
+  letter-spacing: var(--hw-letter-spacing-s);
+  color: var(--hw-text-primary);
+}
+.hw-msg__empty-hint {
+  margin: 0;
+  max-width: 361px; /* Figma copy width */
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  line-height: var(--hw-line-height-m);
+  color: var(--hw-text-secondary);
+}
+/* Desktop copy mentions “on the left”; mobile omits it (Figma mobile frames). */
+.hw-msg__empty-hint--mobile { display: none; }
+.hw-msg__empty-hint--desktop { display: inline; }
+
+/* ----- Conversation list row -------------------------------------------- */
+/*
+  Rows start at the pane's left edge, aligned with the Back link + "Messages"
+  title above the list. Hover = soft grey; active = light-green tint (brand-100)
+  with dark, readable text. Content keeps an interior pad so it isn't flush.
+*/
+.hw-convlist {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+  /* No side inset — rows align with Back + "Messages" at the pane's left edge */
+  padding: 0;
+  gap: var(--hw-space-2xs); /* tiny gap between rows */
+  scrollbar-width: none;
+  box-sizing: border-box;
+}
+.hw-convlist::-webkit-scrollbar { width: 0; height: 0; }
+.hw-conv {
+  display: flex;
+  align-items: center;
+  gap: var(--hw-space-m);
+  /* Equal padding on all four sides of the row */
+  padding: var(--hw-space-s);
+  border: none;
+  border-bottom: 1px solid var(--hw-border-divider);
+  background: transparent;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  transition:
+    background var(--hw-duration-fast) var(--hw-ease-standard),
+    color var(--hw-duration-fast) var(--hw-ease-standard);
+}
+/* Soft grey hover */
+.hw-conv:hover {
+  background: var(--hw-bg-default);
+}
+/* Active: light-green tint to distinguish selection from the grey hover */
+.hw-conv.is-active {
+  background: var(--hw-color-brand-primary-100);
+}
+/* Active row keeps dark, readable text on the light-green tint (no green-on-green,
+   which was invisible). The tint itself signals selection. */
+.hw-conv.is-active .hw-conv__name {
+  color: var(--hw-text-primary);
+}
+.hw-conv.is-active .hw-conv__preview {
+  color: var(--hw-text-secondary); /* also overrides the typing-row green on the active row */
+}
+.hw-conv:focus-visible {
+  outline: var(--hw-border-width-m) solid var(--hw-border-focus);
+  outline-offset: 0;
+}
+.hw-conv__body {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-2xs);
+}
+.hw-conv__name {
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  font-weight: var(--hw-weight-bold);
+  color: var(--hw-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--hw-duration-fast) var(--hw-ease-standard);
+}
+.hw-conv__preview {
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-s);
+  color: var(--hw-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Figma typing row — green preview text (secondary pressed / brand-200) */
+.hw-conv__preview.is-typing {
+  color: var(--hw-color-brand-primary-200); /* #8ED799 — matches Figma typing */
+}
+.hw-conv__meta {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--hw-space-xs);
+  min-width: 47px;
+}
+.hw-conv__time {
+  font-size: var(--hw-size-s);
+  font-weight: var(--hw-weight-bold);
+  color: var(--hw-text-primary);
+  white-space: nowrap;
+}
+/* Unread count — red pill (Figma danger #DC3545) */
+.hw-conv__badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border-radius: var(--hw-radius-pill);
+  background: var(--hw-color-red-500); /* #DC3545 */
+  color: var(--hw-color-default-white);
+  font-size: 10px;
+  font-weight: var(--hw-weight-bold);
+  line-height: 20px;
+  text-align: center;
+}
+/* Read receipts: checkmark (sent) / check-double (delivered|read) */
+.hw-conv__ticks {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--hw-text-tertiary); /* sent + delivered */
+  line-height: 0;
+}
+.hw-conv__ticks.is-read {
+  color: var(--hw-color-brand-primary-500); /* seen — brand green */
+}
+
+/* ----- Thread ------------------------------------------------------------ */
+.hw-thread {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+.hw-thread__head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--hw-space-m);
+  /* Figma: px 32 on thread content; top padding lives on .hw-msg__thread-pane */
+  padding: 0 var(--hw-space-2xl) var(--hw-space-m);
+  border-bottom: none;
+}
+.hw-thread__head-main {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.hw-thread__name {
+  margin: 0;
+  font-family: var(--hw-font-heading);
+  font-size: var(--hw-size-l);
+  letter-spacing: var(--hw-letter-spacing-s);
+  color: var(--hw-text-primary);
+}
+.hw-thread__status {
+  margin: 0;
+  font-size: var(--hw-size-s);
+  color: var(--hw-text-tertiary);
+}
+.hw-thread__actions {
+  flex: none;
+  display: flex;
+  gap: var(--hw-space-s);
+  width: 100%;
+  padding: var(--hw-space-m) var(--hw-space-2xl);
+  border-bottom: 1px solid var(--hw-border-divider);
+  box-sizing: border-box;
+}
+.hw-thread__actions .hw-button { flex: 1 1 0; min-width: 0; }
+
+.hw-thread__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--hw-space-l) var(--hw-space-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-l);
+  scrollbar-width: none;
+}
+.hw-thread__scroll::-webkit-scrollbar { width: 0; height: 0; }
+
+/* Composer */
+.hw-thread__composer {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--hw-space-s);
+  /* Equal inset on all sides — was 12 top/base + 24 left/right (too wide) */
+  padding: var(--hw-space-m); /* 12px all around */
+  border-top: 1px solid var(--hw-border-divider);
+  background: var(--hw-color-default-white);
+}
+.hw-thread__icon-btn {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: var(--hw-bg-default);
+  color: var(--hw-text-primary);
+  cursor: pointer;
+}
+.hw-thread__icon-btn:focus-visible {
+  outline: var(--hw-border-width-m) solid var(--hw-border-focus);
+  outline-offset: var(--hw-space-2xs);
+}
+.hw-thread__icon-btn--send {
+  background: var(--hw-button-primary-bg-default);
+  color: var(--hw-button-primary-text-default);
+}
+.hw-thread__input-wrap {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--hw-space-s);
+  padding: 0 var(--hw-space-m);
+  height: 48px;
+  background: var(--hw-bg-default);
+}
+.hw-thread__input {
+  flex: 1 1 0;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  color: var(--hw-text-primary);
+  outline: none;
+}
+.hw-thread__input::placeholder { color: var(--hw-text-placeholder); }
+
+/* ----- Bubbles ---------------------------------------------------------- */
+.hw-sys {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-s);
+  align-items: stretch;
+}
+.hw-sys__head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--hw-space-s);
+}
+.hw-sys__title {
+  font-size: var(--hw-size-s);
+  font-weight: var(--hw-weight-bold);
+  color: var(--hw-text-secondary);
+}
+.hw-sys__time {
+  font-size: var(--hw-size-s);
+  color: var(--hw-text-tertiary);
+}
+.hw-sys__body {
+  margin: 0;
+  padding: var(--hw-space-m);
+  border: 1px solid var(--hw-border-divider);
+  background: var(--hw-bg-default);
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  line-height: var(--hw-line-height-m);
+  color: var(--hw-text-secondary);
+  text-align: center;
+}
+
+/*
+  Bubbles — Figma Label/Chat Sender (298:17200) + Receiver (298:17229).
+  Body is a sharp rectangle (no radius). A 10×13 tail sits at the bottom
+  outer corner (left for peer, right for me) via CSS mask + fill color.
+*/
+.hw-bubble-row {
+  display: flex;
+  align-items: flex-end; /* tail sits on the baseline of the body */
+  width: 100%;
+  max-width: 100%;
+}
+.hw-bubble-row--out { justify-content: flex-start; }
+.hw-bubble-row--in { justify-content: flex-end; }
+
+.hw-bubble {
+  /* Figma: max text width 240 + px 16*2 = 272 body; row + tail ≈ 282 */
+  max-width: min(272px, calc(85% - 10px));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: var(--hw-space-s); /* 8px text → foot */
+  padding: var(--hw-space-m) var(--hw-space-l); /* 12 / 16 — Figma py-12 px-16 */
+  box-sizing: border-box;
+  overflow: hidden; /* clip content to the rectangle; tail is a sibling */
+  border-radius: var(--hw-radius-none);
+}
+/* Peer (sender) — light surface */
+.hw-bubble--out {
+  background: var(--hw-bg-default); /* #F5F5F5 */
+  color: var(--hw-text-primary);
+}
+/* Mine (receiver in Figma naming) — primary hover green #155D3E */
+.hw-bubble--in {
+  background: var(--hw-button-primary-bg-hover); /* brand-primary-800 */
+  color: var(--hw-color-default-white);
+}
+
+/* 10×13 speech tail (Figma Chat Icon / Loading Icon path) */
+.hw-bubble__tail {
+  flex: none;
+  width: 10px;
+  height: 13px;
+  background-color: var(--hw-bg-default);
+  -webkit-mask-image: url("/assets/icons/chat/bubble-tail.svg");
+  mask-image: url("/assets/icons/chat/bubble-tail.svg");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+/* Peer: tail on the left — mirror so the nib points bottom-left */
+.hw-bubble-row--out .hw-bubble__tail {
+  background-color: var(--hw-bg-default);
+  transform: scaleX(-1);
+}
+/* Mine: tail on the right — native orientation (nib bottom-right) */
+.hw-bubble-row--in .hw-bubble__tail {
+  background-color: var(--hw-button-primary-bg-hover);
+}
+
+.hw-bubble__text {
+  margin: 0;
+  width: 100%;
+  max-width: 240px; /* Figma Chat Text max-width */
+  min-width: 24px;
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m); /* 14 */
+  line-height: var(--hw-line-height-m); /* 20 */
+  word-break: break-word;
+  text-align: left;
+}
+.hw-bubble--in .hw-bubble__text {
+  color: var(--hw-color-default-white);
+}
+.hw-bubble--out .hw-bubble__text {
+  color: var(--hw-text-primary);
+}
+
+.hw-bubble__foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--hw-space-s); /* 8px — Figma gap between time and meta icon */
+  align-self: flex-end;
+}
+.hw-bubble__time {
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-s); /* 12 */
+  line-height: var(--hw-line-height-s);
+  white-space: nowrap;
+}
+.hw-bubble--out .hw-bubble__time {
+  color: var(--hw-text-tertiary);
+}
+.hw-bubble--in .hw-bubble__time {
+  color: var(--hw-text-inverse); /* #F5F5F5 */
+}
+.hw-bubble__meta-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  line-height: 0;
+  flex: none;
+}
+.hw-bubble--out .hw-bubble__meta-icon {
+  color: var(--hw-text-tertiary);
+}
+.hw-bubble--in .hw-bubble__meta-icon {
+  color: var(--hw-text-inverse);
+}
+
+/* Quote card inside a bubble */
+.hw-quote {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--hw-space-s);
+  width: 100%;
+  max-width: 240px;
+}
+.hw-quote__label {
+  font-size: var(--hw-size-s);
+  font-weight: var(--hw-weight-bold);
+  opacity: 0.9;
+  align-self: flex-start;
+}
+.hw-quote__amount {
+  margin: 0;
+  font-family: var(--hw-font-heading);
+  font-size: var(--hw-size-2xl);
+  line-height: 1.2;
+  letter-spacing: var(--hw-letter-spacing-s);
+  align-self: flex-start;
+}
+.hw-bubble--in .hw-quote__label,
+.hw-bubble--in .hw-quote__amount {
+  color: var(--hw-color-default-white);
+}
+
+.hw-quote__btn {
+  width: 100%;
+}
+
+/* ----- Modal / sheets --------------------------------------------------- */
+.hw-modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--hw-space-l);
+}
+.hw-modal {
+  width: 100%;
+  max-width: 420px;
+  max-height: min(90vh, 640px);
+  overflow-y: auto;
+  background: var(--hw-color-default-white);
+  padding: var(--hw-space-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-l);
+  box-sizing: border-box;
+}
+.hw-modal__title {
+  margin: 0;
+  font-family: var(--hw-font-heading);
+  font-size: var(--hw-size-2xl);
+  letter-spacing: var(--hw-letter-spacing-s);
+  color: var(--hw-text-primary);
+  text-align: center;
+}
+.hw-modal__body {
+  margin: 0;
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  line-height: var(--hw-line-height-m);
+  color: var(--hw-text-secondary);
+  text-align: center;
+}
+.hw-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-xs);
+}
+.hw-modal__label {
+  font-size: var(--hw-size-s);
+  color: var(--hw-text-secondary);
+}
+.hw-modal__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--hw-space-m);
+}
+.hw-modal__actions--stack {
+  grid-template-columns: 1fr;
+}
+.hw-modal__pay-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-s);
+}
+.hw-modal__pay-opt {
+  display: flex;
+  align-items: center;
+  gap: var(--hw-space-m);
+  padding: var(--hw-space-m);
+  border: 1px solid var(--hw-border-default);
+  background: var(--hw-color-default-white);
+  cursor: pointer;
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  color: var(--hw-text-primary);
+  text-align: left;
+}
+.hw-modal__pay-opt.is-selected {
+  border-color: var(--hw-color-brand-primary-500);
+  background: var(--hw-button-secondary-bg-default);
+}
+.hw-modal__stars {
+  display: flex;
+  justify-content: center;
+  gap: var(--hw-space-s);
+}
+.hw-modal__star {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--hw-color-yellow-500);
+  padding: 0;
+  line-height: 0;
+}
+.hw-modal__star.is-off { color: var(--hw-color-gray-300); }
+
+/* ----- Responsive ------------------------------------------------------- */
+@media (max-width: 1023.98px) {
+  .hw-msg__layout {
+    grid-template-columns: 1fr;
+    height: auto;
+    flex: 1 1 auto;
+  }
+  /* On mobile, either list OR thread fills the screen */
+  .hw-msg.is-thread .hw-msg__list-pane { display: none; }
+  .hw-msg:not(.is-thread) .hw-msg__thread-pane { display: none; }
+  .hw-msg__thread-pane {
+    border: none;
+    padding-top: 0;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: var(--hw-color-default-white);
+  }
+  .hw-msg__empty-hint--desktop { display: none; }
+  .hw-msg__empty-hint--mobile { display: inline; }
+  .hw-msg__empty-art {
+    width: 128px;
+    height: 128px;
+  }
+  .hw-thread__head-main { align-items: center; }
+  .hw-modal-scrim {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .hw-modal {
+    max-width: none;
+    border-radius: 0;
+    max-height: 85vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hw-conv { transition-duration: 0.01ms; }
+}

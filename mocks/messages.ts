@@ -1,0 +1,115 @@
+// Mock chat-thread messages for the quotation flow (Figma Quotation Flow).
+// Thread for conv_01 = Jane (customer) ↔ Veek (vendor) on job_02 (Weekly Apartment Clean).
+// Other conversations have a short text-only seed so the list can open a thread.
+import type { Message } from "@/types";
+
+export const messages: Message[] = [
+  // ── conv_01 · Jane ↔ Veek · quotation story ─────────────────────────────
+  {
+    id: "msg_01",
+    conversationId: "conv_01",
+    kind: "system",
+    senderId: null,
+    systemTitle: "System Notification",
+    body: "Your Service Request has been accepted by the provider",
+    sentAt: "2025-09-20T10:00:00+01:00",
+    status: "read",
+  },
+  {
+    id: "msg_02",
+    conversationId: "conv_01",
+    kind: "text",
+    senderId: "usr_veek",
+    body: "Hi, can you give more details about the job?",
+    sentAt: "2025-09-20T10:05:00+01:00",
+    status: "read",
+  },
+  {
+    id: "msg_03",
+    conversationId: "conv_01",
+    kind: "text",
+    senderId: "usr_jane",
+    body: "Hello, I need help with cleaning a 3-bedroom apartment this weekend.",
+    sentAt: "2025-09-20T10:08:00+01:00",
+    status: "read",
+  },
+  {
+    id: "msg_04",
+    conversationId: "conv_01",
+    kind: "text",
+    senderId: "usr_jane",
+    body: "Can you confirm if you're available on Saturday?",
+    sentAt: "2025-09-20T10:09:00+01:00",
+    status: "read",
+  },
+  {
+    id: "msg_05",
+    conversationId: "conv_01",
+    kind: "text",
+    senderId: "usr_veek",
+    body: "Yes, I'm available. The job will cost ₦25,000.",
+    sentAt: "2025-09-20T10:15:00+01:00",
+    status: "read",
+  },
+  {
+    id: "msg_06",
+    conversationId: "conv_01",
+    kind: "quote",
+    senderId: "usr_veek",
+    body: "Quote",
+    sentAt: "2025-09-20T10:16:00+01:00",
+    status: "delivered",
+    quote: {
+      id: "quote_01",
+      amount: 25000,
+      status: "pending",
+    },
+  },
+  {
+    id: "msg_07",
+    conversationId: "conv_01",
+    kind: "text",
+    senderId: "usr_veek",
+    body: "I've sent you a quotation. Let me know if adjustments are needed.",
+    sentAt: "2025-09-20T10:17:00+01:00",
+    status: "delivered",
+  },
+
+  // ── short seeds for other customer conversations ────────────────────────
+  {
+    id: "msg_10",
+    conversationId: "conv_02",
+    kind: "text",
+    senderId: "usr_tunde",
+    body: "I've had a look — the trap needs replacing. Sending a quote.",
+    sentAt: "2025-09-20T16:30:00+01:00",
+    status: "delivered",
+  },
+  {
+    id: "msg_11",
+    conversationId: "conv_03",
+    kind: "text",
+    senderId: "usr_amaka",
+    body: "Wow, really appreciate the quick turnaround 🔥",
+    sentAt: "2025-09-19T21:10:00+01:00",
+    status: "read",
+  },
+  {
+    id: "msg_12",
+    conversationId: "conv_04",
+    kind: "text",
+    senderId: "usr_femi",
+    body: "Both fans are up and tested. I'll send the invoice across shortly.",
+    sentAt: "2025-09-19T12:45:00+01:00",
+    status: "delivered",
+  },
+  {
+    id: "msg_13",
+    conversationId: "conv_05",
+    kind: "text",
+    senderId: "usr_grace",
+    body: "Thanks, see you Saturday for the pickup 👍",
+    sentAt: "2025-09-17T08:05:00+01:00",
+    status: "read",
+  },
+];

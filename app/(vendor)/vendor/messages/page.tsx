@@ -1,5 +1,6 @@
-import { Placeholder } from "@/components/Placeholder";
+import { MessagesPage } from "@/components/chat/MessagesPage";
 
+// Vendor Messages + Quotation Flow (Figma 300:11629 desktop / 300:26058 mobile).
 export default function Page() {
-  return <Placeholder role="Vendor" title="Messages" />;
+  return <MessagesPage role="vendor" />;
 }

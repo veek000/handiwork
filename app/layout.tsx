@@ -22,6 +22,7 @@ const DESIGN_SYSTEM_CSS = [
   "/assets/css/sidebar.css",
   "/assets/css/auth.css",
   "/assets/css/dashboard.css",
+  "/assets/css/chat.css",
 ];
 
 export default function RootLayout({ children }: { children: ReactNode }) {

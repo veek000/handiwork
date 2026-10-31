@@ -20,4 +20,5 @@ export { useNotifications } from "./useNotifications";
 export { useJobs } from "./useJobs";
 export { useReviews } from "./useReviews";
 export { useConversations } from "./useConversations";
+export { useMessages } from "./useMessages";
 export { useWallet } from "./useWallet";

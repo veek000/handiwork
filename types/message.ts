@@ -1,33 +1,54 @@
-// Messaging. Both flows draw only the conversation LIST plus a "No Chat Selected"
-// empty state — there is no message-thread screen in the current designs.
+// Messaging + quotation thread.
+// Conversations are scoped per Job (see PROJECT.md "Chat" locked decision).
+// The quotation flow lives inside the job-scoped chat thread (Figma Quotation Flow
+// customer 291:46191 / 290:11000 · vendor 300:11629 / 300:26058).
 
-// Read-receipt state from the check-mark glyphs on each conversation row.
+// Read-receipt state from the check-mark glyphs on each conversation row / bubble.
 export type DeliveryStatus = "sent" | "delivered" | "read";
 
 // Fully evidenced by the Messages list row.
 export interface Conversation {
   id: string;
-  jobId: string; // the Job this thread is scoped to — chat is per-order, not an open
-  // inbox (see the "Chat" locked decision in PROJECT.md). Resolves to a Job whose
-  // customerId/vendorId are this conversation's two participants.
-  participantName: string; // the counterparty (from the signed-in user's side), e.g. "Veek Okonkwo"
+  jobId: string; // Job this thread is scoped to — chat is per-order, not an open inbox
+  participantName: string; // counterparty from the signed-in user's side
   participantAvatarUrl?: string;
-  lastMessagePreview: string; // "yah, nice design"
+  lastMessagePreview: string;
   lastMessageAt: string; // ISO 8601 — rendered "4:30 PM" / "Yesterday"
-  unreadCount: number; // red badge count
-  lastMessageStatus: DeliveryStatus; // ✓ / ✓✓
-  isTyping: boolean; // "Veek Design is Typing…"
+  unreadCount: number;
+  lastMessageStatus: DeliveryStatus;
+  isTyping: boolean;
 }
 
-// SPECULATIVE / INFERRED — no chat-thread screen exists yet to source these fields
-// from. This is the minimal atomic message shape a thread would need; treat it as a
-// placeholder to revisit once a conversation-detail screen is designed. It is NOT
-// derived from the Figma flows the way every other type here is.
+// Quote lifecycle inside a chat thread (Figma: Quote bubble → Review → Accept /
+// Counter → Pay → Escrow → Complete).
+export type QuoteStatus =
+  | "pending" // vendor sent, customer hasn't accepted
+  | "countered" // customer sent a counter-offer amount
+  | "accepted" // customer accepted (payment may still be pending)
+  | "paid"; // payment landed in escrow
+
+export interface Quote {
+  id: string;
+  amount: number; // whole-number NGN
+  status: QuoteStatus;
+  counterAmount?: number; // set when customer counters
+}
+
+export type MessageKind = "text" | "quote" | "system";
+
+// Atomic message in a job-scoped thread. `kind` discriminates plain chat vs
+// quote card vs system notification banner.
 export interface Message {
   id: string;
   conversationId: string;
-  senderId: string;
+  kind: MessageKind;
+  /** null for system notifications (no sender bubble side) */
+  senderId: string | null;
   body: string;
   sentAt: string; // ISO 8601
   status: DeliveryStatus;
+  /** set when kind === "quote" */
+  quote?: Quote;
+  /** system banner title, e.g. "System Notification" / "Payment Notice" */
+  systemTitle?: string;
 }

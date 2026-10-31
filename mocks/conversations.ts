@@ -1,16 +1,8 @@
-// Mock conversations — the Messages list (both flows draw only this list + a
-// "No Chat Selected" empty state; there is no message-thread screen yet).
-//
+// Mock conversations — customer Messages list (Jane Doe / usr_jane).
 // Each conversation is scoped to a specific Job (`jobId`) — chat is per-order, not an
-// open inbox (see the "Chat" locked decision in PROJECT.md). These are the signed-in
-// customer's (Jane Doe / usr_jane) threads, so every `jobId` is one of Jane's jobs and
-// `participantName` is that job's vendor (the counterparty). Referential integrity —
-// each `jobId` resolves to a real Job whose customerId is the viewer (usr_jane) and
-// whose vendorId is the named participant — is enforced in mocks/jobs.ts + mocks/users.ts.
-//
-// NOTE: only `Conversation` is mocked. `Message` is deliberately NOT mocked — it's
-// flagged speculative in types/message.ts (no chat-thread screen to source it from);
-// `lastMessagePreview` is the only message-shaped mock content here.
+// open inbox (see the "Chat" locked decision in PROJECT.md). Thread bodies live in
+// mocks/messages.ts (quotation flow seeds conv_01). Vendor-side list is built in
+// hooks/useConversations.ts for the signed-in vendor (Veek).
 import type { Conversation } from "@/types";
 
 export const conversations: Conversation[] = [
@@ -20,10 +12,13 @@ export const conversations: Conversation[] = [
     id: "conv_01",
     jobId: "job_02",
     participantName: "Veek Okonkwo",
-    lastMessagePreview: "Great, I can come by on Saturday morning.",
-    lastMessageAt: "2025-09-20T16:30:00+01:00",
+    // Preview / time / status mirror the thread's last message (mocks/messages.ts msg_07),
+    // matching the vendor-side row in hooks/useConversations.ts. (The typing indicator
+    // replaces the preview text in the row while isTyping = true.)
+    lastMessagePreview: "I've sent you a quotation. Let me know if adjustments are needed.",
+    lastMessageAt: "2025-09-20T10:17:00+01:00",
     unreadCount: 0,
-    lastMessageStatus: "sent",
+    lastMessageStatus: "delivered",
     isTyping: true,
   },
   {

@@ -9,7 +9,7 @@
 //   service.ts      — Service listings + Category tiles
 //   job.ts          — Job (the customer⇄vendor transaction; "Orders" is the vendor label)
 //   review.ts       — Review + the shared Rating (1–5) type
-//   message.ts      — Conversation (evidenced) + Message (speculative)
+//   message.ts      — Conversation + Message/Quote (quotation flow)
 //   notification.ts — Notification bell items
 //   wallet.ts       — vendor earnings summary
 //
@@ -33,7 +33,14 @@ export type { JobStatus, Job } from "./job";
 
 export type { Rating, Review } from "./review";
 
-export type { DeliveryStatus, Conversation, Message } from "./message";
+export type {
+  DeliveryStatus,
+  Conversation,
+  QuoteStatus,
+  Quote,
+  MessageKind,
+  Message,
+} from "./message";
 
 export type { NotificationType, Notification } from "./notification";
 
