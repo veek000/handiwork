@@ -9,6 +9,10 @@ desktop.ini
 node_modules/
 scripts/test-welcome-email.mjs
 
+# Figma reference screenshots pulled for fidelity work (e.g. vendor-home-desktop.png)
+*-desktop.png
+*-mobile.png
+
 # Next.js
 .next/
 next-env.d.ts

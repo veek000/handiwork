@@ -613,6 +613,149 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
     (flex row layout removed now that both children are absolutely positioned).
   **Status: Closed — verified on localhost, merged to dev.**
 
+- **Vendor Home fidelity pass (2026-07-09)** — Rebuilt `/vendor` against Figma desktop
+  `300:7831` (Home frame `300:7832`) + mobile `300:23746` (iPhone `300:34759`), with
+  deep balance-card detail from node `305:8538`. Prior scaffold had the right sections
+  but wrong layout, icons, chrome, and pattern treatment. Files touched:
+  `app/(vendor)/vendor/page.tsx`, `components/{BalanceCard,StatTile,JobCard,QuickActionTile,Select}.tsx`,
+  `hooks/useUsers.ts` (+ barrel), `mocks/jobs.ts`, `public/assets/css/dashboard.css`.
+
+  **BalanceCard (Figma `305:8538`):**
+  - Dark brand-900 body, **equal 16px padding** on left / right / top / base.
+  - Pattern: `Handiwork Pattern Tile.svg` from `illustration/` only (no downloads). SVG
+    already bakes **opacity 0.2** — never re-apply CSS opacity (compounds to ~4% and
+    disappears). Desktop `background-size: 1240px 268px` (native tile → ~134px hands,
+    matching Figma Favicon marks). **Mobile:** half-scale `620px 134px` so marks aren’t
+    huge on a ~360px card.
+  - Soft centre glow: real `.hw-balance__glow` element — solid brand-900, **140px tall**,
+    full width, vertically centered, `filter: blur(40px)` (Figma node `305:8660`; not a
+    radial gradient). Shorter band (100px) on mobile.
+  - White Withdrawable / Escrow strip: equal columns, vertical divider, labels black,
+    amounts Changa One — withdrawable `--hw-color-green-500` (`#198754`), escrow
+    `--hw-color-yellow-600` (`#CC9A06`).
+  - Actions under the dark body: Transaction History (secondary) + Withdraw (primary),
+    side-by-side on desktop and mobile.
+  - Totals still NGN via `formatNaira` (project convention; Figma mock uses `$`).
+
+  **Analysis:**
+  - Section head: “Analysis” + `View details` link → `/vendor/analytics`.
+  - Stat tiles: icon top-left + value top-right + label bottom; **3-up grid on all
+    breakpoints**. Icons (Figma chunk names): `clipboard` · `inbox` · `target-arrow`,
+    filled, `--hw-icon-primary`.
+  - Alignment fix: `.hw-stat__top` uses `align-items: center` + value `line-height: 1` +
+    icon locked to a 16×16 box so the number and icon share the same vertical line
+    (desktop and mobile).
+
+  **Quick Action:**
+  - Bordered rows: hollow `address-card` / `star` + label + chevron, color
+    `--hw-text-primary` (black) — not filled green.
+
+  **My Orders:**
+  - Tabs reuse auth **`.hw-segment` / `.hw-segment__option`** (same control as login/signup
+    RoleToggle) — Active Job / Service Request.
+  - “Sort by” label outside the control: Manrope **Bold 16px** (`--hw-size-l` /
+    `--hw-weight-bold`); Select shows “Recent” / “Oldest”.
+  - Select dropdown: right-anchored (`left: auto; right: 0`) so it doesn’t spill past the
+    viewport edge (auth form select styles were forcing `left:0;right:0`); flips **above**
+    the trigger when there’s not enough room below; width clamped to viewport.
+  - Job cards: title + “Requested by: {customer}” + cyan In Progress badge + Mark as
+    Completed (secondary green) / Cancel Job (red scoped `.hw-jobcard__btn` — not a global
+    Button danger variant). Description / schedule dropped (not in Figma home cards).
+  - Home teaser shows **exactly 3 cards** then **View All** → `/vendor/orders`
+    (`.slice(0, 3)`). Mock data: added `job_15` + `job_16` (`in_progress` for `usr_veek`)
+    so Active Job can fill three cards.
+
+  **Data access:** hooks only — new `useUsers` resolves customers for job cards; page no
+  longer imports `mocks/users` directly (COMPONENT-BUILD-RULES).
+
+  **Status:** Implemented on working tree; `npx tsc --noEmit` passes. Visual QA on
+  localhost recommended (desktop + ~393 mobile) before commit/merge.
+
+- **Quotation flow — customer + vendor (2026-07-10)** — Implemented the job-scoped
+  Messages + quotation path from Figma sections:
+  - Customer desktop `291:46191` / mobile `290:11000`
+  - Vendor desktop `300:11629` / mobile `300:26058`
+
+  **Flow (deep read of the four Figma boards):**
+  1. **Messages list** — conversation rows (avatar, name, preview / typing, time,
+     unread badge or ticks). Desktop: list rail + empty “No Chat Selected” or open
+     thread. Mobile: list full-screen; open thread replaces list.
+  2. **Chat thread** — header (back, peer name, last seen, avatar), role actions
+     (customer: Mark Completed; vendor: Send Quote + Mark as Completed), scrollable
+     transcript, composer (image · message · emoji · send).
+  3. **System banners** in-thread (e.g. request accepted, payment in escrow, job
+     completed).
+  4. **Quote card** bubble — “Quote” + amount + **Review Quote** (customer) or
+     **Edit Quote** (vendor).
+  5. **Vendor Send Quote / Edit Quote** modal — Enter Amount → Confirm.
+  6. **Customer Review Quote** — Accept | Counter Offer | Cancel.
+  7. **Counter Offer** — amount → Confirm (updates quote status + chat text).
+  8. **Make Payment** — Pay with Card | Pay with Transfer → Confirm → Payment
+     Successful + escrow system notice.
+  9. **Mark Completed** → Confirm Job Completion (role-specific copy: release vs
+     request escrow) → optional **Rate Your Experience** (customer) → review submitted
+     system notice.
+
+  Chat remains **per Job** (`Conversation.jobId`), not an open inbox (locked decision).
+
+  **Implementation:**
+  - Types: `Message` is no longer speculative — `kind: text | quote | system`, plus
+    `Quote` / `QuoteStatus` (`pending | countered | accepted | paid`) in `types/message.ts`.
+  - Mocks: `mocks/messages.ts` seeds **conv_01** (Jane ↔ Veek / job_02) with the
+    full pre-quote negotiation + pending quote card; short text seeds for other
+    customer threads. Vendor list in `hooks/useConversations(role)`.
+  - Hooks: `useMessages(conversationId?)`, `useConversations(role)`.
+  - UI: `components/chat/{MessagesPage,ConversationList,ChatThread,ChatBubble,QuoteModals}.tsx`
+    + `public/assets/css/chat.css` (linked from root layout).
+  - Routes: `/customer/messages` and `/vendor/messages` (replace placeholders) —
+    shared `MessagesPage` with `role` prop; thread state advances locally so Accept /
+    Pay / Complete work without Convex yet.
+  - Amounts: NGN via `formatNaira`; chat times via new `formatChatTime`.
+  - Tokens only; modals Escape + scrim dismiss; focus-visible on interactive chrome.
+
+  **Out of scope / follow-ups (not blocking):** live Convex Presence typing, real
+  Flutterwave escrow charge, persisting quote on Job, separate My Jobs / Orders deep
+  links into the same thread, cancel-job confirm from this board. `npx tsc --noEmit`
+  passes.
+
+- **Messages chrome polish — layout, empty state, receipts (2026-07-10)** — Follow-up
+  fidelity pass on the Messages screens after the quotation flow landed.
+
+  **Desktop two-column top alignment (Figma 291:47200 / list+empty boards):**
+  Back + “Messages” title live **only in the left list column**. The right chat pane
+  starts on the **same top edge as Back** (not under a full-width page header). Grid:
+  `minmax(280px, 361px) 1fr`, gap 32px (`--hw-space-2xl`). Mobile still: list **or**
+  full-screen thread (`is-thread`).
+
+  **Empty “No Chat Selected” pane** (Figma empty boards `298:32555` / `300:11030`
+  desktop · `290:23050` / `300:25699` mobile):
+  - Art: **`illustration-29.svg`** (project set; not a download) at
+    `/assets/illustration/illustration-29.svg`.
+  - Title: “No Chat Selected” (Changa One).
+  - Desktop copy: “Select a user from the list **on the left** to view the chat and
+    details.” Mobile omits “on the left” (`.hw-msg__empty-hint--desktop|mobile`).
+
+  **Delivery ticks + unread badge + typing (list rows):**
+  - Single tick = **sent** → `<hw-icon name="checkmark">` (grey).
+  - Double tick = **delivered** (grey) or **read/seen** (brand green
+    `--hw-color-brand-primary-500`).
+  - Unread count = **red pill** (`--hw-color-red-500` / `#DC3545`) with white number —
+    not brand green.
+  - Typing: preview class `.is-typing` — green text
+    `{participantName} is Typing...` (`--hw-color-brand-primary-200` / `#8ED799`,
+    matching Figma). Seeded on customer `conv_01` (Veek) and vendor `conv_01` (Jane).
+
+  **New icon — `check-double`:**
+  - Source: user-supplied `check-double-line.svg` (Downloads), renamed and vendored as
+    **`check-double`** into `public/assets/icons/svg/{filled,hollow,duo}/check-double.svg`.
+  - Registered in `catalog.json` + embedded in `hw-icons.js` for all three variants
+    (viewBox `0 0 24 24`, `currentColor` fill). Use
+    `<hw-icon name="check-double" variant="filled" size="16">`.
+
+  **Files:** `components/chat/{MessagesPage,ConversationList}.tsx`,
+  `public/assets/css/chat.css`, `public/assets/icons/**`, `hooks/useConversations.ts`.
+  `npx tsc --noEmit` passes.
+
 ## Locked decisions for future phases (not yet built)
 
 Consolidated from the planning conversation and organized by area so it stays scannable
