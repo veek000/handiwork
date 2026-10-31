@@ -319,7 +319,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: url("/assets/illustration/Handiwork Pattern Tile.svg") center / 520px auto repeat;
+  background: url("/assets/illustration/Handiwork Pattern Tile.svg") center / 624px auto repeat;
   pointer-events: none;
 }
 /* Radial gradient darkening the centre behind the text, over the pattern (like the
@@ -490,4 +490,547 @@
 @media (prefers-reduced-motion: reduce) {
   .hw-sidebar { transition-duration: 0.01ms; }
   .hw-svc__fav { transition-duration: 0.01ms; }
+}
+
+/* =========================================================================
+   Vendor Home — Balance, Analysis, Quick Action, My Orders.
+   Figma desktop 300:7832 / mobile 300:34759. Tokens only.
+   ========================================================================= */
+
+/* ----- Vendor Home layout ----------------------------------------------- */
+.hw-vendor-home {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-2xl);
+}
+
+/* Section link ("View details") — muted body, not bold primary. */
+.hw-section__link {
+  font-weight: var(--hw-weight-regular);
+  color: var(--hw-text-secondary);
+  white-space: nowrap;
+}
+
+/* ----- Balance Card (Figma 305:8538) ------------------------------------ */
+/*
+  Frame 1000011048 —  dark surface, py 16, pattern grid + centre blur glow,
+  then title/amount + white Withdrawable/Escrow strip. Actions sit under it.
+*/
+.hw-balance {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-m);
+}
+.hw-balance__body {
+  position: relative;
+  overflow: hidden;
+  /* Equal 16px on left / right / top / base (Figma space/l) */
+  padding: var(--hw-space-l);
+  background: var(--hw-color-brand-primary-900);
+  color: var(--hw-text-inverse);
+}
+/*
+  Pattern layer — Handiwork Pattern Tile.svg (illustration/).
+  Figma uses 134×134 favicon marks @ opacity 20% in a brick grid.
+  The tile is already a brick-staggered strip of the same hand mark with
+  opacity 0.2 baked into the SVG — use native 1240×268 so each mark ≈ 134px.
+  Do NOT add CSS opacity (would compound to ~4%).
+*/
+.hw-balance__body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url("/assets/illustration/Handiwork Pattern Tile.svg");
+  background-repeat: repeat;
+  background-position: center center;
+  background-size: 1240px 268px; /* native tile → ~134px hands (Figma size) */
+  pointer-events: none;
+}
+/*
+  Soft centre glow — Figma node 305:8660:
+  solid brand-900 rect, height 140, full width, centered, blur ~40px.
+  This is the "gradient": it softens the pattern behind the totals so text
+  stays legible while marks still read at the top/bottom edges.
+*/
+.hw-balance__glow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  z-index: 1;
+  height: 140px;
+  transform: translateY(-50%);
+  background: var(--hw-color-brand-primary-900);
+  filter: blur(40px);
+  pointer-events: none;
+}
+/* Content sits above pattern + glow */
+.hw-balance__content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-l); /* 16px between head and white strip */
+}
+.hw-balance__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+/* Figma Mobile/Text/L/Regular — #F5F5F5 */
+.hw-balance__title {
+  margin: 0;
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-l);
+  font-weight: var(--hw-weight-regular);
+  line-height: var(--hw-line-height-l);
+  color: var(--hw-color-gray-100);
+}
+/* Figma Mobile/Heading/2XL — Changa One 32px white */
+.hw-balance__total {
+  font-family: var(--hw-font-heading);
+  font-size: var(--hw-size-5xl);
+  line-height: var(--hw-line-height-5xl);
+  letter-spacing: var(--hw-letter-spacing-s);
+  color: var(--hw-color-default-white);
+}
+/* White strip — Figma gap 16, px 12, py 8 */
+.hw-balance__breakdown {
+  display: flex;
+  align-items: center;
+  gap: var(--hw-space-l);
+  padding: var(--hw-space-s) var(--hw-space-m); /* 8 / 12 */
+  background: var(--hw-color-default-white);
+  min-height: 60px;
+  box-sizing: border-box;
+}
+.hw-balance__item {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--hw-space-2xs); /* 4px */
+}
+.hw-balance__divider {
+  flex: none;
+  width: 1px;
+  align-self: stretch;
+  min-height: 39px;
+  background: var(--hw-border-divider);
+}
+.hw-balance__label {
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-s);
+  line-height: var(--hw-line-height-s);
+  color: var(--hw-text-primary); /* black on white */
+}
+.hw-balance__value {
+  font-family: var(--hw-font-heading);
+  font-size: var(--hw-size-l);
+  line-height: var(--hw-line-height-l);
+  letter-spacing: var(--hw-letter-spacing-s);
+  font-weight: var(--hw-weight-regular);
+}
+/* Figma Green/500 · Yellow/600 */
+.hw-balance__value--withdrawable {
+  color: var(--hw-color-green-500); /* #198754 */
+}
+.hw-balance__value--escrow {
+  color: var(--hw-color-yellow-600); /* #CC9A06 */
+}
+.hw-balance__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--hw-space-m);
+}
+
+/* ----- Analysis stat tiles ---------------------------------------------- */
+/* Desktop: wide cards (icon top-left, value top-right, label bottom).
+   Mobile keeps 3 columns (compact). */
+.hw-analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--hw-space-l);
+}
+.hw-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-s);
+  padding: var(--hw-space-m) var(--hw-space-m) var(--hw-space-l);
+  border: 1px solid var(--hw-border-default);
+  background: var(--hw-color-default-white);
+  min-width: 0;
+}
+/* Icon (left) + value (right) on one row — same vertical centre line
+   (Figma Card (Chart) top row: chunk icon 16 + number). */
+.hw-stat__top {
+  display: flex;
+  align-items: center; /* icon + number share the same mid-line */
+  justify-content: space-between;
+  gap: var(--hw-space-s);
+  width: 100%;
+  min-height: 24px; /* Figma value row height */
+}
+.hw-stat__icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--hw-icon-primary);
+  line-height: 0;
+}
+.hw-stat__icon hw-icon,
+.hw-stat__icon > * {
+  display: block;
+  width: 16px !important;
+  height: 16px !important;
+  line-height: 0;
+}
+.hw-stat__value {
+  flex: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--hw-font-heading);
+  font-size: var(--hw-size-2xl);
+  line-height: 1; /* tight box so flex center lines up with the 16px icon */
+  letter-spacing: var(--hw-letter-spacing-s);
+  color: var(--hw-text-primary);
+  text-align: right;
+}
+.hw-stat__label {
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-s);
+  line-height: var(--hw-line-height-s);
+  color: var(--hw-text-secondary);
+  max-width: 100%;
+}
+
+/* ----- Quick Action tiles ----------------------------------------------- */
+.hw-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--hw-space-l);
+}
+.hw-action {
+  display: flex;
+  align-items: center;
+  gap: var(--hw-space-m);
+  padding: var(--hw-space-m) var(--hw-space-l);
+  border: 1px solid var(--hw-border-default);
+  background: var(--hw-color-default-white);
+  cursor: pointer;
+  text-decoration: none; /* rendered as an <a> (Next Link) */
+  transition: background var(--hw-duration-fast) var(--hw-ease-standard);
+}
+.hw-action:hover { background: var(--hw-bg-default); }
+.hw-action:focus-visible {
+  outline: var(--hw-border-width-m) solid var(--hw-border-focus);
+  outline-offset: var(--hw-space-2xs);
+}
+.hw-action__icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Figma Quick Action: hollow icons in primary black */
+  color: var(--hw-text-primary);
+}
+.hw-action__label {
+  flex: 1 1 0;
+  min-width: 0;
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  font-weight: var(--hw-weight-regular);
+  color: var(--hw-text-primary);
+  text-align: left;
+}
+.hw-action > hw-icon:last-child {
+  flex: none;
+  color: var(--hw-text-primary);
+}
+
+/* My Orders tabs reuse .hw-segment / .hw-segment__option from auth.css
+   (same control as login/signup RoleToggle). No separate tab styles. */
+
+/* Sort row: "Sort by" left, Recent dropdown right */
+.hw-orders-sort {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hw-space-l);
+}
+/* Figma Mobile/Text/L/Bold — Manrope Bold 16px */
+.hw-orders-sort__label {
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-l);
+  line-height: var(--hw-line-height-l);
+  font-weight: var(--hw-weight-bold);
+  color: var(--hw-text-primary);
+}
+
+/* ----- Select (Sort by dropdown on Vendor Home) ------------------------- */
+/* Scoped under vendor/orders context; auth has its own .hw-select for forms.
+   Must override auth’s left:0/right:0 stretch so the menu doesn’t spill past
+   the right edge of the screen (trigger sits on the far right of the row). */
+.hw-orders-sort .hw-select {
+  position: relative;
+  flex: none;
+  z-index: 5; /* above neighbouring cards while open */
+}
+.hw-orders-sort .hw-select.is-open { z-index: 30; }
+.hw-orders-sort .hw-select__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hw-space-s);
+  padding: var(--hw-space-s) var(--hw-space-m);
+  border: 1px solid var(--hw-border-default);
+  background: var(--hw-color-default-white);
+  cursor: pointer;
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  color: var(--hw-text-primary);
+}
+.hw-orders-sort .hw-select__label { color: var(--hw-text-tertiary); }
+.hw-orders-sort .hw-select__value { font-weight: var(--hw-weight-regular); }
+.hw-orders-sort .hw-select__list {
+  position: absolute;
+  /* Pin to the trigger’s right edge (overrides auth left:0) so a wider menu
+     grows leftward and stays on-screen. */
+  top: calc(100% + var(--hw-space-xs));
+  left: auto;
+  right: 0;
+  z-index: 30;
+  min-width: 100%; /* at least as wide as the trigger */
+  width: max-content;
+  max-width: min(240px, calc(100vw - var(--hw-space-2xl)));
+  max-height: 240px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--hw-space-xs);
+  margin: 0;
+  list-style: none;
+  background: var(--hw-color-default-white);
+  border: 1px solid var(--hw-border-default);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+}
+/* Flip above the trigger when there isn’t room below the viewport. */
+.hw-orders-sort .hw-select__list--above {
+  top: auto;
+  bottom: calc(100% + var(--hw-space-xs));
+}
+.hw-orders-sort .hw-select__option {
+  display: block;
+  width: 100%;
+  padding: var(--hw-space-s) var(--hw-space-m);
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  color: var(--hw-text-primary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--hw-duration-fast) var(--hw-ease-standard);
+}
+.hw-orders-sort .hw-select__option:hover { background: var(--hw-bg-default); }
+.hw-orders-sort .hw-select__option.is-active {
+  background: var(--hw-button-secondary-bg-default);
+  font-weight: var(--hw-weight-bold);
+}
+
+/* ----- Job cards + list ------------------------------------------------- */
+.hw-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-l);
+}
+.hw-orders-empty {
+  margin: 0;
+  padding: var(--hw-space-2xl);
+  text-align: center;
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-m);
+  color: var(--hw-text-tertiary);
+  border: 1px solid var(--hw-border-default);
+}
+.hw-jobcard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-l);
+  padding: var(--hw-space-l);
+  border: 1px solid var(--hw-border-default);
+  background: var(--hw-color-default-white);
+}
+.hw-jobcard__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--hw-space-m);
+}
+.hw-jobcard__meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-2xs);
+  min-width: 0;
+}
+.hw-jobcard__title {
+  margin: 0;
+  font-family: var(--hw-font-heading);
+  font-size: var(--hw-size-l);
+  line-height: var(--hw-line-height-l);
+  letter-spacing: var(--hw-letter-spacing-s);
+  color: var(--hw-text-primary);
+}
+.hw-jobcard__requested {
+  margin: 0;
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-s);
+  line-height: var(--hw-line-height-s);
+  color: var(--hw-text-tertiary);
+}
+.hw-jobcard__requested span {
+  color: var(--hw-text-secondary);
+}
+.hw-jobcard__badge {
+  flex: none;
+  padding: 4px var(--hw-space-s);
+  font-family: var(--hw-font-body);
+  font-size: var(--hw-size-s);
+  font-weight: var(--hw-weight-regular);
+  line-height: 1.3;
+  border-radius: var(--hw-radius-none);
+  white-space: nowrap;
+}
+/* Status colours from feedback / extended palette tokens (no raw hex). */
+.hw-jobcard__badge--pending {
+  background: var(--hw-color-yellow-100);
+  color: var(--hw-color-yellow-800);
+}
+.hw-jobcard__badge--quoted {
+  background: var(--hw-color-cyan-100);
+  color: var(--hw-color-cyan-800);
+}
+.hw-jobcard__badge--in_progress {
+  background: var(--hw-color-cyan-100);
+  color: var(--hw-color-cyan-700);
+}
+.hw-jobcard__badge--completed {
+  background: var(--hw-feedback-success-bg);
+  color: var(--hw-feedback-success-text);
+}
+.hw-jobcard__badge--cancelled,
+.hw-jobcard__badge--rejected {
+  background: var(--hw-feedback-error-bg);
+  color: var(--hw-feedback-error-text);
+}
+
+.hw-jobcard__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--hw-space-m);
+}
+/* Job-card action buttons — complete = secondary green, cancel = danger red.
+   Scoped here (not a global Button variant) because danger is un-specced in
+   Semantic Buttons; derived from feedback-error primitives. */
+.hw-jobcard__btn {
+  appearance: none;
+  border: none;
+  border-radius: var(--hw-radius-none);
+  padding: var(--hw-space-m) var(--hw-space-l);
+  font-family: var(--hw-font-heading);
+  font-size: var(--hw-size-m);
+  line-height: var(--hw-line-height-m);
+  letter-spacing: var(--hw-letter-spacing-s);
+  cursor: pointer;
+  transition:
+    background-color var(--hw-duration-fast) var(--hw-ease-standard),
+    color var(--hw-duration-fast) var(--hw-ease-standard),
+    transform var(--hw-duration-fast) var(--hw-ease-standard);
+}
+.hw-jobcard__btn:focus-visible {
+  outline: var(--hw-border-width-m) solid var(--hw-border-focus);
+  outline-offset: var(--hw-space-2xs);
+}
+.hw-jobcard__btn:not(:disabled):active { transform: scale(0.97); }
+.hw-jobcard__btn--complete {
+  background: var(--hw-button-secondary-bg-default);
+  color: var(--hw-button-secondary-text-default);
+}
+.hw-jobcard__btn--complete:hover {
+  background: var(--hw-button-secondary-bg-hover);
+}
+.hw-jobcard__btn--complete:active {
+  background: var(--hw-button-secondary-bg-pressed);
+}
+.hw-jobcard__btn--cancel {
+  background: var(--hw-color-red-500);
+  color: var(--hw-color-default-white);
+}
+.hw-jobcard__btn--cancel:hover {
+  background: var(--hw-color-red-600);
+}
+.hw-jobcard__btn--cancel:active {
+  background: var(--hw-color-red-700);
+}
+
+/* ----- Vendor Home responsive (≤1023px / mobile Figma 393) -------------- */
+@media (max-width: 1023.98px) {
+  .hw-vendor-home { gap: var(--hw-space-xl); }
+
+  /* Padding stays equal space-l on all sides (same as desktop / Figma). */
+  .hw-balance__total {
+    font-size: var(--hw-size-4xl);
+    line-height: var(--hw-line-height-4xl);
+  }
+  /* Mobile pattern: half-scale tile so marks aren’t huge on a ~360px card */
+  .hw-balance__body::before {
+    background-size: 620px 134px; /* ~½ native → ~67px hands */
+  }
+  .hw-balance__glow {
+    height: 100px; /* shorter band on shorter mobile card */
+  }
+  /* Keep side-by-side actions on mobile (Figma 300:34759). */
+  .hw-balance__actions { gap: var(--hw-space-s); }
+
+  .hw-analysis-grid { gap: var(--hw-space-m); }
+  .hw-stat {
+    padding: var(--hw-space-s) var(--hw-space-s) var(--hw-space-m);
+  }
+  /* Keep icon + number on the same line at mobile type size */
+  .hw-stat__top { min-height: 20px; }
+  .hw-stat__value {
+    font-size: var(--hw-size-l);
+    line-height: 1;
+  }
+
+  .hw-quick-grid { gap: var(--hw-space-m); }
+  .hw-action {
+    padding: var(--hw-space-s) var(--hw-space-m);
+    gap: var(--hw-space-s);
+  }
+  .hw-action__label { font-size: var(--hw-size-s); }
+
+  .hw-jobcard { gap: var(--hw-space-m); padding: var(--hw-space-m); }
+  .hw-jobcard__title {
+    font-size: var(--hw-size-m);
+    line-height: var(--hw-line-height-m);
+  }
+  /* Keep action buttons side-by-side on mobile (Figma). */
+  .hw-jobcard__actions { gap: var(--hw-space-s); }
+  .hw-jobcard__btn {
+    padding: var(--hw-space-s) var(--hw-space-m);
+    font-size: var(--hw-size-s);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hw-action { transition-duration: 0.01ms; }
+  .hw-orders-sort .hw-select__option { transition-duration: 0.01ms; }
+  .hw-jobcard__btn { transition-duration: 0.01ms; }
+  .hw-jobcard__btn:not(:disabled):active { transform: none; }
 }

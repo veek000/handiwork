@@ -7,7 +7,8 @@
 //   • usr_daniel  — 2, usr_eleanor — 1, usr_bob — 1
 //   • usr_kristin — 0 (zero-jobs edge case)
 //   • Every JobStatus value appears at least once:
-//     pending ×2, quoted ×2, in_progress ×3, completed ×5, cancelled ×1, rejected ×1
+//     pending ×2, quoted ×2, in_progress ×5, completed ×5, cancelled ×1, rejected ×1
+//   • usr_veek has ≥3 in_progress so Vendor Home can show 3 Active Job cards
 import type { Job } from "@/types";
 
 export const jobs: Job[] = [
@@ -199,5 +200,33 @@ export const jobs: Job[] = [
     preferredTime: "11:00",
     images: [],
     createdAt: "2025-08-27T15:20:00+01:00",
+  },
+
+  // ── Extra active jobs for Veek (Vendor Home shows 3 Active Job cards) ──────
+  {
+    id: "job_15",
+    title: "Kitchen Sink Repair",
+    description: "Sink is clogged and the trap needs checking. Customer wants same-week slot.",
+    status: "in_progress",
+    serviceId: "svc_deep_cleaning",
+    customerId: "usr_daniel",
+    vendorId: "usr_veek",
+    preferredDate: "2025-09-21",
+    preferredTime: "10:00",
+    images: [],
+    createdAt: "2025-09-19T11:00:00+01:00",
+  },
+  {
+    id: "job_16",
+    title: "Kitchen Sink Repair",
+    description: "Second unit in the same compound — same scope as the other sink job.",
+    status: "in_progress",
+    serviceId: "svc_house_cleaning",
+    customerId: "usr_bob",
+    vendorId: "usr_veek",
+    preferredDate: "2025-09-22",
+    preferredTime: "14:00",
+    images: [],
+    createdAt: "2025-09-19T16:30:00+01:00",
   },
 ];

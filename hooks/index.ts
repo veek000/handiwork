@@ -13,6 +13,7 @@
 // consumer, because consumers already depend on the hook, not the fixture.
 
 export { useCurrentUser } from "./useCurrentUser";
+export { useUsers } from "./useUsers";
 export { useServices } from "./useServices";
 export { useCategories } from "./useCategories";
 export { useNotifications } from "./useNotifications";
