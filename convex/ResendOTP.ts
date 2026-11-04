@@ -7,6 +7,10 @@ import { Resend as ResendAPI } from "resend";
 export const ResendOTP = Resend({
   id: "resend-otp",
   apiKey: process.env.AUTH_RESEND_KEY,
+  // Codes expire after 15 minutes (the provider default is 24 h). With a 4-digit code and
+  // Convex Auth's ~10 failed attempts/hour lockout, 24 h allowed ~240 guesses (~2.4%);
+  // 15 min caps it at ~10 (~0.1%).
+  maxAge: 15 * 60,
   // 4-digit numeric code — matches the 4-box OTP UI on the signup Confirmation step.
   async generateVerificationToken() {
     const bytes = new Uint8Array(4);

@@ -9,6 +9,7 @@ import { Input } from "@/components/Input";
 import { RoleToggle, type AuthRole } from "@/components/auth/RoleToggle";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import { SocialButton } from "@/components/auth/SocialButton";
+import { FACEBOOK_LOGIN_ENABLED } from "@/lib/authProviders";
 import { useRoleRedirect } from "../useRoleRedirect";
 
 // One role-agnostic login screen (Figma: Customer Login 289:3541, identical to the
@@ -102,7 +103,12 @@ export default function LoginPage() {
           <div className="hw-divider">Or Login with</div>
 
           <div className="hw-social">
-            <SocialButton provider="facebook" onClick={() => handleOAuth("facebook")} />
+            <SocialButton
+                provider="facebook"
+                onClick={() => handleOAuth("facebook")}
+                disabled={!FACEBOOK_LOGIN_ENABLED}
+                title={FACEBOOK_LOGIN_ENABLED ? undefined : "Facebook sign-in coming soon"}
+              />
             <SocialButton provider="google" onClick={() => handleOAuth("google")} />
             {/* Apple deferred (paid Apple Developer account) — disabled for now. */}
             <SocialButton provider="apple" disabled title="Apple sign-in coming soon" />

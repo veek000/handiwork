@@ -9,6 +9,7 @@ import { Input } from "@/components/Input";
 import { RoleToggle, type AuthRole } from "@/components/auth/RoleToggle";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import { SocialButton } from "@/components/auth/SocialButton";
+import { FACEBOOK_LOGIN_ENABLED } from "@/lib/authProviders";
 import { Select } from "@/components/auth/Select";
 import { PhoneInput } from "@/components/auth/PhoneInput";
 import { OtpInput } from "@/components/auth/OtpInput";
@@ -262,7 +263,12 @@ export default function SignupPage() {
               <div className="hw-divider">Or Sign up with</div>
 
               <div className="hw-social">
-                <SocialButton provider="facebook" onClick={() => handleOAuth("facebook")} />
+                <SocialButton
+                provider="facebook"
+                onClick={() => handleOAuth("facebook")}
+                disabled={!FACEBOOK_LOGIN_ENABLED}
+                title={FACEBOOK_LOGIN_ENABLED ? undefined : "Facebook sign-in coming soon"}
+              />
                 <SocialButton provider="google" onClick={() => handleOAuth("google")} />
                 {/* Apple deferred (paid Apple Developer account) — disabled for now. */}
                 <SocialButton provider="apple" disabled title="Apple sign-in coming soon" />

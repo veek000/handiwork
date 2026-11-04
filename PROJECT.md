@@ -845,6 +845,15 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   gains `revenueByMonth` + `lastYearRevenue`. Deviations: NGN not "$"; average tagged with an amount (Figma's
   "Avg 6.8%" is a percent on a currency axis). Flows exercised in the browser; no horizontal overflow at 393 / 1440;
   `tsc` + `next build` pass.
+- **Auth hardening from the Convex audit (2026-11-04)** — Email codes now expire after 15 min (`maxAge` in
+  `convex/ResendOTP.ts`; the Resend provider default was 24 h, which with 4-digit codes and ~10 failed attempts/hour
+  left ~2.4% guessable). Pushed to dev (`npx convex dev --once`); prod picks it up on the next `master` deploy.
+  Facebook sign-in is shown disabled ("coming soon") on login + signup until `AUTH_FACEBOOK_ID/_SECRET` exist; turn it
+  on per environment with `NEXT_PUBLIC_AUTH_FACEBOOK=1` (`lib/authProviders.ts`). Dashboards are guarded in
+  `DashboardChrome`: signed out → `/login`, wrong role → own dashboard (no role = customer), placeholder until settled;
+  header/drawer show the real account's name, email, photo and area/state (rest of the data is still mock).
+  `NEXT_PUBLIC_DEV_SKIP_AUTH=1` skips the guard locally (ignored in production builds). Still open: the Resend sender
+  is `onboarding@resend.dev`, which only delivers to the Resend account owner — verify a domain before launch.
 
 ## Locked decisions for future phases (not yet built)
 
