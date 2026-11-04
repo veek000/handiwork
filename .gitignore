@@ -26,3 +26,6 @@ next-env.d.ts
 .env.production.local
 .convex/
 convex/_generated/
+
+# Figma capture (screenshots, design code, assets) — local reference only, large
+design-reference/

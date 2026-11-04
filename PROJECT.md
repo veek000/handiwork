@@ -162,7 +162,7 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
 ```
 
 - Variants `--primary` / `--secondary`; layout modifier `--block` (full width).
-- States pulled directly from `Semantic__Color` Buttons/* (default/hover/`:active`/disabled, bg+text). Focus: `Border/focus` 2px outline, 2px offset. Sharp corners (`radius-none`), Changa One. Demo: `components/button.html`.
+- States pulled directly from `Semantic__Color` Buttons/* (default/hover/`:active`/disabled, bg+text). Focus: `Border/focus` 2px outline, 2px offset. Sharp corners (`radius-none`), Changa One. **Inside the app (`.hw-app`) buttons use Manrope Bold with Text/inverse / Text/primary** — see the 2026-11-04 progress entry. Demo: `components/button.html`.
 
 ### Input — `assets/css/input.css`
 
@@ -755,6 +755,96 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   **Files:** `components/chat/{MessagesPage,ConversationList}.tsx`,
   `public/assets/css/chat.css`, `public/assets/icons/**`, `hooks/useConversations.ts`.
   `npx tsc --noEmit` passes.
+
+- **Figma capture + Customer Search & Discovery (2026-11-03)** — The full app designs (Customer/Vendor ×
+  Desktop/Mobile, 174 screens) were captured into **`design-reference/`** (git-ignored; see its README):
+  1:1 PNG of every screen, the full layer outline (names/sizes/text) per section, and every raster image.
+  The Figma source was a temporary copy that has since been deleted — build from the capture.
+  Built **`/customer/search`** (Figma desktop `6619:3356/3488/3694`, mobile `6619:18702/18764/18887`):
+  Popular Searches chips (`data/popularSearches.ts`) → results for `?q=` (read server-side and passed down —
+  `useSearchParams` needs a Suspense boundary, inside which `<hw-icon>` upgrades before hydration and throws a
+  hydration mismatch) → **Filter By** (right drawer ≥1024px, bottom sheet below; sort / price range / rating;
+  draft + Apply/Reset; Esc/scrim/✕ close). Search + filter logic is pure (`lib/search.ts`) over `useServices()`.
+  New shared components: **`PageNav`** (Back + breadcrumb — reuse on every inner screen), `SearchField`,
+  `ServiceListItem` (bordered result row; inline CTA ≥768px, full-width bar below), `FilterPanel`; styles in
+  `assets/css/search.css`. Home's hero search now routes to Search. **Sidebar** active item is now the most
+  specific matching section (inner screens keep their section lit). `StarRating` pluralises "(1 Review)".
+  Figma deviations: the Ratings placeholder "Choose an area" (copy-paste from the address form) → "Choose a
+  rating"; chip gap 10px → `--hw-space-s` (no 10px token). `tsc` + `next build` pass.
+
+- **Customer Service Detail + Book Service (2026-11-04)** — Built **`/customer/services/[id]`** (Figma desktop
+  `6619:3942/4273/4668`, mobile `6619:19050/19306/19630`). Server page resolves service, vendor, reviews,
+  the vendor's services and 2 "Recommended for you" (same category first) through the hooks; `?q=` carries the
+  originating search into the breadcrumb ("Viewing results for “q”") + Back. Desktop: gallery (772×320) beside
+  "About {vendor}" (361px), then title/price, provider row, About Service, Book Service, Reviews, Recommended;
+  mobile: one column, "About {vendor}" under Book Service. **Book Service** opens in the shared **`SidePanel`**
+  (new — drawer ≥1024 / bottom sheet; `FilterPanel` refactored onto it, its old `.hw-filter*` CSS removed):
+  multi-select of the vendor's services (current preselected), native Date/Time, optional description + image →
+  **Request Sent** (illustration-13) with Message Service Provider / Go Home. UI only — sending persists nothing
+  yet (will create a pending Job once Convex is wired). New components: `SidePanel`, `MultiSelect`,
+  `ServiceGallery`, `ReviewSummary` (per-star bars), `ReviewCard` (collapsible Service Provider Response),
+  `VendorAboutCard`, `BookServicePanel`, `ServiceDetailScreen`; styles in `assets/css/service.css` (also the
+  shared `.hw-panel`, `.hw-form`, `.hw-badge`, `.hw-sr-only`, `a.hw-button`). Extended: `Avatar` gains
+  `verified` (Figma green check, `icons/verified-badge.svg`); `DocumentUpload` gains `title`/`hint`.
+  **Assets from the capture:** the full-res cleaner photo replaces the 196px service placeholder
+  (`img/service-cleaner.jpg`, 1000×667, used by every mock service) and 6 avatars (`img/avatars/*.jpg`, 160px)
+  are wired into mock users + reviews. Figma deviations: Date/Time placeholders "Min" (copied from the price
+  filter) → native pickers. `tsc` + `next build` pass.
+
+- **App buttons → Manrope Bold (2026-11-04, decided)** — The app designs (login, signup, every dashboard screen)
+  set buttons in **Manrope Bold** with **Text/inverse** (`#F5F5F5`) on primary and **Text/primary** on secondary;
+  the original Button spec was Changa One with the Buttons text tokens (green on primary). Decision: adopt the new
+  style **for the app only**. `app/layout.tsx` puts **`hw-app`** on `<body>`, and `button.css` has a `.hw-app`
+  block (font, weight, letter-spacing none, text colours; `:not(:disabled)` so disabled colours still come from the
+  Buttons tokens). The static marketing pages (`landing/faq/contact/privacy/terms`) never load the app layout, so
+  they keep Changa One — verified by computed style on `/login`, `/signup`, `/customer`, `/vendor`, Service Detail
+  (Manrope 700, `#F5F5F5`/`#212121`) and `/landing.html` (Changa One, unchanged). The Buttons tokens themselves are
+  untouched.
+
+- **Customer Vendor Profile (2026-11-04)** — Built **`/customer/vendors/[id]`** (Figma desktop `6619:5023/5277`,
+  mobile `6619:19913/20080`), linked from Service Detail's provider row + "View Profile" (`?from=<serviceId>&q=`
+  feed the breadcrumb "Viewing results for “q” › {service} › Profile View" and Back). Header: 80px verified avatar,
+  name + Available, rating, bio, location, **Share Profile** (native share sheet, else copy link → "Link copied");
+  a grid puts Share top-right on desktop and after bio/location on mobile. Experience + Job Completed tiles
+  (`alarm-clock` / `target-arrow`). **Services / Reviews** tabs via the new generic **`SegmentedControl`** (the auth
+  `RoleToggle` now uses it too — same `.hw-segment` styling); Services reuse `ServiceListItem` + `FilterPanel` +
+  `lib/search`; Reviews use `ReviewSummary` (new `variant="profile"`: large average then bars) + `ReviewCard`, with
+  a **`ReviewFilterPanel`** (star rating; Figma shows the Filter By button but no panel, so it mirrors the Search
+  filter in the shared SidePanel). New: `SegmentedControl`, `ShareButton`, `ReviewFilterPanel`,
+  `VendorProfileScreen`; styles `.hw-vprofile*` / `.hw-pstat*` in `service.css` (`hw-vprofile`, not `hw-profile`,
+  which the sidebar drawer already uses). Verified desktop + mobile against the capture; `tsc` + `next build` pass.
+
+- **Customer My Jobs (2026-11-04)** — Replaced the `/customer/jobs` placeholder (Figma desktop `6619:5727 → 6625`,
+  mobile `6619:20409 → 21014`). **Active Job** (Pending / Quoted / In Progress / Marked as Completed) → View Chat +
+  Cancel Job (→ **Confirm Job Cancellation**, illustration-25, Confirm secondary above Back primary). **Completed Jobs**
+  → "Add a Review" (→ **Rate Your Experience** → **Thanks for the Feedback**, illustration-22) or, once reviewed, the
+  review (score, stars, text, collapsible provider response) with Edit Review (prefilled) / Delete Review (→ confirm —
+  not in Figma, added because it's destructive). Cancelled + rejected jobs are listed after completed ones in the
+  Completed tab without actions (the design doesn't place them; they shouldn't vanish). Sort Recent/Oldest (reuses the
+  vendor `.hw-orders-sort` row + `SortSelect`), 4 per page, "Page N of M" (Figma's "Page 1 to 8" wording fixed).
+  State changes are local only until Convex. **Data model:** `JobStatus` gains **`marked_completed`** (vendor marked
+  done, awaiting the customer — still Active; mock `job_07`); `Review` gains optional **`jobId`** (rev_07→job_08,
+  rev_13→job_04). **Messages** pages read `?job=<jobId>` and open that job's thread (View Chat). **Reuse:** `JobCard`
+  now takes `party` + `children` + `compact` (vendor home unchanged — verified); `ProviderResponse` extracted from
+  `ReviewCard`; `SidePanel` gains `centered`; new `ConfirmPanel`, `ReviewPanel`, `CustomerJobsScreen`; `jobs.css`
+  (+ generic `.hw-pager`). Job-card buttons moved to Manrope Bold (app button decision); "Quoted" badge is now the
+  neutral grey from Figma. `tsc` + `next build` pass.
+
+- **Vendor My Services, My Orders, Job Details, My Reviews, Analytics (2026-11-04)** — Replaced the four vendor
+  placeholders and added Job Details, from the capture (desktop + mobile); local state only until Convex.
+  `/vendor/services` (`6619:30286/30518/30816`): `ServiceListItem` gains an `actions` slot (Edit / Delete);
+  `ServiceFormPanel` (Add New Service / Edit Service — category, rate + /hr·/day·/wk, about, image; no title field in
+  Figma, so a new service is titled by its category); Delete confirms. `/vendor/orders` (`6619:31395/31694`): Active
+  Job (Mark as Completed → confirm → `marked_completed`; Cancel Job → confirm) / Service Request (pending + quoted,
+  stamp via `lib/time.formatStamp`, Review Request); 2-up ≥1024, 8 per page; `JobCard` gains `stamp`; mocks add
+  pending `job_17–19` for Veek. `/vendor/orders/[id]` (`6619:31954`): customer under "From" (Figma shows the vendor —
+  copy-paste), Message / Send Quote → the job's chat, Reject Job → confirm. `/vendor/reviews` (`6619:31115`):
+  "Your Response" (open) with Edit / Delete or Reply (Reply panel not drawn in Figma). `/vendor/analytics`
+  (`6619:32291`): stat tiles, Total Revenue (Yearly / Last 6 Months, vs last year) with new `RevenueChart` (single
+  series, selected month highlighted, dashed average, focusable bars + hidden data table), Job History. `Wallet`
+  gains `revenueByMonth` + `lastYearRevenue`. Deviations: NGN not "$"; average tagged with an amount (Figma's
+  "Avg 6.8%" is a percent on a currency axis). Flows exercised in the browser; no horizontal overflow at 393 / 1440;
+  `tsc` + `next build` pass.
 
 ## Locked decisions for future phases (not yet built)
 
