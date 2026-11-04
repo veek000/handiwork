@@ -46,6 +46,12 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const items = role === "customer" ? CUSTOMER_NAV : VENDOR_NAV;
+  // Most specific section wins, so inner screens keep their section lit: /customer/search
+  // → Home, /customer/jobs/123 → My Jobs.
+  const activeHref = items
+    .map((it) => it.href)
+    .filter((h) => pathname === h || pathname.startsWith(h + "/"))
+    .sort((a, b) => b.length - a.length)[0];
 
   return (
     <aside className={"hw-sidebar" + (open ? " is-open" : "")}>
@@ -82,7 +88,7 @@ export function Sidebar({
 
       <nav className="hw-sidebar__nav">
         {items.map((it) => {
-          const active = pathname === it.href;
+          const active = it.href === activeHref;
           return (
             <Link
               key={it.href}

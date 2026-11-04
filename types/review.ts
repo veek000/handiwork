@@ -15,5 +15,6 @@ export interface Review {
   body: string; // review text
   response?: string; // vendor's reply — "Your Response" / "Service Provider Response"
   serviceId: string; // the service being reviewed
+  jobId?: string; // the job this review closes out (customer My Jobs "Add a Review" / "Edit Review"); absent for legacy reviews
   vendorId: string; // the vendor being reviewed
 }

@@ -22,7 +22,7 @@ export function StarRating({ value, count }: { value: number; count?: number }) 
           );
         })}
       </span>
-      {count != null ? <span className="hw-rating__count">({count} Reviews)</span> : null}
+      {count != null ? <span className="hw-rating__count">({count} {count === 1 ? "Review" : "Reviews"})</span> : null}
     </span>
   );
 }

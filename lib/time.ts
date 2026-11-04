@@ -48,3 +48,12 @@ export function formatChatTime(iso: string, reference: Date = MOCK_REFERENCE_DAT
   if (isYday) return "Yesterday";
   return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
 }
+
+/** Absolute request stamp — "2025-09-20 | 10:30 AM" (vendor Service Request cards).
+ *  Formatted in Africa/Lagos so server and client agree. */
+export function formatStamp(iso: string): string {
+  const d = new Date(iso);
+  const date = d.toLocaleDateString("en-CA", { timeZone: "Africa/Lagos" });
+  const time = d.toLocaleTimeString("en-US", { timeZone: "Africa/Lagos", hour: "numeric", minute: "2-digit", hour12: true });
+  return `${date} | ${time}`;
+}

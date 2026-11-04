@@ -1,9 +1,11 @@
 "use client";
 
+import { SegmentedControl } from "@/components/SegmentedControl";
+
 /**
  * RoleToggle — the two-segment control on the auth screens.
  * "Looking to Hire" = customer, "Provide a Service" = vendor. Controlled: the
- * parent owns the value. Shared by Login and Signup. Styling: .hw-segment*.
+ * parent owns the value. Shared by Login and Signup. Built on SegmentedControl.
  */
 export type AuthRole = "customer" | "vendor";
 
@@ -19,25 +21,7 @@ export function RoleToggle({
   value: AuthRole;
   onChange: (role: AuthRole) => void;
 }) {
-  return (
-    <div className="hw-segment" role="tablist" aria-label="Account type">
-      {OPTIONS.map((opt) => {
-        const active = value === opt.value;
-        return (
-          <button
-            key={opt.value}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            className={"hw-segment__option" + (active ? " is-active" : "")}
-            onClick={() => onChange(opt.value)}
-          >
-            {opt.label}
-          </button>
-        );
-      })}
-    </div>
-  );
+  return <SegmentedControl ariaLabel="Account type" value={value} onChange={onChange} options={OPTIONS} />;
 }
 
 export default RoleToggle;

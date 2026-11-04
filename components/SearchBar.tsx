@@ -1,19 +1,31 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/Input";
 import { Button } from "@/components/Button";
 
 /**
- * SearchBar — the hero search. Uses the established Input component (default/focus/
- * disabled states) + a secondary Button, rather than a bare input. Non-functional in
- * this prototype (submit prevented; no backend). Styling: .hw-search*.
+ * SearchBar — the Home hero search. Uses the established Input component (default/focus/
+ * disabled states) + a secondary Button. Submitting opens the Search screen with the
+ * query (`/customer/search?q=…`); an empty submit opens it on Popular Searches.
+ * Styling: .hw-search*.
  */
 export function SearchBar() {
+  const router = useRouter();
   return (
-    <form className="hw-search" onSubmit={(e) => e.preventDefault()} role="search">
+    <form
+      className="hw-search"
+      role="search"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const q = String(new FormData(e.currentTarget).get("q") ?? "").trim();
+        router.push(q ? `/customer/search?q=${encodeURIComponent(q)}` : "/customer/search");
+      }}
+    >
       <Input
         className="hw-search__input"
         type="search"
+        name="q"
         placeholder="Search by role, skills or keywords"
         aria-label="Search"
       />

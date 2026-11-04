@@ -15,13 +15,16 @@ import { ChatThread } from "./ChatThread";
  *   right 764px — chat thread (starts on the same row as Back, not below it)
  * Mobile: list OR full-screen thread.
  */
-export function MessagesPage({ role }: { role: UserRole }) {
+export function MessagesPage({ role, initialJobId }: { role: UserRole; initialJobId?: string }) {
   const user = useCurrentUser(role);
   const conversations = useConversations(role);
   const allMessages = useMessages();
   const homeHref = role === "customer" ? "/customer" : "/vendor";
 
-  const [activeId, setActiveId] = useState<string | null>(null);
+  // `?job=` (My Jobs "View Chat") opens that job's thread — chats are scoped per Job.
+  const [activeId, setActiveId] = useState<string | null>(
+    () => (initialJobId ? conversations.find((c) => c.jobId === initialJobId)?.id ?? null : null),
+  );
 
   const active = useMemo(
     () => conversations.find((c) => c.id === activeId) ?? null,

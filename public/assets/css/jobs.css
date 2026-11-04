@@ -1,0 +1,198 @@
+/* =========================================================================
+   Customer My Jobs — Figma desktop 6619:5727 → 6625, mobile 6619:20409 → 21014.
+   Plus the generic pager and the Rate Your Experience panel body. Tokens only;
+   mobile-first, desktop from 1024px.
+   ========================================================================= */
+
+.hw-jobs { display: flex; flex-direction: column; gap: var(--hw-space-l); }
+.hw-jobs__title {
+  margin: 0;
+  font-family: var(--hw-font-heading);
+  font-weight: var(--hw-weight-regular);
+  font-size: var(--hw-size-2xl);
+  line-height: var(--hw-lh-2xl);
+  letter-spacing: var(--hw-letter-spacing-s);
+  color: var(--hw-text-primary);
+}
+.hw-jobs__list { display: flex; flex-direction: column; gap: var(--hw-space-l); }
+
+/* My Jobs card layout: 8px head with a divider, then an 8px action strip. */
+.hw-jobcard--compact { gap: 0; padding: 0; }
+.hw-jobcard--compact .hw-jobcard__head { padding: var(--hw-space-s); }
+.hw-jobcard--compact .hw-jobcard__head + * { border-top: 1px solid var(--hw-border-default); }
+.hw-jobcard--compact .hw-jobcard__requested { color: var(--hw-text-tertiary); }
+.hw-jobcard--compact .hw-jobcard__requested::first-line { font-weight: var(--hw-weight-bold); color: var(--hw-text-primary); }
+.hw-jobcard--compact .hw-jobcard__requested span { font-weight: var(--hw-weight-regular); color: var(--hw-text-tertiary); }
+.hw-jobcard--compact .hw-jobcard__actions { gap: var(--hw-space-s); padding: var(--hw-space-s); }
+.hw-jobcard--compact .hw-jobcard__btn { min-height: 40px; padding: var(--hw-space-s) var(--hw-space-m); }
+.hw-jobcard__actions--one { grid-template-columns: 1fr; }
+
+/* Completed job with the customer's review. */
+.hw-jobreview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--hw-space-s);
+  margin: var(--hw-space-s) var(--hw-space-s) 0;
+  padding: var(--hw-space-m);
+  border: 1px solid var(--hw-border-default);
+}
+.hw-jobcard--compact .hw-jobcard__head + .hw-jobreview { border-top: 1px solid var(--hw-border-default); }
+.hw-jobreview__score { font-family: var(--hw-font-heading); font-size: var(--hw-size-3xl); line-height: var(--hw-lh-3xl); letter-spacing: var(--hw-letter-spacing-s); color: var(--hw-text-primary); }
+.hw-jobreview__stars { display: inline-flex; color: #ffae43; } /* same amber as .hw-rating__stars */
+.hw-jobreview .hw-review__body { align-self: stretch; }
+.hw-jobreview .hw-review__reply { align-self: stretch; }
+
+/* ----- Pager (← Page N of M →) ----------------------------------------- */
+.hw-pager { display: flex; align-items: center; justify-content: space-between; gap: var(--hw-space-m); }
+.hw-pager__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--hw-border-default);
+  background: var(--hw-color-default-white);
+  color: var(--hw-text-primary);
+  cursor: pointer;
+}
+.hw-pager__btn:disabled { color: var(--hw-text-disabled); cursor: not-allowed; }
+.hw-pager__btn:focus-visible { outline: 2px solid var(--hw-border-focus); outline-offset: 2px; }
+.hw-pager__label { flex: 1 1 auto; text-align: center; font-family: var(--hw-font-body); font-size: var(--hw-size-m); color: var(--hw-text-secondary); }
+
+/* ----- Message-style panels (centered body) ----------------------------- */
+.hw-panel__body--centered { flex: 1 1 auto; justify-content: center; }
+.hw-booked__title--s { font-size: var(--hw-size-2xl); line-height: var(--hw-lh-2xl); }
+.hw-booked__text--s { font-size: var(--hw-size-m); line-height: var(--hw-lh-m); }
+
+/* ----- Rate Your Experience -------------------------------------------- */
+.hw-rate { display: flex; flex-direction: column; align-items: center; gap: var(--hw-space-l); }
+.hw-rate__stars { display: flex; gap: var(--hw-space-xs); }
+.hw-rate__star {
+  display: inline-flex;
+  padding: var(--hw-space-2xs);
+  border: none;
+  background: none;
+  color: var(--hw-border-default);
+  cursor: pointer;
+  transition: color var(--hw-duration-fast) var(--hw-ease-standard);
+}
+.hw-rate__star.is-on { color: #ffae43; }
+.hw-rate__star:focus-visible { outline: 2px solid var(--hw-border-focus); outline-offset: 2px; }
+.hw-rate__text.hw-input { width: 100%; min-height: 120px; }
+
+@media (min-width: 1024px) {
+  .hw-jobs__title { font-size: var(--hw-size-2xl); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hw-rate__star { transition-duration: 0.01ms; }
+}
+
+/* ----- Vendor My Services — Figma 6619:30286 / mobile 6619:42699 ------- */
+.hw-vservices { display: flex; flex-direction: column; gap: var(--hw-space-l); }
+.hw-vservices__add.hw-button { gap: var(--hw-space-s); padding: var(--hw-space-s) var(--hw-space-m); font-size: var(--hw-size-m); line-height: var(--hw-lh-m); }
+/* Edit / Delete strip under a service row (reuses the job-card button styles). */
+.hw-svcrow__actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--hw-space-s); padding: var(--hw-space-s); border-top: 1px solid var(--hw-border-default); }
+.hw-svcrow__actions .hw-jobcard__btn { min-height: 40px; padding: var(--hw-space-s) var(--hw-space-m); }
+
+/* JobCard right column (badge + optional request stamp). */
+.hw-jobcard__side { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: var(--hw-space-xs); }
+.hw-jobcard__stamp { font-family: var(--hw-font-body); font-size: var(--hw-size-s); line-height: var(--hw-lh-s); color: var(--hw-text-tertiary); white-space: nowrap; }
+
+/* ----- Vendor My Orders grid (2-up desktop) + Job Details — Figma 6619:31395 / 31954 ----- */
+.hw-jobs__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--hw-space-l); align-items: start; }
+.hw-jobdetail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hw-space-l);
+  padding: var(--hw-space-l);
+  border: 1px solid var(--hw-border-default);
+  background: var(--hw-color-default-white);
+}
+.hw-jobdetail__head { display: flex; flex-direction: column; gap: var(--hw-space-xs); }
+.hw-jobdetail__title,
+.hw-jobdetail__subtitle {
+  margin: 0;
+  font-family: var(--hw-font-heading);
+  font-weight: var(--hw-weight-regular);
+  font-size: var(--hw-size-2xl);
+  line-height: var(--hw-lh-2xl);
+  letter-spacing: var(--hw-letter-spacing-s);
+  color: var(--hw-text-primary);
+}
+.hw-jobdetail__when { margin: 0; font-family: var(--hw-font-body); font-size: var(--hw-size-m); line-height: var(--hw-lh-m); color: var(--hw-text-tertiary); }
+.hw-jobdetail__from { display: flex; flex-direction: column; gap: var(--hw-space-s); }
+.hw-jobdetail__label { font-family: var(--hw-font-body); font-size: var(--hw-size-m); line-height: var(--hw-lh-m); font-weight: var(--hw-weight-bold); color: var(--hw-text-primary); }
+.hw-jobdetail__who { display: flex; align-items: center; gap: var(--hw-space-s); }
+.hw-jobdetail__name { flex: 1 1 auto; min-width: 0; font-family: var(--hw-font-heading); font-size: var(--hw-size-l); line-height: var(--hw-lh-l); letter-spacing: var(--hw-letter-spacing-s); color: var(--hw-text-primary); }
+.hw-jobdetail__msg,
+.hw-jobdetail__quote {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: var(--hw-space-s) var(--hw-space-m);
+  font-family: var(--hw-font-body);
+  font-weight: var(--hw-weight-bold);
+  font-size: var(--hw-size-m);
+  line-height: var(--hw-lh-m);
+  text-decoration: none;
+  transition: background-color var(--hw-duration-fast) var(--hw-ease-standard);
+}
+.hw-jobdetail__msg { background: var(--hw-button-secondary-bg-default); color: var(--hw-text-primary); }
+.hw-jobdetail__msg:hover { background: var(--hw-button-secondary-bg-hover); }
+.hw-jobdetail__quote { background: var(--hw-button-primary-bg-default); color: var(--hw-text-inverse); }
+.hw-jobdetail__quote:hover { background: var(--hw-button-primary-bg-hover); }
+.hw-jobdetail__msg:focus-visible,
+.hw-jobdetail__quote:focus-visible { outline: 2px solid var(--hw-border-focus); outline-offset: 2px; }
+.hw-jobdetail__from .hw-jobcard__actions { gap: var(--hw-space-s); }
+.hw-jobdetail__from .hw-jobcard__btn { min-height: 40px; }
+.hw-jobdetail__desc { display: flex; flex-direction: column; gap: var(--hw-space-s); }
+.hw-jobdetail__text { margin: 0; font-family: var(--hw-font-body); font-size: var(--hw-size-l); line-height: var(--hw-lh-l); color: var(--hw-text-tertiary); }
+
+@media (min-width: 1024px) {
+  .hw-jobs__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hw-jobdetail__desc .hw-jobdetail__text { font-size: var(--hw-size-m); line-height: var(--hw-lh-m); }
+}
+
+/* ----- Review card actions (vendor My Reviews — Figma 6619:31115) ------ */
+.hw-review__actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--hw-space-s); }
+.hw-review__actions--ruled { padding-top: var(--hw-space-l); border-top: 1px solid var(--hw-border-default); }
+.hw-review__actions .hw-jobcard__btn { min-height: 40px; padding: var(--hw-space-s) var(--hw-space-m); }
+.hw-review__reply-btn { grid-column: 1 / -1; }
+
+/* ----- Vendor Analytics — Figma 6619:32291 / mobile 6619:43823 --------- */
+.hw-analytics { gap: var(--hw-space-xl); }
+.hw-revenue { display: flex; flex-direction: column; gap: var(--hw-space-s); padding: var(--hw-space-m); border: 1px solid var(--hw-border-default); background: var(--hw-color-default-white); }
+.hw-revenue__head { display: flex; align-items: center; justify-content: space-between; gap: var(--hw-space-s); }
+.hw-revenue__title { display: inline-flex; align-items: center; gap: var(--hw-space-s); margin: 0; font-family: var(--hw-font-body); font-size: var(--hw-size-m); line-height: var(--hw-lh-m); font-weight: var(--hw-weight-bold); color: var(--hw-text-primary); }
+.hw-revenue__title hw-icon { color: var(--hw-icon-primary); }
+.hw-revenue__total { margin: var(--hw-space-s) 0 0; font-family: var(--hw-font-heading); font-size: var(--hw-size-5xl); line-height: var(--hw-lh-5xl); letter-spacing: var(--hw-letter-spacing-s); color: var(--hw-text-primary); }
+.hw-revenue__change { display: flex; align-items: center; gap: var(--hw-space-xs); margin: 0; font-family: var(--hw-font-body); font-size: var(--hw-size-s); line-height: var(--hw-lh-s); color: var(--hw-text-tertiary); }
+.hw-revenue__delta { display: inline-flex; align-items: center; gap: var(--hw-space-2xs); padding: var(--hw-space-2xs) var(--hw-space-xs); background: var(--hw-feedback-success-bg); color: var(--hw-feedback-success-text); }
+.hw-revenue__delta.is-down { background: var(--hw-feedback-error-bg); color: var(--hw-feedback-error-text); }
+.hw-revenue__delta.is-down hw-icon { transform: rotate(180deg); }
+
+/* Revenue bars: neutral columns, selected month in brand dark green, dashed average. */
+.hw-rchart { margin-top: var(--hw-space-l); }
+.hw-rchart__scroll { overflow-x: auto; scrollbar-width: none; }
+.hw-rchart__scroll::-webkit-scrollbar { display: none; }
+.hw-rchart__plot,
+.hw-rchart__axis { display: grid; grid-template-columns: repeat(var(--hw-rchart-cols), minmax(44px, 1fr)); gap: var(--hw-space-xs); min-width: calc(var(--hw-rchart-cols) * 48px); }
+.hw-rchart__plot { position: relative; height: 160px; align-items: end; border-bottom: 1px solid var(--hw-border-default); }
+.hw-rchart__col { position: relative; height: 100%; display: flex; align-items: flex-end; padding: 0; border: none; background: none; cursor: pointer; }
+.hw-rchart__bar { position: relative; width: 100%; background: var(--hw-bg-subtle); transition: background-color var(--hw-duration-fast) var(--hw-ease-standard); }
+.hw-rchart__col:hover .hw-rchart__bar { background: var(--hw-border-default); }
+.hw-rchart__col.is-active .hw-rchart__bar { background: var(--hw-button-primary-bg-pressed); }
+.hw-rchart__col:focus-visible { outline: 2px solid var(--hw-border-focus); outline-offset: 2px; }
+.hw-rchart__val { position: absolute; top: var(--hw-space-xs); left: 50%; transform: translateX(-50%); font-family: var(--hw-font-body); font-size: var(--hw-size-xs); font-weight: var(--hw-weight-bold); color: var(--hw-text-inverse); white-space: nowrap; }
+.hw-rchart__avg { position: absolute; left: 0; right: 0; z-index: 1; border-top: 1px dashed var(--hw-text-tertiary); pointer-events: none; }
+.hw-rchart__avgtag { position: absolute; left: 0; top: 0; transform: translateY(-50%); padding: var(--hw-space-2xs) var(--hw-space-xs); background: var(--hw-button-primary-bg-default); color: var(--hw-text-inverse); font-family: var(--hw-font-body); font-size: var(--hw-size-xs); white-space: nowrap; }
+.hw-rchart__axis { margin-top: var(--hw-space-s); }
+.hw-rchart__month { padding: var(--hw-space-2xs) 0; text-align: center; font-family: var(--hw-font-body); font-size: var(--hw-size-s); color: var(--hw-text-tertiary); }
+.hw-rchart__month.is-active { background: var(--hw-button-secondary-bg-default); color: var(--hw-text-primary); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hw-rchart__bar { transition-duration: 0.01ms; }
+}

@@ -3,7 +3,8 @@ import type { CSSProperties } from "react";
 /**
  * Avatar — round avatar showing initials derived from a name (dark brand circle,
  * light text), or an image if `src` is provided. Reusable: dashboard header, sidebar
- * drawer, messages, reviews. Styling: .hw-ava.
+ * drawer, messages, reviews. `verified` adds the green check badge Figma shows on
+ * vendor avatars (Service Detail, reviews, chat). Styling: .hw-ava.
  */
 export function initialsOf(name: string): string {
   return name
@@ -19,11 +20,13 @@ export function Avatar({
   src,
   size = 40,
   className,
+  verified = false,
 }: {
   name: string;
   src?: string;
   size?: number;
   className?: string;
+  verified?: boolean;
 }) {
   const style: CSSProperties = { width: size, height: size, fontSize: Math.round(size * 0.4) };
   return (
@@ -34,6 +37,10 @@ export function Avatar({
       ) : (
         initialsOf(name)
       )}
+      {verified ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img className="hw-ava__badge" src="/assets/icons/verified-badge.svg" alt="Verified" />
+      ) : null}
     </span>
   );
 }

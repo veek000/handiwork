@@ -38,10 +38,20 @@
   color: var(--hw-text-inverse);
   font-family: var(--hw-font-heading);
   line-height: 1;
-  overflow: hidden;
+  position: relative; /* anchors the verified badge, which sits on the rim */
   flex: none;
 }
-.hw-ava img { width: 100%; height: 100%; object-fit: cover; }
+.hw-ava img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--hw-radius-circle); }
+/* Verified check (Figma "Top status": 15px on a 40px avatar, centred ~(34,7.5)). */
+.hw-ava img.hw-ava__badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 37.5%;
+  height: 37.5%;
+  object-fit: contain;
+  border-radius: 0;
+}
 
 /* ----- Dashboard header ------------------------------------------------- */
 .hw-dash-header {
@@ -912,13 +922,15 @@
   color: var(--hw-color-yellow-800);
 }
 .hw-jobcard__badge--quoted {
-  background: var(--hw-color-cyan-100);
-  color: var(--hw-color-cyan-800);
+  /* Figma My Jobs: neutral grey "Quoted" pill */
+  background: var(--hw-bg-subtle);
+  color: var(--hw-text-tertiary);
 }
 .hw-jobcard__badge--in_progress {
   background: var(--hw-color-cyan-100);
   color: var(--hw-color-cyan-700);
 }
+.hw-jobcard__badge--marked_completed,
 .hw-jobcard__badge--completed {
   background: var(--hw-feedback-success-bg);
   color: var(--hw-feedback-success-text);
@@ -941,11 +953,17 @@
   appearance: none;
   border: none;
   border-radius: var(--hw-radius-none);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: var(--hw-space-m) var(--hw-space-l);
-  font-family: var(--hw-font-heading);
+  /* Manrope Bold, like every app button since 2026-11-04 (see button.css .hw-app block) */
+  font-family: var(--hw-font-body);
+  font-weight: var(--hw-weight-bold);
   font-size: var(--hw-size-m);
   line-height: var(--hw-line-height-m);
-  letter-spacing: var(--hw-letter-spacing-s);
+  letter-spacing: var(--hw-letter-spacing-none);
+  text-decoration: none; /* also used on <a> (My Jobs "View Chat") */
   cursor: pointer;
   transition:
     background-color var(--hw-duration-fast) var(--hw-ease-standard),
@@ -959,7 +977,7 @@
 .hw-jobcard__btn:not(:disabled):active { transform: scale(0.97); }
 .hw-jobcard__btn--complete {
   background: var(--hw-button-secondary-bg-default);
-  color: var(--hw-button-secondary-text-default);
+  color: var(--hw-text-primary);
 }
 .hw-jobcard__btn--complete:hover {
   background: var(--hw-button-secondary-bg-hover);

@@ -23,6 +23,9 @@ const DESIGN_SYSTEM_CSS = [
   "/assets/css/auth.css",
   "/assets/css/dashboard.css",
   "/assets/css/chat.css",
+  "/assets/css/search.css",
+  "/assets/css/service.css",
+  "/assets/css/jobs.css",
 ];
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -33,7 +36,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <link key={href} rel="stylesheet" href={href} />
         ))}
       </head>
-      <body>
+      {/* hw-app scopes app-only component styling (e.g. Button) away from the static marketing pages */}
+      <body className="hw-app">
         {children}
         {/* <hw-icon> web component. Must define AFTER hydration, not before: the element
             upgrades by injecting SVG into its light DOM, so defining it pre-hydration makes

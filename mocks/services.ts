@@ -1,9 +1,9 @@
 // Mock services. Every `providerId` resolves to a vendor in mocks/users.ts.
 // Per-service ratingAverage / reviewCount are consistent with mocks/reviews.ts.
-// All images use the shared placeholder until real service photos exist.
+// All images use one shared stock photo (from the Figma design) until real service photos exist.
 import type { Service } from "@/types";
 
-const PLACEHOLDER = "/assets/img/service-placeholder.png";
+const PLACEHOLDER = "/assets/img/service-cleaner.jpg";
 
 export const services: Service[] = [
   // Veek (usr_veek) — Cleaners

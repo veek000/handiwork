@@ -10,14 +10,19 @@ import { useRef, useState } from "react";
  * real storage lands with the backend file pass, like AvatarUpload). On pick, the
  * card swaps its subtitle for the chosen filename. Controlled by the parent via the
  * optional `fileName`/`onFile` pair so the wizard can reflect the selection.
- * Styling: .hw-uploader*.
+ * `title`/`hint` default to the Verification copy; Book Service reuses it as
+ * "Upload image". Styling: .hw-uploader*.
  */
 export function DocumentUpload({
   fileName,
   onFile,
+  title = "Upload Document",
+  hint = "JPG, PNG, or GIF (max 10MB)",
 }: {
   fileName?: string;
   onFile?: (name: string | undefined) => void;
+  title?: string;
+  hint?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [localName, setLocalName] = useState<string | undefined>();
@@ -44,9 +49,9 @@ export function DocumentUpload({
           <img src="/assets/icons/upload-document.svg" alt="" aria-hidden="true" width={33} height={40} />
         </span>
         <div className="hw-uploader__text">
-          <span className="hw-uploader__title">Upload Document</span>
+          <span className="hw-uploader__title">{title}</span>
           <span className="hw-uploader__subtitle">
-            {name ?? "JPG, PNG, or GIF (max 10MB)"}
+            {name ?? hint}
           </span>
         </div>
       </div>

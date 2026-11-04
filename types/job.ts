@@ -7,7 +7,8 @@ export type JobStatus =
   | "pending" // Service Request "Pending" / customer "Waiting for a quote"
   | "quoted" // My Jobs "Quoted" (vendor sent a quote back)
   | "in_progress" // "In Progress"
-  | "completed" // "Marked as Completed" / Completed Jobs tab
+  | "marked_completed" // vendor marked it done, awaiting the customer's confirmation — My Jobs "Marked as Completed" (still Active)
+  | "completed" // customer confirmed — Completed Jobs tab
   | "cancelled" // customer backed out — "Cancel Job" + "Job Canceled" notification
   | "rejected"; // vendor declined — Job Details "Reject Job" (distinct from cancelled)
 

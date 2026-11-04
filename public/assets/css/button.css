@@ -65,6 +65,20 @@
 .hw-button--secondary:not(:disabled):not(.is-disabled):hover  { background: var(--hw-button-secondary-bg-hover); }
 .hw-button--secondary:not(:disabled):not(.is-disabled):active { background: var(--hw-button-secondary-bg-pressed); }
 
+/* ----- App UI (customer/vendor app designs, 2026-11) -----
+   The app screens set buttons in Manrope Bold with Text/inverse on primary and
+   Text/primary on secondary (Figma: "Send Request", "Login", "Proceed", "View Details").
+   Scoped to `.hw-app` (the Next app's <body>) so the static marketing pages, built from
+   the Changa One marketing designs, are unchanged. Disabled colours still come from the
+   Buttons tokens below (:not(:disabled) keeps them winning). */
+.hw-app .hw-button {
+  font-family: var(--hw-font-body);
+  font-weight: var(--hw-weight-bold);
+  letter-spacing: var(--hw-letter-spacing-none);
+}
+.hw-app .hw-button--primary:not(:disabled):not(.is-disabled)   { color: var(--hw-text-inverse); }
+.hw-app .hw-button--secondary:not(:disabled):not(.is-disabled) { color: var(--hw-text-primary); }
+
 /* ----- Focus (COMPONENT-BUILD-RULES: Border/focus, 2px outline, 2px offset) ----- */
 .hw-button:focus-visible {
   outline: var(--hw-border-width-m) solid var(--hw-border-focus);
