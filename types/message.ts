@@ -10,6 +10,7 @@ export type DeliveryStatus = "sent" | "delivered" | "read";
 export interface Conversation {
   id: string;
   jobId: string; // Job this thread is scoped to — chat is per-order, not an open inbox
+  jobTitle?: string; // shown under the name so two jobs with one person are told apart
   participantName: string; // counterparty from the signed-in user's side
   participantAvatarUrl?: string;
   lastMessagePreview: string;
@@ -32,6 +33,7 @@ export interface Quote {
   amount: number; // whole-number NGN
   status: QuoteStatus;
   counterAmount?: number; // set when customer counters
+  superseded?: boolean; // replaced by a newer quote / job closed — shown, not actionable
 }
 
 export type MessageKind = "text" | "quote" | "system";

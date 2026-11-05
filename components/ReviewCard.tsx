@@ -19,7 +19,7 @@ export function ReviewCard({
   actions,
 }: {
   review: Review;
-  vendor: { name: string; avatarUrl?: string };
+  vendor: { name: string; avatarUrl?: string; verified?: boolean };
   responseLabel?: string;
   responseOpen?: boolean;
   actions?: ReactNode;

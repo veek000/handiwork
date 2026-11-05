@@ -15,7 +15,7 @@ export function VendorAboutCard({ vendor, profileHref }: { vendor: VendorUser; p
       <div className="hw-about__top">
         <h2 id={`about-${vendor.id}`} className="hw-about__title">About {first}</h2>
         <div className="hw-about__who">
-          <Avatar name={vendor.fullName} src={vendor.avatarUrl} size={40} verified />
+          <Avatar name={vendor.fullName} src={vendor.avatarUrl} size={40} verified={vendor.verified} />
           <div className="hw-about__id">
             <span className="hw-about__namerow">
               <span className="hw-about__name">{first}</span>

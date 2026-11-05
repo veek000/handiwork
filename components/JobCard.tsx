@@ -13,8 +13,8 @@ export const JOB_STATUS_LABEL: Record<Job["status"], string> = {
 
 /**
  * JobCard — a job row with title, the other party, and a status badge.
- *  - Vendor My Orders (Figma 300:7832 / 300:34759): pass `customer` → "Requested by:",
- *    default actions Mark as Completed + Cancel Job.
+ *  - Vendor Home / My Orders (Figma 300:7832 / 300:34759): pass `customer` →
+ *    "Requested by:" and the actions as `children`.
  *  - Customer My Jobs (Figma 6619:5727 / 6619:20409): pass `party` ("Requesting from")
  *    and the role's actions/review block as `children`; `compact` uses the My Jobs
  *    layout (8px head, divider, 8px action strip).
@@ -57,16 +57,7 @@ export function JobCard({
         </div>
       </div>
 
-      {children ?? (
-        <div className="hw-jobcard__actions">
-          <button type="button" className="hw-jobcard__btn hw-jobcard__btn--complete">
-            Mark as Completed
-          </button>
-          <button type="button" className="hw-jobcard__btn hw-jobcard__btn--cancel">
-            Cancel Job
-          </button>
-        </div>
-      )}
+      {children}
     </div>
   );
 }

@@ -873,6 +873,78 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   `error.tsx`, `not-found.tsx` (standalone 404) and `global-error.tsx`. Styles in new `settings.css`. Checked at
   1440 / 393 with the dev bypass (signed out, so saves show the signed-out error); a real signed-in save, password
   change and delete are not yet exercised. `tsc` + `next build` pass.
+- **App data moved into Convex, with retention rules (2026-11-05)** — Dashboards no longer read mocks. New tables:
+  `services`, `jobs`, `quotes`, `messages`, `payments` (escrow), `reviews`, `notifications` (+ `users.deletedAt` / `demo`).
+  Server modules: `catalog` (Home / Search / Service Detail / Vendor Profile), `services` (My Services; "Delete"
+  archives), `jobs` (request → quoted → in_progress → marked_completed → completed; reject; cancel), `chat` (one thread
+  per job, read receipts, quotes: send / edit / counter, a new quote replaces the open one), `payments` (accept →
+  pending payment with 2% service fee + 1.4% processing fee on top; pay → held; confirm → released; wallet derived
+  from payments), `escrow.ts` (refunds: vendor cancels/rejects → full total; customer cancels after paying → quote
+  amount back, service fee kept; unpaid → payment marked failed), `reviews` (one per completed job, keeps service
+  rating sums), `notifications` (written by those mutations, honouring Settings prefs; payment notices always),
+  `files` (Convex storage uploads, used for service photos), `model.ts` (doc → `types/` mapping). Every function
+  resolves the caller from the session and checks they are a party to the job. **Payments:** Flutterwave isn't
+  connected; `payments.pay` only works where `ALLOW_SIMULATED_PAYMENTS=1` (set on dev only) and refuses elsewhere.
+  **Account deletion retention:** blocked while the account has open jobs or held escrow; otherwise sign-in
+  accounts, sessions, notifications and feedback are deleted, the user row becomes a tombstone (personal fields
+  cleared; shown as "Deleted user" / "Former customer"), a vendor's services are archived, and jobs, chat, reviews
+  and payments are kept. `users.viewer` no longer sends the government ID number to the browser
+  (`hasGovernmentId` instead). Frontend: `hooks/` are now live Convex subscriptions; pages show `LoadingState` /
+  404s; every action is a mutation wrapped in `lib/useRunner` with `ActionError`. Booking creates a job and opens its
+  chat; the chat drives quote → pay (fee breakdown) → complete → review; notifications link to the job's chat, mark
+  all read, page by 10; vendor Home buttons work; category tiles and "View all" open Search. The "Verified" badge now
+  shows only for verified vendors (none yet — no ID check exists). Relative times use the real clock.
+  `mocks/categories` moved to `data/categories`; `mocks/` is only seed input: `npx convex run seed:demo` (done on dev:
+  5 showcase vendors, 9 services, 13 reviews; `seed:removeDemo` takes them out). Verified on dev: a scripted run of
+  the whole lifecycle as two test users (including every refusal message, both refund paths and deletion), then in
+  the browser as two signed-in test accounts: vendor added a service with an uploaded photo, customer booked it,
+  chatted, accepted and paid the quote, confirmed and reviewed; vendor saw balance, notifications, analytics, replied
+  to the review, and deleted their account. Test accounts and data were removed afterwards. `tsc` (app + convex) and
+  `next build` pass.
+
+## What's left before launch (audit 2026-11-05)
+
+From a full read of the code and docs after the Convex data move. Grouped by priority.
+
+**Launch blockers**
+- **Real payments.** Connect Flutterwave escrow: checkout, webhook verification, refunds and payouts. Production
+  currently refuses payment with a clear message. Withdraw and Transaction History are disabled until then.
+- **Forgot password.** The link is `href="#"`; the Password provider has no `reset`. Decided approach: a magic link.
+- **Vendors can't sign up with Google.** OAuth sign-up passes no role, so those accounts become customers, and
+  there's no screen to choose a role afterwards.
+- **Vendor verification.** The signup ID document is never uploaded and there's no review step or admin tool.
+  The badge is hidden for everyone until this exists.
+- **Legal.** Placeholders remain in privacy-policy.html and terms-of-use.html (`[DATE]`, contact emails, fee
+  schedule `[LINK]`, liability cap, dispute window). There's no fee schedule page and no "I agree" step at signup.
+  The dispute process is still undecided.
+- **Email.** The sender is `onboarding@resend.dev` (only reaches the Resend owner); a domain needs verifying. Only
+  the OTP email exists — the welcome, job, payout and password-changed emails aren't built, and the
+  "email me" setting isn't acted on.
+- **Production checks.** Nobody has signed up or logged in on production yet (runbook "STILL TODO"). Production
+  has no services until vendors list them: decide whether to seed the showcase vendors there (they're fictional
+  people).
+- **Admin tooling.** Nothing for disputes, refunds, verification, moderation or reading feedback (Convex dashboard
+  only).
+
+**Needed soon**
+- Uploads: profile photo (AvatarUpload is static), booking photos, chat attachments, ID document. Service photos
+  are done.
+- Location "edit" pencil and the invite banner button do nothing.
+- Chat: typing indicator / last seen (planned via `@convex-dev/presence`).
+- Search filters every service in the browser — fine now; move to a Convex search index as listings grow.
+- Rate limits beyond feedback (one-per-minute) and open requests (ten per customer).
+- Marketing site: the contact form only fakes a send; landing CTAs and social links are `#`; "TradeTrust"
+  placeholder copy is still there.
+- Support email/phone in `data/faqs.ts` may be placeholders.
+- No tests or CI. `npm run lint` is broken (`next lint` was removed in Next 16; ESLint isn't set up).
+- SEO (per-page titles, robots, sitemap, Open Graph), security headers, error monitoring, and analytics on the
+  static pages.
+- README "Quick start" still describes the old static site.
+- Tracked debts: dead `NEXT_PUBLIC_CONVEX_SITE_URL` in `.env.local`; confirm the old filter-branch backup leaked
+  nothing.
+
+**Nice to have**
+- Facebook / Apple sign-in, dark mode, phone verification.
 
 ## Locked decisions for future phases (not yet built)
 

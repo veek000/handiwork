@@ -39,6 +39,7 @@ export interface VendorUser extends BaseUser {
   ratingAverage: number; // Vendor Profile · 4.7 (aggregate average, not a per-review value)
   reviewCount: number; // Vendor Profile · "(20 Reviews)"
   availability: Availability; // Vendor Profile / Job Details · "Available" badge
+  verified?: boolean; // ID checked — only then is the "verified" badge shown
 }
 
 export type User = CustomerUser | VendorUser;

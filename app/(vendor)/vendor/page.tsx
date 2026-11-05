@@ -2,12 +2,13 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  useCurrentUser,
-  useWallet,
-  useJobs,
-  useUsers,
-} from "@/hooks";
+import { useMutation } from "convex/react";
+import { useVendorJobs, useWallet } from "@/hooks";
+import { live } from "@/lib/convexApi";
+import { useRunner } from "@/lib/useRunner";
+import { ActionError } from "@/components/ActionError";
+import { ConfirmPanel } from "@/components/ConfirmPanel";
+import { LoadingState } from "@/components/LoadingState";
 import { BalanceCard } from "@/components/BalanceCard";
 import { StatTile } from "@/components/StatTile";
 import { QuickActionTile } from "@/components/QuickActionTile";
@@ -17,15 +18,14 @@ import { SortSelect } from "@/components/SortSelect";
 // Vendor Home — Figma desktop 300:7831 (Home 300:7832) / mobile 300:23746 (iPhone 300:34759).
 // Data via hooks only (wallet / jobs / users). Shell provides signed-in user chrome.
 export default function VendorHome() {
-  const user = useCurrentUser("vendor");
-  const wallet = useWallet(user.id);
-  const allJobs = useJobs();
-  const users = useUsers();
-
-  const myJobs = useMemo(
-    () => allJobs.filter((j) => j.vendorId === user.id),
-    [allJobs, user.id],
-  );
+  const wallet = useWallet();
+  const data = useVendorJobs();
+  const myJobs = useMemo(() => data?.jobs ?? [], [data]);
+  const users = data?.customers ?? [];
+  const { run, busy, error, clearError } = useRunner();
+  const markCompleted = useMutation(live.markCompleted);
+  const cancelJob = useMutation(live.cancelJob);
+  const [panel, setPanel] = useState<{ kind: "complete" | "cancel"; jobId: string } | null>(null);
 
   const activeJobCount = myJobs.filter((j) => j.status === "in_progress").length;
   const serviceRequestCount = myJobs.filter((j) => j.status === "pending").length;
@@ -53,12 +53,15 @@ export default function VendorHome() {
 
   const ordersWithCustomer = ordersShown.map((job) => ({
     job,
-    customer: users.find((u) => u.id === job.customerId)!,
+    customer: users.find((u) => u.id === job.customerId),
   }));
+  const panelJob = panel ? myJobs.find((j) => j.id === panel.jobId) : undefined;
+
+  if (!data || !wallet) return <LoadingState />;
 
   return (
     <div className="hw-vendor-home">
-      {wallet ? <BalanceCard wallet={wallet} /> : null}
+      <BalanceCard wallet={wallet} />
 
       {/* Analysis */}
       <section className="hw-section">
@@ -189,7 +192,24 @@ export default function VendorHome() {
             <p className="hw-orders-empty">No orders in this list yet.</p>
           ) : (
             ordersWithCustomer.map(({ job, customer }) => (
-              <JobCard key={job.id} job={job} customer={customer} />
+              <JobCard key={job.id} job={job} customer={customer}>
+                {ordersTab === "active" ? (
+                  <div className="hw-jobcard__actions">
+                    <button type="button" className="hw-jobcard__btn hw-jobcard__btn--complete" onClick={() => setPanel({ kind: "complete", jobId: job.id })}>
+                      Mark as Completed
+                    </button>
+                    <button type="button" className="hw-jobcard__btn hw-jobcard__btn--cancel" onClick={() => setPanel({ kind: "cancel", jobId: job.id })}>
+                      Cancel Job
+                    </button>
+                  </div>
+                ) : (
+                  <div className="hw-jobcard__actions hw-jobcard__actions--one">
+                    <Link href={`/vendor/orders/${job.id}`} className="hw-jobcard__btn hw-jobcard__btn--complete">
+                      Review Request
+                    </Link>
+                  </div>
+                )}
+              </JobCard>
             ))
           )}
         </div>
@@ -203,6 +223,29 @@ export default function VendorHome() {
           <span className="hw-button__label">View All</span>
         </Link>
       </section>
+
+      {panel?.kind === "complete" && panelJob ? (
+        <ConfirmPanel
+          art="/assets/illustration/illustration-24.svg"
+          title="Confirm Job Completion"
+          text="Let the customer know this job is done? They'll confirm before the escrow payment is released to you."
+          onClose={() => setPanel(null)}
+          onConfirm={async () => {
+            if (!busy && (await run(() => markCompleted({ id: panelJob.id })))) setPanel(null);
+          }}
+        />
+      ) : null}
+      {panel?.kind === "cancel" && panelJob ? (
+        <ConfirmPanel
+          title="Confirm Job Cancellation"
+          text="Cancel this job? The customer gets a full refund of anything they paid into escrow."
+          onClose={() => setPanel(null)}
+          onConfirm={async () => {
+            if (!busy && (await run(() => cancelJob({ id: panelJob.id })))) setPanel(null);
+          }}
+        />
+      ) : null}
+      <ActionError error={error} onDismiss={clearError} />
     </div>
   );
 }

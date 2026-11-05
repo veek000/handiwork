@@ -1,20 +1,56 @@
-// Real app schema (Phase 6 — auth). authTables are Convex Auth's own tables
-// (authSessions, authAccounts, …). We OVERRIDE the `users` table to carry the
-// profile fields the signup wizard collects. Everything beyond email is OPTIONAL
-// so OAuth logins (Google/Facebook supply only name/email/image) still validate.
+// App schema. authTables are Convex Auth's own tables (authSessions, authAccounts, …);
+// we override `users` to carry the signup profile. Everything beyond email is OPTIONAL
+// so OAuth logins (Google supplies only name/email/image) still validate.
 //
-// NOTE: this is auth-only for now. The real Job/Service/Conversation/etc. tables
-// (from types/) are NOT modelled here yet — that lands when dashboards move off
-// mocks (the deferred "full" pass). Kept intentionally minimal.
+// Marketplace data: services (vendor listings) → jobs (a customer's request to one
+// vendor) → quotes + messages (the job's chat) → payments (escrow per accepted quote)
+// → reviews (one per completed job). Notifications are written by the mutations that
+// change those. The UI types in types/ are produced from these docs in convex/model.ts.
+//
+// Retention: users are tombstoned (deletedAt, personal fields cleared) rather than
+// deleted, so jobs, messages, reviews and payments that point at them stay valid for
+// the other party and for the financial record. See users.deleteAccount.
 import { defineSchema, defineTable } from "convex/server";
 import { authTables } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 
+export const roleV = v.union(v.literal("customer"), v.literal("vendor"));
+export const priceUnitV = v.union(v.literal("hr"), v.literal("day"), v.literal("wk"));
+export const jobStatusV = v.union(
+  v.literal("pending"), // requested, waiting for a quote
+  v.literal("quoted"), // vendor sent a quote
+  v.literal("in_progress"), // quote paid into escrow
+  v.literal("marked_completed"), // vendor says done, awaiting customer confirmation
+  v.literal("completed"), // customer confirmed; escrow released
+  v.literal("cancelled"), // either party cancelled
+  v.literal("rejected"), // vendor declined the request
+);
+export const quoteStatusV = v.union(
+  v.literal("pending"),
+  v.literal("countered"),
+  v.literal("accepted"), // customer accepted; payment started
+  v.literal("paid"), // payment held in escrow
+  v.literal("superseded"), // replaced by a newer quote / job closed
+);
+export const paymentStatusV = v.union(
+  v.literal("pending"), // created at quote acceptance, not yet paid
+  v.literal("held"), // in escrow
+  v.literal("released"), // paid out to the vendor's balance
+  v.literal("refunded"), // returned to the customer (fully or partly — see refundAmount)
+  v.literal("failed"),
+);
+export const notificationTypeV = v.union(
+  v.literal("job_inquiry"),
+  v.literal("quote_received"),
+  v.literal("payment_received"),
+  v.literal("payment_released"),
+  v.literal("job_update"),
+  v.literal("job_cancelled"),
+  v.literal("new_review"),
+);
+
 export default defineSchema({
   ...authTables,
-  // Overrides authTables.users with our extra profile fields. The base auth fields
-  // (name, email, image, emailVerificationTime, phone, …) are still permitted; we
-  // add ours as optional so both password sign-up and OAuth produce valid docs.
   users: defineTable({
     // --- base fields Convex Auth reads/writes ---
     name: v.optional(v.string()),
@@ -25,14 +61,13 @@ export default defineSchema({
     phoneVerificationTime: v.optional(v.number()),
     isAnonymous: v.optional(v.boolean()),
     // --- Handiwork signup profile fields (see types/user.ts) ---
-    role: v.optional(v.union(v.literal("customer"), v.literal("vendor"))),
+    role: v.optional(roleV),
     fullName: v.optional(v.string()),
     countryCode: v.optional(v.string()),
     state: v.optional(v.string()),
     area: v.optional(v.string()),
     address: v.optional(v.string()),
     // --- Vendor-only signup fields (Business Information + Verification steps) ---
-    // All optional: customers never set them, and OAuth accounts have no role yet.
     service: v.optional(v.string()),
     yearsOfExperience: v.optional(v.string()),
     businessBio: v.optional(v.string()),
@@ -49,12 +84,114 @@ export default defineSchema({
         email: v.boolean(),
       }),
     ),
+    // --- Lifecycle ---
+    demo: v.optional(v.boolean()), // seeded showcase account (no sign-in); see seed.ts
+    deletedAt: v.optional(v.number()), // tombstone: account deleted, record kept for history
   }).index("email", ["email"]),
+
+  services: defineTable({
+    vendorId: v.id("users"),
+    title: v.string(),
+    description: v.string(),
+    category: v.string(),
+    price: v.number(), // whole naira
+    priceUnit: priceUnitV,
+    images: v.array(v.string()),
+    ratingSum: v.number(), // maintained by reviews.* (average = ratingSum / reviewCount)
+    reviewCount: v.number(),
+    archivedAt: v.optional(v.number()), // hidden from customers; kept for past jobs
+  })
+    .index("by_vendor", ["vendorId"])
+    .index("by_category", ["category"]),
+
+  jobs: defineTable({
+    customerId: v.id("users"),
+    vendorId: v.id("users"),
+    serviceId: v.id("services"),
+    title: v.string(),
+    description: v.string(),
+    status: jobStatusV,
+    preferredDate: v.string(), // YYYY-MM-DD
+    preferredTime: v.string(), // HH:MM
+    images: v.array(v.string()),
+    cancelledBy: v.optional(roleV),
+    closedAt: v.optional(v.number()), // completed / cancelled / rejected
+  })
+    .index("by_customer", ["customerId"])
+    .index("by_vendor", ["vendorId"]),
+
+  quotes: defineTable({
+    jobId: v.id("jobs"),
+    vendorId: v.id("users"),
+    customerId: v.id("users"),
+    amount: v.number(),
+    counterAmount: v.optional(v.number()),
+    status: quoteStatusV,
+  }).index("by_job", ["jobId"]),
+
+  // The job's chat. senderId is absent for system notices.
+  messages: defineTable({
+    jobId: v.id("jobs"),
+    senderId: v.optional(v.id("users")),
+    kind: v.union(v.literal("text"), v.literal("quote"), v.literal("system")),
+    body: v.string(),
+    quoteId: v.optional(v.id("quotes")),
+    systemTitle: v.optional(v.string()),
+    readAt: v.optional(v.number()), // when the other participant read it
+  }).index("by_job", ["jobId"]),
+
+  // Escrow, one per accepted quote. Amounts in whole naira. The customer pays
+  // total = amount + serviceFee + processingFee; the vendor receives `amount` on
+  // release. Payments are financial records: never deleted (see users.deleteAccount).
+  payments: defineTable({
+    jobId: v.id("jobs"),
+    quoteId: v.id("quotes"),
+    customerId: v.id("users"),
+    vendorId: v.id("users"),
+    amount: v.number(),
+    serviceFee: v.number(),
+    processingFee: v.number(),
+    total: v.number(),
+    status: paymentStatusV,
+    provider: v.union(v.literal("flutterwave"), v.literal("simulated")),
+    providerRef: v.optional(v.string()),
+    heldAt: v.optional(v.number()),
+    releasedAt: v.optional(v.number()),
+    refundedAt: v.optional(v.number()),
+    refundAmount: v.optional(v.number()),
+    retainedFee: v.optional(v.number()), // service fee kept on a late customer cancellation
+  })
+    .index("by_job", ["jobId"])
+    .index("by_vendor", ["vendorId"])
+    .index("by_customer", ["customerId"]),
+
+  reviews: defineTable({
+    jobId: v.optional(v.id("jobs")), // absent only for seeded showcase reviews
+    serviceId: v.id("services"),
+    vendorId: v.id("users"),
+    customerId: v.id("users"),
+    rating: v.number(), // 1–5
+    body: v.string(),
+    response: v.optional(v.string()),
+  })
+    .index("by_vendor", ["vendorId"])
+    .index("by_service", ["serviceId"])
+    .index("by_job", ["jobId"])
+    .index("by_customer", ["customerId"]),
+
+  notifications: defineTable({
+    userId: v.id("users"),
+    type: notificationTypeV,
+    title: v.string(),
+    body: v.string(),
+    read: v.boolean(),
+    jobId: v.optional(v.id("jobs")),
+  }).index("by_user", ["userId"]),
 
   // Product feedback sent from the dashboard Feedback screen.
   feedback: defineTable({
     userId: v.id("users"),
-    role: v.optional(v.union(v.literal("customer"), v.literal("vendor"))),
+    role: v.optional(roleV),
     kind: v.union(v.literal("suggestion"), v.literal("problem"), v.literal("compliment"), v.literal("other")),
     rating: v.optional(v.number()),
     message: v.string(),

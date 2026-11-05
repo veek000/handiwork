@@ -2,7 +2,11 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useMutation } from "convex/react";
 import type { Job, Rating, Review, User } from "@/types";
+import { live } from "@/lib/convexApi";
+import { useRunner } from "@/lib/useRunner";
+import { ActionError } from "@/components/ActionError";
 import { PageNav } from "@/components/PageNav";
 import { SegmentedControl } from "@/components/SegmentedControl";
 import { SortSelect } from "@/components/SortSelect";
@@ -24,23 +28,26 @@ const PAGE_SIZE = 4;
  * "Add a Review" (→ Rate Your Experience → Thanks for the Feedback) or, once reviewed,
  * the review with Edit / Delete; cancelled + rejected jobs are listed there too, without
  * actions (the design doesn't place them; they shouldn't vanish). Sort Recent/Oldest,
- * 4 per page. State changes are local only until Convex is wired.
+ * 4 per page. Live data: cancel / review / delete call Convex and the list updates by
+ * itself; a failure shows the error banner.
  */
 export function CustomerJobsScreen({
-  jobs: initialJobs,
-  reviews: initialReviews,
+  jobs,
+  reviews: reviewList,
   vendors,
-  customer,
 }: {
   jobs: Job[];
   reviews: Review[];
   vendors: User[];
-  customer: User;
 }) {
-  const [jobs, setJobs] = useState(initialJobs);
-  const [reviews, setReviews] = useState<Record<string, Review>>(
-    () => Object.fromEntries(initialReviews.filter((r) => r.jobId).map((r) => [r.jobId!, r])),
+  const reviews = useMemo<Record<string, Review>>(
+    () => Object.fromEntries(reviewList.filter((r) => r.jobId).map((r) => [r.jobId!, r])),
+    [reviewList],
   );
+  const { run, busy, error, clearError } = useRunner();
+  const cancelJob = useMutation(live.cancelJob);
+  const saveReviewM = useMutation(live.saveReview);
+  const deleteReview = useMutation(live.deleteReview);
   const [tab, setTab] = useState<Tab>("active");
   const [sort, setSort] = useState("recent");
   const [page, setPage] = useState(1);
@@ -51,7 +58,7 @@ export function CustomerJobsScreen({
     const inTab = jobs.filter((j) => (tab === "active" ? ACTIVE.includes(j.status) : !ACTIVE.includes(j.status)));
     // Completed tab: finished jobs first, then cancelled / rejected; each by date.
     const rank = (j: Job) => (tab === "completed" && j.status !== "completed" ? 1 : 0);
-    return inTab.sort(
+    return [...inTab].sort(
       (a, b) => rank(a) - rank(b) || (sort === "recent" ? 1 : -1) * b.createdAt.localeCompare(a.createdAt),
     );
   }, [jobs, tab, sort]);
@@ -66,23 +73,7 @@ export function CustomerJobsScreen({
   const panelJob = panel ? jobs.find((j) => j.id === panel.jobId) : undefined;
 
   function saveReview(job: Job, rating: Rating, text: string) {
-    const vendor = vendorOf(job);
-    setReviews((all) => ({
-      ...all,
-      [job.id]: {
-        ...(all[job.id] ?? {
-          id: `rev_local_${job.id}`,
-          authorName: customer.fullName,
-          authorLocation: customer.location,
-          authorAvatarUrl: customer.avatarUrl,
-          serviceId: job.serviceId,
-          vendorId: vendor?.id ?? job.vendorId,
-          jobId: job.id,
-        }),
-        rating,
-        body: text,
-      },
-    }));
+    return run(() => saveReviewM({ jobId: job.id, rating, body: text }), "We couldn't save your review. Please try again.");
   }
 
   return (
@@ -193,11 +184,15 @@ export function CustomerJobsScreen({
       {panel?.kind === "cancel" && panelJob ? (
         <ConfirmPanel
           title="Confirm Job Cancellation"
-          text="Are you sure you want to cancel this job? This action cannot be undone."
+          text={
+            panelJob.status === "in_progress"
+              ? "Cancel this job? You've already paid, so you'll be refunded the quote amount; the 2% service fee is kept as the cancellation fee. This can't be undone."
+              : "Cancel this job? Nothing has been paid yet, so there's no charge. This can't be undone."
+          }
           onClose={() => setPanel(null)}
-          onConfirm={() => {
-            setJobs((all) => all.map((j) => (j.id === panelJob.id ? { ...j, status: "cancelled" } : j)));
-            setPanel(null);
+          onConfirm={async () => {
+            if (busy) return;
+            if (await run(() => cancelJob({ id: panelJob.id }), "We couldn't cancel the job. Please try again.")) setPanel(null);
           }}
         />
       ) : null}
@@ -207,13 +202,9 @@ export function CustomerJobsScreen({
           text="Are you sure you want to delete your review? This action cannot be undone."
           confirmLabel="Delete"
           onClose={() => setPanel(null)}
-          onConfirm={() => {
-            setReviews((all) => {
-              const next = { ...all };
-              delete next[panelJob.id];
-              return next;
-            });
-            setPanel(null);
+          onConfirm={async () => {
+            if (busy) return;
+            if (await run(() => deleteReview({ jobId: panelJob.id }))) setPanel(null);
           }}
         />
       ) : null}
@@ -225,6 +216,7 @@ export function CustomerJobsScreen({
           onSubmit={(rating, text) => saveReview(panelJob, rating, text)}
         />
       ) : null}
+      <ActionError error={error} onDismiss={clearError} />
     </div>
   );
 }

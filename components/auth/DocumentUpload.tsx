@@ -6,9 +6,10 @@ import { useRef, useState } from "react";
  * DocumentUpload — the Verification-step ID uploader (Figma vendor signup, node
  * 363:12374). A dashed card with a file icon, "Upload Document" title + accepted-
  * formats subtitle, and a "Select Image" secondary button that opens a hidden
- * <input type="file"> (client-side only — the file is NOT uploaded anywhere yet;
- * real storage lands with the backend file pass, like AvatarUpload). On pick, the
- * card swaps its subtitle for the chosen filename. Controlled by the parent via the
+ * <input type="file">. On pick, the card swaps its subtitle for the chosen filename
+ * and `onFile` receives the name and the File (callers that store it upload it — My
+ * Services does; the signup ID step doesn't yet). Files over 10MB or not JPG/PNG/GIF
+ * are refused with a message. Controlled by the parent via the
  * optional `fileName`/`onFile` pair so the wizard can reflect the selection.
  * `title`/`hint` default to the Verification copy; Book Service reuses it as
  * "Upload image". Styling: .hw-uploader*.
@@ -20,18 +21,25 @@ export function DocumentUpload({
   hint = "JPG, PNG, or GIF (max 10MB)",
 }: {
   fileName?: string;
-  onFile?: (name: string | undefined) => void;
+  onFile?: (name: string | undefined, file?: File) => void;
   title?: string;
   hint?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [localName, setLocalName] = useState<string | undefined>();
+  const [problem, setProblem] = useState<string | null>(null);
   const name = fileName ?? localName;
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const picked = e.target.files?.[0]?.name;
-    setLocalName(picked);
-    onFile?.(picked);
+    const file = e.target.files?.[0];
+    if (file && (!/^image\/(jpeg|png|gif)$/.test(file.type) || file.size > 10 * 1024 * 1024)) {
+      setProblem("Use a JPG, PNG or GIF under 10MB.");
+      e.target.value = "";
+      return;
+    }
+    setProblem(null);
+    setLocalName(file?.name);
+    onFile?.(file?.name, file);
   }
 
   return (
@@ -50,8 +58,8 @@ export function DocumentUpload({
         </span>
         <div className="hw-uploader__text">
           <span className="hw-uploader__title">{title}</span>
-          <span className="hw-uploader__subtitle">
-            {name ?? hint}
+          <span className="hw-uploader__subtitle" role={problem ? "alert" : undefined}>
+            {problem ?? name ?? hint}
           </span>
         </div>
       </div>

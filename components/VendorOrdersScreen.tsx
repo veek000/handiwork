@@ -2,7 +2,11 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useMutation } from "convex/react";
 import type { Job, User } from "@/types";
+import { live } from "@/lib/convexApi";
+import { useRunner } from "@/lib/useRunner";
+import { ActionError } from "@/components/ActionError";
 import { PageNav } from "@/components/PageNav";
 import { SegmentedControl } from "@/components/SegmentedControl";
 import { SortSelect } from "@/components/SortSelect";
@@ -23,10 +27,13 @@ const PAGE_SIZE = 8;
  * Vendor My Orders (Figma desktop 6619:31395 / 31694, mobile 6619:43443 / 43557).
  * Active Job: Mark as Completed (→ confirm → "Marked as Completed", awaiting the
  * customer) + Cancel Job (→ confirm). Service Request: request stamp + Review Request
- * → Job Details. 2-up on desktop, 8 per page, Sort Recent/Oldest. Local state only.
+ * → Job Details. 2-up on desktop, 8 per page, Sort Recent/Oldest. Actions call Convex
+ * (jobs:markCompleted / jobs:cancel); the list is live.
  */
-export function VendorOrdersScreen({ jobs: initial, customers }: { jobs: Job[]; customers: User[] }) {
-  const [jobs, setJobs] = useState(initial);
+export function VendorOrdersScreen({ jobs, customers }: { jobs: Job[]; customers: User[] }) {
+  const { run, busy, error, clearError } = useRunner();
+  const markCompleted = useMutation(live.markCompleted);
+  const cancelJob = useMutation(live.cancelJob);
   const [tab, setTab] = useState<Tab>("active");
   const [sort, setSort] = useState("recent");
   const [page, setPage] = useState(1);
@@ -44,7 +51,6 @@ export function VendorOrdersScreen({ jobs: initial, customers }: { jobs: Job[]; 
   const current = Math.min(page, pages);
   const shown = list.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
   const panelJob = panel ? jobs.find((j) => j.id === panel.jobId) : undefined;
-  const setStatus = (id: string, status: Job["status"]) => setJobs((all) => all.map((j) => (j.id === id ? { ...j, status } : j)));
 
   return (
     <div className="hw-jobs">
@@ -137,23 +143,24 @@ export function VendorOrdersScreen({ jobs: initial, customers }: { jobs: Job[]; 
           title="Confirm Job Completion"
           text={`Let ${customerOf(panelJob)?.fullName.split(" ")[0] ?? "the customer"} know this job is done? They'll confirm before the escrow payment is released to you.`}
           onClose={() => setPanel(null)}
-          onConfirm={() => {
-            setStatus(panelJob.id, "marked_completed");
-            setPanel(null);
+          onConfirm={async () => {
+            if (busy) return;
+            if (await run(() => markCompleted({ id: panelJob.id }))) setPanel(null);
           }}
         />
       ) : null}
       {panel?.kind === "cancel" && panelJob ? (
         <ConfirmPanel
           title="Confirm Job Cancellation"
-          text="Are you sure you want to cancel this job? This action cannot be undone."
           onClose={() => setPanel(null)}
-          onConfirm={() => {
-            setStatus(panelJob.id, "cancelled");
-            setPanel(null);
+          text="Cancel this job? The customer gets a full refund of anything they paid into escrow."
+          onConfirm={async () => {
+            if (busy) return;
+            if (await run(() => cancelJob({ id: panelJob.id }))) setPanel(null);
           }}
         />
       ) : null}
+      <ActionError error={error} onDismiss={clearError} />
     </div>
   );
 }

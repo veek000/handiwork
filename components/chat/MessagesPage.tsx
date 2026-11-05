@@ -3,7 +3,8 @@
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import type { UserRole } from "@/types";
-import { useConversations, useCurrentUser, useMessages } from "@/hooks";
+import { useThreads, useViewer } from "@/hooks";
+import { LoadingState } from "@/components/LoadingState";
 import { ConversationList } from "./ConversationList";
 import { ChatThread } from "./ChatThread";
 
@@ -13,28 +14,23 @@ import { ChatThread } from "./ChatThread";
  * Figma desktop layout (291:47200): two columns aligned at the top —
  *   left  361px — Back + "Messages" + conversation list
  *   right 764px — chat thread (starts on the same row as Back, not below it)
- * Mobile: list OR full-screen thread.
+ * Mobile: list OR full-screen thread. One thread per job (live from Convex); `?job=`
+ * opens that job's thread.
  */
 export function MessagesPage({ role, initialJobId }: { role: UserRole; initialJobId?: string }) {
-  const user = useCurrentUser(role);
-  const conversations = useConversations(role);
-  const allMessages = useMessages();
+  const user = useViewer();
+  const threads = useThreads();
+  const conversations = useMemo(() => threads ?? [], [threads]);
   const homeHref = role === "customer" ? "/customer" : "/vendor";
 
-  // `?job=` (My Jobs "View Chat") opens that job's thread — chats are scoped per Job.
-  const [activeId, setActiveId] = useState<string | null>(
-    () => (initialJobId ? conversations.find((c) => c.jobId === initialJobId)?.id ?? null : null),
-  );
+  // `?job=` (My Jobs "View Chat", notifications) opens that job's thread — a thread's
+  // id is its job id.
+  const [activeId, setActiveId] = useState<string | null>(initialJobId ?? null);
 
   const active = useMemo(
     () => conversations.find((c) => c.id === activeId) ?? null,
     [conversations, activeId],
   );
-
-  const threadMessages = useMemo(() => {
-    if (!activeId) return [];
-    return allMessages.filter((m) => m.conversationId === activeId);
-  }, [allMessages, activeId]);
 
   const select = useCallback((id: string) => setActiveId(id), []);
   const clear = useCallback(() => setActiveId(null), []);
@@ -54,23 +50,20 @@ export function MessagesPage({ role, initialJobId }: { role: UserRole; initialJo
             Back
           </Link>
           <h1 className="hw-msg__title">Messages</h1>
-          <ConversationList
-            conversations={conversations}
-            activeId={activeId}
-            onSelect={select}
-          />
+          {threads === undefined ? (
+            <LoadingState label="Loading chats…" />
+          ) : conversations.length ? (
+            <ConversationList conversations={conversations} activeId={activeId} onSelect={select} />
+          ) : (
+            <p className="hw-searchpage__emptysub">
+              {role === "customer" ? "No chats yet. Book a service and your chat with the provider starts here." : "No chats yet. They start when a customer requests your service."}
+            </p>
+          )}
         </div>
 
         <div className="hw-msg__thread-pane">
-          {active ? (
-            <ChatThread
-              key={active.id}
-              conversation={active}
-              initialMessages={threadMessages}
-              viewerId={user.id}
-              viewerRole={role}
-              onBack={clear}
-            />
+          {active && user ? (
+            <ChatThread key={active.id} conversation={active} viewerId={user.id} viewerRole={role} onBack={clear} />
           ) : (
             /* Figma empty pane (298:32555 / 300:11030 desktop · 290:23050 / 300:25699 mobile):
                illustration-29 + title + select-a-user copy */

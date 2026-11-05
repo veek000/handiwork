@@ -19,7 +19,8 @@ export function ReviewPanel({
 }: {
   initialRating?: Rating;
   initialText?: string;
-  onSubmit: (rating: Rating, text: string) => void;
+  /** resolve false to keep the panel open (the save failed) */
+  onSubmit: (rating: Rating, text: string) => void | Promise<boolean | void>;
   onClose: () => void;
 }) {
   const [rating, setRating] = useState<number>(initialRating ?? 0);
@@ -56,9 +57,9 @@ export function ReviewPanel({
           variant="primary"
           block
           disabled={rating < 1}
-          onClick={() => {
-            onSubmit(rating as Rating, text.trim());
-            setDone(true);
+          onClick={async () => {
+            const ok = await onSubmit(rating as Rating, text.trim());
+            if (ok !== false) setDone(true);
           }}
         >
           Submit Review

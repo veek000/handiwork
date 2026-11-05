@@ -1,9 +1,12 @@
+"use client";
+
+import Link from "next/link";
 import { useCategories, useServices } from "@/hooks";
-import { Button } from "@/components/Button";
 import { SearchBar } from "@/components/SearchBar";
 import { CategoryTile } from "@/components/CategoryTile";
 import { ServiceCard } from "@/components/ServiceCard";
 import { InviteCarousel } from "@/components/InviteCarousel";
+import { LoadingState } from "@/components/LoadingState";
 
 // Customer Home (Figma 291:35211 desktop / 290:3862 mobile). Backed by real mock data:
 // categories → mocks/categories, services → mocks/services. The signed-in user +
@@ -30,7 +33,7 @@ export default function CustomerHome() {
       <section className="hw-section">
         <div className="hw-section__head">
           <h2 className="hw-section__title">Browse all categories</h2>
-          <a href="#" className="hw-link">View all</a>
+          <Link href="/customer/search" className="hw-link">View all</Link>
         </div>
         <div className="hw-cat-grid">
           {categories.map((c) => (
@@ -46,18 +49,28 @@ export default function CustomerHome() {
       <section className="hw-section">
         <div className="hw-section__head">
           <h2 className="hw-section__title">Popular Services</h2>
-          <a href="#" className="hw-link">View all</a>
+          <Link href="/customer/search" className="hw-link">View all</Link>
         </div>
-        <div className="hw-svc-grid">
-          {/* 6 on mobile (2×3), 5 on desktop (the 6th is hidden ≥1024px). */}
-          {services.slice(0, 6).map((s) => (
-            <ServiceCard
-              key={s.id}
-              service={s}
-              action={<Button variant="primary" block>Book Service</Button>}
-            />
-          ))}
-        </div>
+        {services === undefined ? (
+          <LoadingState label="Loading services…" />
+        ) : services.length === 0 ? (
+          <p className="hw-searchpage__emptysub">No services listed yet. Check back soon.</p>
+        ) : (
+          <div className="hw-svc-grid">
+            {/* 6 on mobile (2×3), 5 on desktop (the 6th is hidden ≥1024px). */}
+            {services.slice(0, 6).map((s) => (
+              <ServiceCard
+                key={s.id}
+                service={s}
+                action={
+                  <Link href={`/customer/services/${s.id}`} className="hw-button hw-button--primary hw-button--block">
+                    Book Service
+                  </Link>
+                }
+              />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

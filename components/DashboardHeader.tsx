@@ -41,7 +41,7 @@ export function DashboardHeader({
       <LocationTag user={user} className="hw-dash-header__location" />
 
       <div className="hw-dash-header__right">
-        <NotificationBell notifications={notifications} href={notificationsHref} />
+        <NotificationBell notifications={notifications} href={notificationsHref} role={role} />
 
         <ProfileMenu role={role} user={user} />
       </div>

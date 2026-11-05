@@ -15,7 +15,7 @@ export function ProviderResponse({
   defaultOpen = false,
 }: {
   response: string;
-  vendor: { name: string; avatarUrl?: string };
+  vendor: { name: string; avatarUrl?: string; verified?: boolean };
   label?: string;
   defaultOpen?: boolean;
 }) {
@@ -24,7 +24,7 @@ export function ProviderResponse({
   return (
     <div className="hw-review__reply">
       <button type="button" className="hw-review__toggle" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((o) => !o)}>
-        <Avatar name={vendor.name} src={vendor.avatarUrl} size={40} verified />
+        <Avatar name={vendor.name} src={vendor.avatarUrl} size={40} verified={vendor.verified} />
         <span className="hw-review__replytitle">{label}</span>
         <hw-icon suppressHydrationWarning name={open ? "angle-up" : "angle-down"} variant="hollow" size="16"></hw-icon>
       </button>

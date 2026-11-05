@@ -8,6 +8,7 @@ import { PageNav } from "@/components/PageNav";
 import { SearchField } from "@/components/SearchField";
 import { ServiceListItem } from "@/components/ServiceListItem";
 import { FilterPanel } from "@/components/FilterPanel";
+import { LoadingState } from "@/components/LoadingState";
 import { POPULAR_SEARCHES } from "@/data/popularSearches";
 import { EMPTY_FILTERS, activeFilterCount, searchServices, type SearchFilters } from "@/lib/search";
 
@@ -20,7 +21,9 @@ import { EMPTY_FILTERS, activeFilterCount, searchServices, type SearchFilters } 
 export function SearchScreen({ query }: { query: string }) {
   const router = useRouter();
   const pathname = usePathname();
-  const services = useServices();
+  const live = useServices();
+  const loading = live === undefined;
+  const services = useMemo(() => live ?? [], [live]);
   const [filters, setFilters] = useState<SearchFilters>(EMPTY_FILTERS);
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -34,9 +37,9 @@ export function SearchScreen({ query }: { query: string }) {
         <PageNav backHref="/customer" crumbs={[{ label: "Home", href: "/customer" }, { label: "Search" }]} />
         {/* keyed by query so the field resets when the URL changes (chip click, Back) */}
         <SearchField key={query} initialValue={query} onSubmit={go} onClear={() => go("")} />
-        {query ? (
+        {query && !loading ? (
           <p className="hw-searchpage__count" role="status">
-            {results.length} {results.length === 1 ? "result" : "results"} for <b>&ldquo;{query}&rdquo;</b> in your location
+            {results.length} {results.length === 1 ? "result" : "results"} for <b>&ldquo;{query}&rdquo;</b>
           </p>
         ) : null}
       </div>
@@ -71,7 +74,9 @@ export function SearchScreen({ query }: { query: string }) {
             </button>
           </div>
 
-          {results.length ? (
+          {loading ? (
+            <LoadingState label="Searching…" />
+          ) : results.length ? (
             <div className="hw-searchpage__grid">
               {results.map((s) => (
                 <ServiceListItem key={s.id} service={s} href={`/customer/services/${s.id}?q=${encodeURIComponent(query)}`} />

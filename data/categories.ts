@@ -1,6 +1,6 @@
-// Mock service categories — the "Browse all categories" grid on the customer Home.
-// Names + illustrations match the Figma exactly; the illustrations were exported from
-// the design into public/assets/illustration/category/. Swappable fixture data.
+// Service categories — the "Browse all categories" grid on the customer Home and the
+// category choices when a vendor lists a service. Reference data, not user data:
+// names + illustrations match the Figma (public/assets/illustration/category/).
 import type { Category } from "@/types";
 
 const DIR = "/assets/illustration/category";

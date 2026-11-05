@@ -2,7 +2,6 @@
 
 import { useRef, useState, type KeyboardEvent } from "react";
 import { useQuery } from "convex/react";
-import type { User } from "@/types";
 import { PageNav } from "@/components/PageNav";
 import { viewerRef } from "@/app/(auth)/useRoleRedirect";
 import { DEFAULT_NOTIFICATION_PREFS, type ViewerDoc } from "@/lib/convexApi";
@@ -26,18 +25,16 @@ const TABS: { value: SettingsTab; label: string; icon: string; title: string; de
  * Desktop: a section list on the left, the active section's card on the right. Mobile:
  * the sections become a scrolling tab row above the card. `?tab=` deep-links a section.
  *
- * Reads the signed-in account (users:viewer) and saves to Convex. `fallbackUser` (mock)
- * only fills the form when there is no account (local NEXT_PUBLIC_DEV_SKIP_AUTH);
- * saving then fails with the signed-out message.
+ * Reads the signed-in account (users:viewer) and saves to Convex. With no account (only
+ * possible under the local NEXT_PUBLIC_DEV_SKIP_AUTH bypass) the form starts empty and
+ * saving fails with the signed-out message.
  */
 export function SettingsScreen({
   role,
-  fallbackUser,
   serviceOptions,
   initialTab,
 }: {
   role: "customer" | "vendor";
-  fallbackUser: User;
   serviceOptions: string[];
   initialTab?: string;
 }) {
@@ -47,19 +44,18 @@ export function SettingsScreen({
   const viewer = useQuery(viewerRef) as ViewerDoc | null | undefined;
 
   const v = viewer ?? null;
-  const vendorFallback = fallbackUser.role === "vendor" ? fallbackUser : null;
   const profile = {
-    fullName: v ? v.fullName || v.name || "" : fallbackUser.fullName,
-    countryCode: v ? v.countryCode || "+234" : fallbackUser.countryCode,
-    phone: v ? v.phone || "" : fallbackUser.phone,
-    state: v ? v.state || "" : fallbackUser.state,
-    area: v ? v.area || "" : fallbackUser.area,
-    address: v ? v.address || "" : fallbackUser.address,
+    fullName: v?.fullName || v?.name || "",
+    countryCode: v?.countryCode || "+234",
+    phone: v?.phone || "",
+    state: v?.state || "",
+    area: v?.area || "",
+    address: v?.address || "",
   };
   const business = {
     service: v ? v.service || "" : "",
     yearsOfExperience: v ? v.yearsOfExperience || "" : "",
-    businessBio: v ? v.businessBio || "" : vendorFallback?.bio ?? "",
+    businessBio: v?.businessBio || "",
   };
   // Remount the sections when the source switches (loading → account) so their form
   // state starts from the real values.
@@ -122,11 +118,11 @@ export function SettingsScreen({
           </header>
 
           {active.value === "profile" ? (
-            <ProfileSettings key={source} initial={profile} email={v?.email ?? fallbackUser.email}
-              avatarUrl={v ? v.image : fallbackUser.avatarUrl} roleLabel={role === "vendor" ? "Service Provider" : "Customer"} />
+            <ProfileSettings key={source} initial={profile} email={v?.email ?? ""}
+              avatarUrl={v?.image} roleLabel={role === "vendor" ? "Service Provider" : "Customer"} />
           ) : null}
           {active.value === "business" ? (
-            <BusinessSettings key={source} initial={business} serviceOptions={serviceOptions} idSubmitted={!!v?.governmentIdNumber} />
+            <BusinessSettings key={source} initial={business} serviceOptions={serviceOptions} idSubmitted={!!v?.hasGovernmentId} />
           ) : null}
           {active.value === "notifications" ? (
             <NotificationSettings key={source} role={role} initial={v?.notificationPrefs ?? DEFAULT_NOTIFICATION_PREFS} />

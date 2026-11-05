@@ -1,13 +1,7 @@
-// DEMO-ONLY relative-time formatting.
-//
-// The mock data uses fixed historical timestamps (see mocks/*, Phase 2.5), so a real
-// `Date.now()` formatter would render everything as "months ago". Instead we format
-// against a single fixed reference date so the UI reads like the Figma ("5 min ago",
-// "2 hours ago"). This is NOT real relative-time behaviour — once the app has live
-// data, drop MOCK_REFERENCE_DATE and pass `new Date()` as the reference.
-export const MOCK_REFERENCE_DATE = new Date("2025-09-20T17:05:00+01:00");
+// Time + money formatting for the dashboards. Relative times are measured from now
+// (the data is live; the old fixed mock reference date is gone).
 
-export function formatRelativeTime(iso: string, reference: Date = MOCK_REFERENCE_DATE): string {
+export function formatRelativeTime(iso: string, reference: Date = new Date()): string {
   const diffMs = reference.getTime() - new Date(iso).getTime();
   const min = Math.round(diffMs / 60000);
   const hr = Math.round(diffMs / 3_600_000);
@@ -25,8 +19,8 @@ export function formatNaira(amount: number): string {
   return `NGN${amount.toLocaleString("en-US")}`;
 }
 
-/** Chat list / bubble clock — "4:30 PM" or "Yesterday" relative to mock ref. */
-export function formatChatTime(iso: string, reference: Date = MOCK_REFERENCE_DATE): string {
+/** Chat list / bubble clock — "4:30 PM", "Yesterday" or "05 Nov". */
+export function formatChatTime(iso: string, reference: Date = new Date()): string {
   const d = new Date(iso);
   const sameDay =
     d.getFullYear() === reference.getFullYear() &&

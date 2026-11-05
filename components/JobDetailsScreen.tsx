@@ -3,7 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useMutation } from "convex/react";
 import type { Job, User } from "@/types";
+import { live } from "@/lib/convexApi";
+import { useRunner } from "@/lib/useRunner";
+import { ActionError } from "@/components/ActionError";
 import { PageNav } from "@/components/PageNav";
 import { Avatar } from "@/components/Avatar";
 import { ConfirmPanel } from "@/components/ConfirmPanel";
@@ -19,8 +23,10 @@ import { formatRelativeTime } from "@/lib/time";
  */
 export function JobDetailsScreen({ job, customer }: { job: Job; customer?: User }) {
   const router = useRouter();
-  const [status, setStatus] = useState(job.status);
+  const status = job.status;
   const [confirm, setConfirm] = useState(false);
+  const { run, busy, error, clearError } = useRunner();
+  const reject = useMutation(live.rejectJob);
   const chatHref = `/vendor/messages?job=${job.id}`;
   const open = status === "pending" || status === "quoted";
 
@@ -68,13 +74,16 @@ export function JobDetailsScreen({ job, customer }: { job: Job; customer?: User 
           text={`Decline ${customer?.fullName.split(" ")[0] ?? "this customer"}'s request? They'll be notified so they can book someone else.`}
           confirmLabel="Reject"
           onClose={() => setConfirm(false)}
-          onConfirm={() => {
-            setStatus("rejected");
-            setConfirm(false);
-            router.push("/vendor/orders");
+          onConfirm={async () => {
+            if (busy) return;
+            if (await run(() => reject({ id: job.id }))) {
+              setConfirm(false);
+              router.push("/vendor/orders");
+            }
           }}
         />
       ) : null}
+      <ActionError error={error} onDismiss={clearError} />
     </div>
   );
 }

@@ -1,7 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useMutation } from "convex/react";
 import type { Service } from "@/types";
+import { live } from "@/lib/convexApi";
+import { useRunner } from "@/lib/useRunner";
+import { ActionError } from "@/components/ActionError";
 import { PageNav } from "@/components/PageNav";
 import { ServiceListItem } from "@/components/ServiceListItem";
 import { FilterPanel } from "@/components/FilterPanel";
@@ -15,18 +19,21 @@ type Panel = { kind: "filter" } | { kind: "add" } | { kind: "edit" | "delete"; i
  * Vendor My Services (Figma desktop 6619:30286 / 30518 / 30816, mobile 6619:42699 /
  * 42847 / 43047): the vendor's services with Edit / Delete, "+ Add New Service", Filter
  * By. Add / Edit open ServiceFormPanel; Delete asks first (not in Figma — destructive).
- * Changes are local only until Convex is wired.
+ * Saved to Convex (services:create / update / archive — "Delete" archives, so past jobs
+ * keep their service). A picked photo is uploaded to Convex storage first.
  */
 export function VendorServicesScreen({
-  services: initial,
+  services,
   categories,
-  vendorId,
 }: {
   services: Service[];
   categories: string[];
-  vendorId: string;
 }) {
-  const [services, setServices] = useState(initial);
+  const { run, busy, error, clearError } = useRunner();
+  const createService = useMutation(live.createService);
+  const updateService = useMutation(live.updateService);
+  const archiveService = useMutation(live.archiveService);
+  const uploadUrl = useMutation(live.uploadUrl);
   const [filters, setFilters] = useState<SearchFilters>(EMPTY_FILTERS);
   const [panel, setPanel] = useState<Panel>(null);
   // Filters apply as on Search, but with no sort chosen the vendor's own order is kept
@@ -41,29 +48,23 @@ export function VendorServicesScreen({
   const target = panel && "id" in panel ? services.find((s) => s.id === panel.id) : undefined;
   const close = () => setPanel(null);
 
-  function save(draft: ServiceDraft) {
-    if (panel?.kind === "edit" && target) {
-      setServices((all) =>
-        all.map((s) => (s.id === target.id ? { ...s, category: draft.category, price: draft.price, priceUnit: draft.priceUnit, description: draft.description } : s)),
-      );
-    } else {
-      setServices((all) => [
-        {
-          id: `svc_local_${Date.now()}`,
-          title: draft.category,
-          category: draft.category,
-          description: draft.description,
-          price: draft.price,
-          priceUnit: draft.priceUnit,
-          images: ["/assets/img/service-cleaner.jpg"],
-          providerId: vendorId,
-          ratingAverage: 0,
-          reviewCount: 0,
-        },
-        ...all,
-      ]);
-    }
-    close();
+  async function upload(file: File) {
+    const url = await uploadUrl({});
+    const res = await fetch(url, { method: "POST", headers: { "Content-Type": file.type }, body: file });
+    if (!res.ok) throw new Error("upload failed");
+    const { storageId } = (await res.json()) as { storageId: string };
+    return storageId;
+  }
+
+  async function save(draft: ServiceDraft) {
+    if (busy) return;
+    const ok = await run(async () => {
+      const imageStorageId = draft.file ? await upload(draft.file) : undefined;
+      const fields = { category: draft.category, price: draft.price, priceUnit: draft.priceUnit, description: draft.description, imageStorageId };
+      if (panel?.kind === "edit" && target) await updateService({ id: target.id, ...fields });
+      else await createService(fields);
+    }, "We couldn't save the service. Please try again.");
+    if (ok) close();
   }
 
   return (
@@ -120,12 +121,12 @@ export function VendorServicesScreen({
           text={`Remove "${target.title}" from your services? Customers will no longer be able to book it.`}
           confirmLabel="Delete"
           onClose={close}
-          onConfirm={() => {
-            setServices((all) => all.filter((s) => s.id !== target.id));
-            close();
+          onConfirm={async () => {
+            if (!busy && (await run(() => archiveService({ id: target.id })))) close();
           }}
         />
       ) : null}
+      <ActionError error={error} onDismiss={clearError} />
     </div>
   );
 }

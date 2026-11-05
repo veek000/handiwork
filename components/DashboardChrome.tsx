@@ -4,7 +4,8 @@ import { useEffect, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useConvexAuth, useQuery } from "convex/react";
 import { viewerRef } from "@/app/(auth)/useRoleRedirect";
-import type { User, Notification } from "@/types";
+import type { User } from "@/types";
+import { useNotifications, useUnreadMessages } from "@/hooks";
 import { Sidebar } from "@/components/Sidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { LocationTag } from "@/components/LocationTag";
@@ -18,8 +19,8 @@ import { LocationTag } from "@/components/LocationTag";
  * It is also the dashboards' route guard: signed-out visitors go to /login, and a signed-in
  * account on the other role's dashboard goes to its own (OAuth accounts without a role
  * count as customers, as in useRoleRedirect). Nothing renders until that is settled. The
- * header / drawer show the real account's name, email, photo and state; the rest of the
- * dashboard data is still mock until it moves into Convex.
+ * header / drawer show the real account; notifications and the unread-messages badge
+ * are live Convex subscriptions.
  *
  * Local only: NEXT_PUBLIC_DEV_SKIP_AUTH=1 skips the guard (ignored in production builds)
  * so screens can be checked without signing in.
@@ -35,25 +36,29 @@ type Viewer = {
   state?: string;
   area?: string;
 };
-export function DashboardChrome({
-  role,
-  user,
-  notifications,
-  messagesCount,
-  children,
-}: {
-  role: "customer" | "vendor";
-  user: User;
-  notifications: Notification[];
-  messagesCount: number;
-  children: ReactNode;
-}) {
+// Shown in the chrome only under the local dev bypass, when nobody is signed in.
+const GUEST: User = {
+  id: "guest",
+  role: "customer",
+  fullName: "Guest",
+  email: "Not signed in",
+  phone: "",
+  countryCode: "+234",
+  state: "",
+  area: "",
+  address: "",
+  location: "Not set",
+};
+
+export function DashboardChrome({ role, children }: { role: "customer" | "vendor"; children: ReactNode }) {
   const [navOpen, setNavOpen] = useState(false);
   const router = useRouter();
   const { isLoading, isAuthenticated } = useConvexAuth();
   // undefined while loading, null when signed out, the account once signed in.
   const viewer = useQuery(viewerRef, SKIP_AUTH ? "skip" : {}) as Viewer | null | undefined;
   const viewerRole = viewer ? (viewer.role ?? "customer") : undefined;
+  const notifications = useNotifications() ?? [];
+  const messagesCount = useUnreadMessages() ?? 0;
 
   useEffect(() => {
     if (SKIP_AUTH || isLoading) return;
@@ -74,16 +79,15 @@ export function DashboardChrome({
     );
   }
 
-  // Real identity over the mock profile. The mock photo is dropped so a real account
-  // never shows someone else's face (Avatar falls back to initials).
+  let user = { ...GUEST, role } as User;
   if (viewer) {
     const place = [viewer.area, viewer.state].filter(Boolean).join(", ");
     user = {
       ...user,
-      fullName: viewer.fullName || viewer.name || viewer.email || user.fullName,
-      email: viewer.email ?? user.email,
+      fullName: viewer.fullName || viewer.name || viewer.email || "Handiwork user",
+      email: viewer.email ?? "",
       avatarUrl: viewer.image,
-      location: place ? `${place}, Nigeria` : user.location,
+      location: place || "Set your location",
     };
   }
 

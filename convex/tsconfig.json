@@ -12,6 +12,8 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "types": ["node"],
+    /* seed.ts imports the UI fixtures in mocks/, which use the app's "@/" alias */
+    "paths": { "@/*": ["../*"] },
 
     /* These compiler options are required by Convex */
     "target": "ESNext",

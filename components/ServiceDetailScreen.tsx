@@ -18,7 +18,7 @@ import { formatNaira } from "@/lib/time";
 /**
  * Customer Service Detail (Figma desktop 6619:3942, mobile 6619:19050) + Book Service
  * (6619:4273 / 4668, mobile 6619:19306 / 19630). Data is resolved by the server page
- * through hooks and passed in. Desktop: gallery + "About {vendor}" side by side, then
+ * live from Convex and passed in. Desktop: gallery + "About {vendor}" side by side, then
  * title/price, provider row, About Service, Book Service, Reviews, Recommended. Mobile:
  * one column with "About {vendor}" moved under Book Service.
  */
@@ -64,7 +64,7 @@ export function ServiceDetailScreen({
         </div>
 
         <Link href={profileHref} className="hw-detail__provider">
-          <Avatar name={vendor.fullName} src={vendor.avatarUrl} size={40} verified />
+          <Avatar name={vendor.fullName} src={vendor.avatarUrl} size={40} verified={vendor.verified} />
           <span className="hw-detail__providername">{vendorFirst}</span>
         </Link>
 
@@ -88,7 +88,7 @@ export function ServiceDetailScreen({
         {reviews.length ? (
           <div className="hw-detail__reviewlist">
             {reviews.map((r) => (
-              <ReviewCard key={r.id} review={r} vendor={{ name: vendor.fullName, avatarUrl: vendor.avatarUrl }} />
+              <ReviewCard key={r.id} review={r} vendor={{ name: vendor.fullName, avatarUrl: vendor.avatarUrl, verified: vendor.verified }} />
             ))}
           </div>
         ) : (
@@ -121,9 +121,8 @@ export function ServiceDetailScreen({
       {booking ? (
         <BookServicePanel
           vendorName={vendorFirst}
-          serviceOptions={vendorServices.map((s) => s.title)}
-          initialService={service.title}
-          messagesHref="/customer/messages"
+          serviceOptions={vendorServices.map((s) => ({ id: s.id, title: s.title }))}
+          initialServiceId={service.id}
           homeHref="/customer"
           onClose={() => setBooking(false)}
         />

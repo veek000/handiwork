@@ -48,10 +48,11 @@ export function BalanceCard({ wallet }: { wallet: Wallet }) {
       </div>
 
       <div className="hw-balance__actions">
-        <Button variant="secondary" block>
+        {/* Payouts (Flutterwave transfers) aren't connected yet — shown, not clickable. */}
+        <Button variant="secondary" block disabled title="Transaction history is coming soon">
           Transaction History
         </Button>
-        <Button variant="primary" block>
+        <Button variant="primary" block disabled title="Withdrawals open once payouts are connected">
           Withdraw
         </Button>
       </div>

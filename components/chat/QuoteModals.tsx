@@ -178,10 +178,16 @@ export function CounterOfferModal({
 /** Customer: pay with card / transfer */
 export function PaymentModal({
   amount,
+  breakdown,
+  busy = false,
   onClose,
   onPaid,
 }: {
+  /** total to pay */
   amount: number;
+  /** quote + fees that make up the total (PROJECT.md "Payments": fees on top, not blended) */
+  breakdown?: { quote: number; serviceFee: number; processingFee: number };
+  busy?: boolean;
   onClose: () => void;
   onPaid: (method: "card" | "transfer") => void;
 }) {
@@ -197,6 +203,14 @@ export function PaymentModal({
           Pay {formatNaira(amount)}. Funds are held in escrow until you confirm
           the job is complete.
         </p>
+        {breakdown ? (
+          <dl className="hw-modal__fees">
+            <div><dt>Quote</dt><dd>{formatNaira(breakdown.quote)}</dd></div>
+            <div><dt>Service fee (2%)</dt><dd>{formatNaira(breakdown.serviceFee)}</dd></div>
+            <div><dt>Processing fee</dt><dd>{formatNaira(breakdown.processingFee)}</dd></div>
+            <div className="hw-modal__fees-total"><dt>Total</dt><dd>{formatNaira(amount)}</dd></div>
+          </dl>
+        ) : null}
         <div className="hw-modal__pay-options">
           <button
             type="button"
@@ -221,8 +235,8 @@ export function PaymentModal({
           <Button variant="secondary" block onClick={onClose}>
             Cancel
           </Button>
-          <Button variant="primary" block onClick={() => onPaid(method)}>
-            Confirm
+          <Button variant="primary" block disabled={busy} onClick={() => onPaid(method)}>
+            {busy ? "Paying…" : "Confirm"}
           </Button>
         </div>
       </div>

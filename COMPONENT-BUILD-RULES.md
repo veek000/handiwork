@@ -92,18 +92,23 @@ acts on it either way.
 If a later screen needs a variant/state a component doesn't have, extend the
 shared component file. Never duplicate and modify inline for a single page.
 
-## Data access — hooks only, never mocks/ directly
-**No component, page, or layout may import from `mocks/` directly.** All data
-access goes through the `hooks/` layer — one hook per domain (`useCurrentUser`,
-`useServices`, `useCategories`, `useNotifications`, `useJobs`, `useReviews`,
-`useConversations`, `useWallet`). Consume data by calling the hook at the top of
-the component; pass it down as props to leaf components (`ServiceCard`,
-`NotificationList`, etc. stay prop-driven and data-source-agnostic).
+## Data access — hooks only, never Convex or mocks/ directly
+**No component, page, or layout may call Convex queries or import from `mocks/`
+directly.** Reads go through `hooks/` — live Convex subscriptions (`useServices`,
+`useServiceDetail`, `useCustomerJobs`, `useVendorJobs`, `useThreads`,
+`useThreadMessages`, `useWallet`, `useVendorReviews`, `useNotifications`,
+`useViewer`, …) that return `undefined` while loading, then the UI types from
+`types/` (shaped on the server in `convex/model.ts`). Pages handle the loading
+(`LoadingState`) and not-found cases and pass data down as props; leaf components
+(`ServiceCard`, `NotificationList`, …) stay prop-driven.
 
-`mocks/` is imported in exactly one place: `hooks/`. This is the single seam that
-swaps to Convex at Phase 6 (`useQuery` / server fetch) without touching a single
-consumer. If a screen needs data no hook exposes, add a hook — do not reach into
-`mocks/` from the component.
+Writes call the function references in `lib/convexApi.ts` (`live.*`, `api.*`) with
+`useMutation`, wrapped in `lib/useRunner` so a failure shows `ActionError` with the
+server's user-facing `ConvexError` message. Never update local copies of server data
+— the subscriptions update the screen by themselves.
+
+`mocks/` is no longer read by the app: it holds the UI-phase fixtures that
+`convex/seed.ts` turns into showcase vendors, services and reviews.
 
 ## Token updates (standing rule, not one-time)
 Every time new token exports arrive: diff against existing

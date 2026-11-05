@@ -13,9 +13,11 @@ import { NotificationList } from "./NotificationList";
 export function NotificationBell({
   notifications,
   href,
+  role,
 }: {
   notifications: Notification[];
   href: string;
+  role: "customer" | "vendor";
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -53,7 +55,7 @@ export function NotificationBell({
 
       {open ? (
         <div className="hw-notif-panel" role="dialog" aria-label="Notifications">
-          <NotificationList notifications={notifications} withHead />
+          <NotificationList notifications={notifications} role={role} withHead />
         </div>
       ) : null}
     </div>

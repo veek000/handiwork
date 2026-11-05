@@ -1,49 +1,48 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation } from "convex/react";
 import type { Notification } from "@/types";
+import { live } from "@/lib/convexApi";
 import { NotificationItem } from "./NotificationItem";
 
 /**
- * NotificationList — the shared notification content: All/Unread tabs + the "Today"
- * group + items (or the empty state), with a local "Mark all as read". Used by the
- * desktop dropdown (NotificationBell, with `withHead`) and the mobile full-screen
- * notification page (NotificationPage, without the head). Styling: .hw-notif*.
+ * NotificationList — the shared notification content: All/Unread tabs, the items
+ * grouped Today / Earlier (or the empty state), and "Mark all as read" (saved to
+ * Convex). Used by the desktop dropdown (NotificationBell, `withHead`) and the full
+ * notification page (which renders its own Mark-all beside the heading and pages the
+ * list through `pageItems`). Rows about a job link to its chat. Styling: .hw-notif*.
  */
 export function NotificationList({
   notifications,
+  role,
   withHead = false,
-  items: controlledItems,
-  onMarkAllRead,
+  pageItems,
 }: {
   notifications: Notification[];
+  role: "customer" | "vendor";
   withHead?: boolean;
-  // Optional controlled mode: when the parent owns the read-state (the mobile page,
-  // which renders its own "Mark all as read" beside the heading), it passes items +
-  // the handler. Uncontrolled otherwise (the desktop dropdown manages its own state).
-  items?: Notification[];
-  onMarkAllRead?: () => void;
+  /** page the visible list (the full page); receives the filtered list */
+  pageItems?: (list: Notification[]) => Notification[];
 }) {
-  const [localItems, setLocalItems] = useState(notifications);
   const [tab, setTab] = useState<"all" | "unread">("all");
+  const markAll = useMutation(live.markAllNotificationsRead);
 
-  const items = controlledItems ?? localItems;
-  const markAllRead =
-    onMarkAllRead ?? (() => setLocalItems((list) => list.map((n) => ({ ...n, read: true }))));
-
-  const unread = items.filter((n) => !n.read);
-  const shown = tab === "all" ? items : unread;
+  const unread = notifications.filter((n) => !n.read);
+  const filtered = tab === "all" ? notifications : unread;
+  const shown = pageItems ? pageItems(filtered) : filtered;
+  const today = new Date().toDateString();
+  const groups = [
+    { label: "Today", items: shown.filter((n) => new Date(n.createdAt).toDateString() === today) },
+    { label: "Earlier", items: shown.filter((n) => new Date(n.createdAt).toDateString() !== today) },
+  ].filter((g) => g.items.length);
 
   return (
     <div className="hw-notif-body">
       {withHead ? (
         <div className="hw-notif-panel__head">
           <span className="hw-notif-panel__title">Notification</span>
-          <button
-            type="button"
-            className="hw-link hw-notif-panel__mark"
-            onClick={markAllRead}
-          >
+          <button type="button" className="hw-link hw-notif-panel__mark" disabled={!unread.length} onClick={() => markAll({})}>
             Mark all as read
           </button>
         </div>
@@ -62,7 +61,7 @@ export function NotificationList({
         </button>
       </div>
 
-      {shown.length === 0 ? (
+      {groups.length === 0 ? (
         <div className="hw-notif-empty">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className="hw-notif-empty__art" src="/assets/illustration/illustration-16.svg" alt="" aria-hidden="true" />
@@ -71,12 +70,16 @@ export function NotificationList({
         </div>
       ) : (
         <div className="hw-notif-scroll">
-          <p className="hw-notif-group">Today</p>
-          <ul className="hw-notif-list">
-            {shown.map((n) => (
-              <NotificationItem key={n.id} notification={n} />
-            ))}
-          </ul>
+          {groups.map((g) => (
+            <div key={g.label}>
+              <p className="hw-notif-group">{g.label}</p>
+              <ul className="hw-notif-list">
+                {g.items.map((n) => (
+                  <NotificationItem key={n.id} notification={n} href={n.jobId ? `/${role}/messages?job=${n.jobId}` : undefined} />
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       )}
     </div>

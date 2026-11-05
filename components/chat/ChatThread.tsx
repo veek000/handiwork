@@ -1,9 +1,16 @@
 "use client";
 
-import { useMemo, useRef, useState, useEffect } from "react";
-import type { Conversation, Message, Quote, UserRole } from "@/types";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useMutation } from "convex/react";
+import type { Conversation, Message, UserRole } from "@/types";
 import { Avatar } from "@/components/Avatar";
 import { Button } from "@/components/Button";
+import { ActionError } from "@/components/ActionError";
+import { LoadingState } from "@/components/LoadingState";
+import { JOB_STATUS_LABEL } from "@/components/JobCard";
+import { usePaymentForJob, useThreadMessages } from "@/hooks";
+import { live } from "@/lib/convexApi";
+import { useRunner } from "@/lib/useRunner";
 import { ChatBubble } from "./ChatBubble";
 import {
   SendQuoteModal,
@@ -17,198 +24,119 @@ import {
 
 type Modal =
   | null
-  | { type: "sendQuote"; editMessageId?: string; amount?: number }
+  | { type: "sendQuote"; editQuoteId?: string; amount?: number }
   | { type: "reviewQuote"; message: Message }
-  | { type: "counter" }
-  | { type: "pay"; amount: number }
+  | { type: "counter"; quoteId: string }
+  | { type: "pay"; paymentId: string; amount: number; serviceFee: number; processingFee: number; total: number }
   | { type: "paySuccess" }
   | { type: "confirmComplete" }
   | { type: "review" };
 
 /**
- * Job-scoped chat thread with quotation actions (Figma Quotation Flow).
- * Messages are held in local state seeded from mocks so Accept / Send Quote /
- * Pay can advance the story without a backend.
+ * Job-scoped chat thread with the quotation flow (Figma Quotation Flow), live from
+ * Convex. Vendor: Send / Edit Quote, Mark as Completed. Customer: Review Quote →
+ * Accept (→ pay into escrow, fees shown) or Counter; Mark Completed (confirms and
+ * releases escrow) → Rate Your Experience. Opening the thread marks the other
+ * person's messages read. Which actions are enabled follows the job's status.
  */
 export function ChatThread({
   conversation,
-  initialMessages,
   viewerId,
   viewerRole,
   onBack,
 }: {
   conversation: Conversation;
-  initialMessages: Message[];
   viewerId: string;
   viewerRole: UserRole;
   onBack?: () => void;
 }) {
-  const [msgs, setMsgs] = useState<Message[]>(initialMessages);
+  const jobId = conversation.jobId;
+  const data = useThreadMessages(jobId);
+  const payment = usePaymentForJob(jobId);
   const [draft, setDraft] = useState("");
   const [modal, setModal] = useState<Modal>(null);
-  const [phase, setPhase] = useState<
-    "chat" | "quoted" | "paid" | "complete_pending" | "done"
-  >("chat");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { run, busy, error, clearError } = useRunner();
 
-  // Detect initial quote state from seed data
+  const send = useMutation(live.sendMessage);
+  const markRead = useMutation(live.markThreadRead);
+  const sendQuote = useMutation(live.sendQuote);
+  const editQuote = useMutation(live.editQuote);
+  const counterQuote = useMutation(live.counterQuote);
+  const acceptQuote = useMutation(live.acceptQuote);
+  const pay = useMutation(live.pay);
+  const markCompleted = useMutation(live.markCompleted);
+  const confirmCompleted = useMutation(live.confirmCompleted);
+  const saveReview = useMutation(live.saveReview);
+
+  const msgs = useMemo(() => data?.messages ?? [], [data]);
+  const status = data?.jobStatus;
+  const unreadFromOther = msgs.some((m) => m.senderId && m.senderId !== viewerId && m.status !== "read");
+
   useEffect(() => {
-    const q = initialMessages.find((m) => m.kind === "quote")?.quote;
-    if (q?.status === "paid") setPhase("paid");
-    else if (q?.status === "accepted") setPhase("quoted");
-    else if (q) setPhase("quoted");
-  }, [initialMessages]);
+    markRead({ jobId }).catch(() => {});
+  }, [jobId, msgs.length, markRead]);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [msgs, modal]);
+  }, [msgs.length, modal]);
 
   const activeQuote = useMemo(() => {
-    const quotes = msgs.filter((m) => m.kind === "quote" && m.quote);
+    const quotes = msgs.filter((m) => m.kind === "quote" && m.quote && !m.quote.superseded);
     return quotes[quotes.length - 1]?.quote ?? null;
   }, [msgs]);
 
-  function pushMessage(partial: Omit<Message, "id" | "conversationId">) {
-    const msg: Message = {
-      ...partial,
-      id: `msg_local_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-      conversationId: conversation.id,
-    };
-    setMsgs((prev) => [...prev, msg]);
-    return msg;
-  }
-
-  function updateQuote(quoteId: string, patch: Partial<Quote>) {
-    setMsgs((prev) =>
-      prev.map((m) =>
-        m.quote?.id === quoteId
-          ? { ...m, quote: { ...m.quote, ...patch } }
-          : m,
-      ),
-    );
-  }
-
-  function sendText() {
+  async function sendText() {
     const body = draft.trim();
-    if (!body) return;
-    pushMessage({
-      kind: "text",
-      senderId: viewerId,
-      body,
-      sentAt: new Date().toISOString(),
-      status: "sent",
-    });
+    if (!body || busy) return;
     setDraft("");
+    const ok = await run(() => send({ jobId, body }), "Your message didn't send. Please try again.");
+    if (!ok) setDraft(body);
   }
 
-  function handleSendQuote(amount: number) {
-    const editId =
-      modal && modal.type === "sendQuote" ? modal.editMessageId : undefined;
-    if (editId) {
-      setMsgs((prev) =>
-        prev.map((m) =>
-          m.id === editId && m.quote
-            ? {
-                ...m,
-                quote: { ...m.quote, amount, status: "pending", counterAmount: undefined },
-              }
-            : m,
-        ),
-      );
-    } else {
-      pushMessage({
-        kind: "quote",
-        senderId: viewerId,
-        body: "Quote",
-        sentAt: new Date().toISOString(),
-        status: "sent",
-        quote: { id: `quote_${Date.now()}`, amount, status: "pending" },
-      });
-      pushMessage({
-        kind: "text",
-        senderId: viewerId,
-        body: "I've sent you a quotation. Let me know if adjustments are needed.",
-        sentAt: new Date().toISOString(),
-        status: "sent",
-      });
+  async function handleSendQuote(amount: number) {
+    const editId = modal?.type === "sendQuote" ? modal.editQuoteId : undefined;
+    const ok = await run(() => (editId ? editQuote({ quoteId: editId, amount }) : sendQuote({ jobId, amount })));
+    if (ok) setModal(null);
+  }
+
+  async function handleAccept(quoteId: string) {
+    let result: Awaited<ReturnType<typeof acceptQuote>> | undefined;
+    const ok = await run(async () => {
+      result = await acceptQuote({ quoteId });
+    });
+    if (ok && result) setModal({ type: "pay", ...result });
+  }
+
+  async function handleCounter(quoteId: string, amount: number) {
+    if (await run(() => counterQuote({ quoteId, amount }))) setModal(null);
+  }
+
+  async function handlePaid(paymentId: string, method: "card" | "transfer") {
+    if (await run(() => pay({ paymentId, method }), "The payment didn't go through. Please try again.")) {
+      setModal({ type: "paySuccess" });
     }
-    setPhase("quoted");
-    setModal(null);
   }
 
-  function handleAccept() {
-    if (!activeQuote) return;
-    updateQuote(activeQuote.id, { status: "accepted" });
-    setModal({ type: "pay", amount: activeQuote.amount });
+  async function handleConfirmComplete() {
+    if (viewerRole === "vendor") {
+      if (await run(() => markCompleted({ id: jobId }))) setModal(null);
+    } else if (await run(() => confirmCompleted({ id: jobId }))) {
+      setModal({ type: "review" });
+    }
   }
 
-  function handleCounter(amount: number) {
-    if (!activeQuote) return;
-    updateQuote(activeQuote.id, { status: "countered", counterAmount: amount });
-    pushMessage({
-      kind: "text",
-      senderId: viewerId,
-      body: `I'd like to counter at NGN${amount.toLocaleString("en-US")}.`,
-      sentAt: new Date().toISOString(),
-      status: "sent",
-    });
-    setModal(null);
-  }
-
-  function handlePaid() {
-    if (!activeQuote) return;
-    updateQuote(activeQuote.id, { status: "paid" });
-    pushMessage({
-      kind: "system",
-      senderId: null,
-      systemTitle: "Payment Notice",
-      body: "Payment In Escrow — Your payment is secured. Funds release when work is confirmed complete.",
-      sentAt: new Date().toISOString(),
-      status: "read",
-    });
-    pushMessage({
-      kind: "text",
-      senderId: viewerId,
-      body: "Yes this is Perfect, i have made the payment.",
-      sentAt: new Date().toISOString(),
-      status: "sent",
-    });
-    setPhase("paid");
-    setModal({ type: "paySuccess" });
-  }
-
-  function handleMarkComplete() {
-    setModal({ type: "confirmComplete" });
-  }
-
-  function handleConfirmComplete() {
-    pushMessage({
-      kind: "system",
-      senderId: null,
-      systemTitle: "System Notification",
-      body:
-        viewerRole === "vendor"
-          ? "Job marked as completed by provider. Waiting for customer confirmation."
-          : "Thank you for confirming. Your job is now marked as complete",
-      sentAt: new Date().toISOString(),
-      status: "read",
-    });
-    setPhase(viewerRole === "customer" ? "done" : "complete_pending");
-    setModal(viewerRole === "customer" ? { type: "review" } : null);
-  }
+  // Customer accepted earlier but didn't finish paying: offer to complete it.
+  const pendingPayment = viewerRole === "customer" && payment?.status === "pending" && status === "quoted" ? payment : null;
+  const canComplete = viewerRole === "vendor" ? status === "in_progress" : status === "in_progress" || status === "marked_completed";
 
   return (
     <div className="hw-thread">
       <header className="hw-thread__head">
         {onBack ? (
           <button type="button" className="hw-msg__back" onClick={onBack}>
-            <hw-icon
-              suppressHydrationWarning
-              name="angle-left"
-              variant="hollow"
-              size="12"
-            ></hw-icon>
+            <hw-icon suppressHydrationWarning name="angle-left" variant="hollow" size="12"></hw-icon>
             Back
           </button>
         ) : (
@@ -217,16 +145,11 @@ export function ChatThread({
         <div className="hw-thread__head-main">
           <h2 className="hw-thread__name">{conversation.participantName}</h2>
           <p className="hw-thread__status">
-            {conversation.isTyping
-              ? `${conversation.participantName} is Typing...`
-              : "Last seen 02.21 AM"}
+            {conversation.jobTitle ?? "Job"}
+            {status ? ` · ${JOB_STATUS_LABEL[status]}` : ""}
           </p>
         </div>
-        <Avatar
-          name={conversation.participantName}
-          src={conversation.participantAvatarUrl}
-          size={40}
-        />
+        <Avatar name={conversation.participantName} src={conversation.participantAvatarUrl} size={40} />
       </header>
 
       <div className="hw-thread__actions">
@@ -235,69 +158,52 @@ export function ChatThread({
             <Button
               variant="primary"
               block
-              onClick={() =>
-                setModal({
-                  type: "sendQuote",
-                  amount: activeQuote?.amount ?? 25000,
-                })
-              }
+              disabled={status !== "pending" && status !== "quoted"}
+              onClick={() => setModal({ type: "sendQuote", amount: activeQuote?.amount ?? 25000 })}
             >
               Send Quote
             </Button>
-            <Button
-              variant="secondary"
-              block
-              disabled={phase !== "paid" && phase !== "complete_pending"}
-              onClick={handleMarkComplete}
-            >
+            <Button variant="secondary" block disabled={!canComplete} onClick={() => setModal({ type: "confirmComplete" })}>
               Mark as Completed
             </Button>
           </>
+        ) : pendingPayment ? (
+          <Button variant="primary" block onClick={() => setModal({ type: "pay", paymentId: pendingPayment.id, ...pendingPayment })}>
+            Complete Payment
+          </Button>
         ) : (
-          <Button
-            variant="primary"
-            block
-            disabled={phase !== "paid" && phase !== "complete_pending"}
-            onClick={handleMarkComplete}
-          >
+          <Button variant="primary" block disabled={!canComplete} onClick={() => setModal({ type: "confirmComplete" })}>
             Mark Completed
           </Button>
         )}
       </div>
 
-      <div className="hw-thread__scroll" ref={scrollRef}>
-        {msgs.map((m) => (
-          <ChatBubble
-            key={m.id}
-            message={m}
-            isMine={m.senderId === viewerId}
-            viewerRole={viewerRole}
-            onReviewQuote={(msg) => setModal({ type: "reviewQuote", message: msg })}
-            onEditQuote={(msg) =>
-              setModal({
-                type: "sendQuote",
-                editMessageId: msg.id,
-                amount: msg.quote?.amount,
-              })
-            }
-          />
-        ))}
+      <div className="hw-thread__scroll" ref={scrollRef} aria-live="polite">
+        {data === undefined ? (
+          <LoadingState label="Loading messages…" />
+        ) : (
+          msgs.map((m) => (
+            <ChatBubble
+              key={m.id}
+              message={m}
+              isMine={m.senderId === viewerId}
+              viewerRole={viewerRole}
+              onReviewQuote={(msg) => setModal({ type: "reviewQuote", message: msg })}
+              onEditQuote={(msg) => setModal({ type: "sendQuote", editQuoteId: msg.quote?.id, amount: msg.quote?.amount })}
+            />
+          ))
+        )}
+        {unreadFromOther ? <span className="hw-sr-only">New message</span> : null}
       </div>
 
       <div className="hw-thread__composer">
-        <button type="button" className="hw-thread__icon-btn" aria-label="Attach image">
-          <hw-icon
-            suppressHydrationWarning
-            name="image"
-            variant="hollow"
-            size="16"
-          ></hw-icon>
-        </button>
         <div className="hw-thread__input-wrap">
           <input
             className="hw-thread__input"
             type="text"
             placeholder="Message"
+            aria-label="Message"
+            maxLength={2000}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
@@ -307,33 +213,21 @@ export function ChatThread({
               }
             }}
           />
-          <button type="button" className="hw-thread__icon-btn" aria-label="Emoji" style={{ width: 32, height: 32, background: "transparent" }}>
-            <hw-icon
-              suppressHydrationWarning
-              name="face-smile"
-              variant="hollow"
-              size="16"
-            ></hw-icon>
-          </button>
         </div>
         <button
           type="button"
           className="hw-thread__icon-btn hw-thread__icon-btn--send"
           aria-label="Send"
+          disabled={!draft.trim()}
           onClick={sendText}
         >
-          <hw-icon
-            suppressHydrationWarning
-            name="paper-plane"
-            variant="filled"
-            size="20"
-          ></hw-icon>
+          <hw-icon suppressHydrationWarning name="paper-plane" variant="filled" size="20"></hw-icon>
         </button>
       </div>
 
       {modal?.type === "sendQuote" ? (
         <SendQuoteModal
-          title={modal.editMessageId ? "Edit Quote" : "Quotation"}
+          title={modal.editQuoteId ? "Edit Quote" : "Quotation"}
           initialAmount={modal.amount ?? 25000}
           onClose={() => setModal(null)}
           onSubmit={handleSendQuote}
@@ -343,26 +237,23 @@ export function ChatThread({
         <ReviewQuoteModal
           amount={modal.message.quote.amount}
           onClose={() => setModal(null)}
-          onAccept={handleAccept}
-          onCounter={() => setModal({ type: "counter" })}
+          onAccept={() => handleAccept(modal.message.quote!.id)}
+          onCounter={() => setModal({ type: "counter", quoteId: modal.message.quote!.id })}
         />
       ) : null}
       {modal?.type === "counter" ? (
-        <CounterOfferModal
-          onClose={() => setModal(null)}
-          onSubmit={handleCounter}
-        />
+        <CounterOfferModal onClose={() => setModal(null)} onSubmit={(amount) => handleCounter(modal.quoteId, amount)} />
       ) : null}
       {modal?.type === "pay" ? (
         <PaymentModal
-          amount={modal.amount}
+          amount={modal.total}
+          breakdown={{ quote: modal.amount, serviceFee: modal.serviceFee, processingFee: modal.processingFee }}
+          busy={busy}
           onClose={() => setModal(null)}
-          onPaid={() => handlePaid()}
+          onPaid={(method) => handlePaid(modal.paymentId, method)}
         />
       ) : null}
-      {modal?.type === "paySuccess" ? (
-        <PaymentSuccessModal onClose={() => setModal(null)} />
-      ) : null}
+      {modal?.type === "paySuccess" ? <PaymentSuccessModal onClose={() => setModal(null)} /> : null}
       {modal?.type === "confirmComplete" ? (
         <ConfirmCompleteModal
           amount={activeQuote?.amount ?? 0}
@@ -374,19 +265,12 @@ export function ChatThread({
       {modal?.type === "review" ? (
         <ReviewModal
           onClose={() => setModal(null)}
-          onSubmit={() => {
-            pushMessage({
-              kind: "system",
-              senderId: null,
-              systemTitle: "System Notification",
-              body: "Your review has been submitted. Thanks for the Feedback!",
-              sentAt: new Date().toISOString(),
-              status: "read",
-            });
-            setModal(null);
+          onSubmit={async (rating, text) => {
+            if (await run(() => saveReview({ jobId, rating, body: text }))) setModal(null);
           }}
         />
       ) : null}
+      <ActionError error={error} onDismiss={clearError} />
     </div>
   );
 }

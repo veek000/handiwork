@@ -28,7 +28,8 @@ export function RevenueChart({ values, startMonth = 0, initialIndex }: { values:
     <div className="hw-rchart">
       <div className="hw-rchart__scroll">
         <div className="hw-rchart__plot" style={{ ["--hw-rchart-cols" as string]: values.length }}>
-          {avg > 0 ? (
+          {/* An average needs at least two earning months to say anything. */}
+          {earning.length > 1 ? (
             <div className="hw-rchart__avg" style={{ bottom: `${(avg / max) * 100}%` }} aria-hidden="true">
               <span className="hw-rchart__avgtag">Avg {short(avg)}</span>
             </div>

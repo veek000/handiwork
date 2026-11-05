@@ -12,7 +12,8 @@ export interface ServiceDraft {
   price: number;
   priceUnit: PriceUnit;
   description: string;
-  imageName?: string;
+  /** a new photo to upload (replaces the current one) */
+  file?: File;
 }
 
 const UNITS: { unit: PriceUnit; label: string }[] = [
@@ -27,7 +28,7 @@ const UNITS: { unit: PriceUnit; label: string }[] = [
  * Pricing (rate) + Pricing category (/hr · /day · /wk), About Service, Service Images.
  * Footer: Upload Service (add) or Save (edit) as secondary above Cancel (primary), per
  * Figma. The design has no separate title field, so a new service is titled by its
- * category. The image is picked client-side only (no upload until storage exists).
+ * category. A picked photo is uploaded to Convex storage by the screen on save.
  */
 export function ServiceFormPanel({
   categories,
@@ -46,6 +47,7 @@ export function ServiceFormPanel({
   const [unit, setUnit] = useState<PriceUnit>(service?.priceUnit ?? "hr");
   const [description, setDescription] = useState(service?.description ?? "");
   const [imageName, setImageName] = useState<string | undefined>();
+  const [file, setFile] = useState<File | undefined>();
   const price = Number(rate);
   const ready = Boolean(category) && price > 0 && description.trim().length > 0;
 
@@ -67,7 +69,7 @@ export function ServiceFormPanel({
         className="hw-form"
         onSubmit={(e) => {
           e.preventDefault();
-          if (ready) onSubmit({ category, price, priceUnit: unit, description: description.trim(), imageName });
+          if (ready) onSubmit({ category, price, priceUnit: unit, description: description.trim(), file });
         }}
       >
         <div className="hw-form__group">
@@ -117,7 +119,7 @@ export function ServiceFormPanel({
 
         <div className="hw-form__group">
           <span className="hw-form__label">Service Images</span>
-          <DocumentUpload title="Upload image" fileName={imageName} onFile={setImageName} />
+          <DocumentUpload title="Upload image" fileName={imageName} onFile={(n, f) => { setImageName(n); setFile(f); }} />
         </div>
       </form>
     </SidePanel>

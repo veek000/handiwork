@@ -1,7 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useMutation } from "convex/react";
 import type { Review, VendorUser } from "@/types";
+import { live } from "@/lib/convexApi";
+import { useRunner } from "@/lib/useRunner";
+import { ActionError } from "@/components/ActionError";
 import { PageNav } from "@/components/PageNav";
 import { ReviewSummary } from "@/components/ReviewSummary";
 import { ReviewCard } from "@/components/ReviewCard";
@@ -39,17 +43,18 @@ function ResponsePanel({ initial, onSave, onClose }: { initial: string; onSave: 
 /**
  * Vendor My Reviews (Figma desktop 6619:31115, mobile 6619:43248): average + per-star
  * bars, Filter By (star rating), and each review with "Your Response" (open) and Edit /
- * Delete, or Reply when unanswered. Replies are local only until Convex is wired.
+ * Delete, or Reply when unanswered. Replies are saved to Convex (reviews:respond).
  */
-export function VendorReviewsScreen({ vendor, reviews: initial }: { vendor: VendorUser; reviews: Review[] }) {
-  const [reviews, setReviews] = useState(initial);
+export function VendorReviewsScreen({ vendor, reviews }: { vendor: VendorUser; reviews: Review[] }) {
+  const { run, busy, error, clearError } = useRunner();
+  const respond = useMutation(live.respondToReview);
   const [stars, setStars] = useState<ReviewStarOption>("");
   const [panel, setPanel] = useState<Panel>(null);
   const shown = useMemo(() => (stars ? reviews.filter((r) => r.rating === parseInt(stars, 10)) : reviews), [reviews, stars]);
   const target = panel && "id" in panel ? reviews.find((r) => r.id === panel.id) : undefined;
-  const setResponse = (id: string, response?: string) => setReviews((all) => all.map((r) => (r.id === id ? { ...r, response } : r)));
+  const setResponse = (id: string, response?: string) => run(() => respond({ id, response }), "We couldn't save your reply. Please try again.");
   const close = () => setPanel(null);
-  const me = { name: vendor.fullName, avatarUrl: vendor.avatarUrl };
+  const me = { name: vendor.fullName, avatarUrl: vendor.avatarUrl, verified: vendor.verified };
 
   return (
     <div className="hw-jobs">
@@ -94,7 +99,7 @@ export function VendorReviewsScreen({ vendor, reviews: initial }: { vendor: Vend
         <ReviewFilterPanel value={stars} onClose={close} onApply={(next) => { setStars(next); close(); }} />
       ) : null}
       {panel?.kind === "reply" && target ? (
-        <ResponsePanel initial={target.response ?? ""} onClose={close} onSave={(text) => { setResponse(target.id, text); close(); }} />
+        <ResponsePanel initial={target.response ?? ""} onClose={close} onSave={async (text) => { if (!busy && (await setResponse(target.id, text))) close(); }} />
       ) : null}
       {panel?.kind === "delete" && target ? (
         <ConfirmPanel
@@ -102,9 +107,10 @@ export function VendorReviewsScreen({ vendor, reviews: initial }: { vendor: Vend
           text="Remove your reply to this review? The review itself stays visible."
           confirmLabel="Delete"
           onClose={close}
-          onConfirm={() => { setResponse(target.id, undefined); close(); }}
+          onConfirm={async () => { if (!busy && (await setResponse(target.id, undefined))) close(); }}
         />
       ) : null}
+      <ActionError error={error} onDismiss={clearError} />
     </div>
   );
 }

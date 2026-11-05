@@ -58,6 +58,7 @@ export function ConversationList({
             />
             <span className="hw-conv__body">
               <span className="hw-conv__name">{c.participantName}</span>
+              {c.jobTitle ? <span className="hw-conv__job">{c.jobTitle}</span> : null}
               <span
                 className={
                   "hw-conv__preview" + (c.isTyping ? " is-typing" : "")

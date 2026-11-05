@@ -64,7 +64,7 @@ export function VendorProfileScreen({
       {/* Grid: mobile stacks who → about → Share; desktop puts Share top-right of "who". */}
       <header className="hw-vprofile__head">
         <div className="hw-vprofile__who">
-          <Avatar name={vendor.fullName} src={vendor.avatarUrl} size={80} verified />
+          <Avatar name={vendor.fullName} src={vendor.avatarUrl} size={80} verified={vendor.verified} />
           <div className="hw-vprofile__id">
             <div className="hw-vprofile__namerow">
               <h1 className="hw-vprofile__name">{first}</h1>
@@ -148,7 +148,7 @@ export function VendorProfileScreen({
           {shownReviews.length ? (
             <div className="hw-detail__reviewlist">
               {shownReviews.map((r) => (
-                <ReviewCard key={r.id} review={r} vendor={{ name: vendor.fullName, avatarUrl: vendor.avatarUrl }} />
+                <ReviewCard key={r.id} review={r} vendor={{ name: vendor.fullName, avatarUrl: vendor.avatarUrl, verified: vendor.verified }} />
               ))}
             </div>
           ) : (

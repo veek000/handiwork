@@ -23,14 +23,18 @@ async function requireUserId(ctx: QueryCtx): Promise<Id<"users">> {
 }
 
 // Used client-side after login to route by the account's real role (customer →
-// /customer, vendor → /vendor) and by the dashboards for the header identity.
-// Returns null when unauthenticated.
+// /customer, vendor → /vendor) and by the dashboards for the header identity and
+// Settings. Returns null when unauthenticated (or the account was deleted). The
+// government ID number never leaves the server — only whether one is on file.
 export const viewer = query({
   args: {},
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) return null;
-    return await ctx.db.get(userId);
+    const user = await ctx.db.get(userId);
+    if (!user || user.deletedAt) return null;
+    const { governmentIdNumber, ...safe } = user;
+    return { ...safe, hasGovernmentId: Boolean(governmentIdNumber) };
   },
 });
 
@@ -147,23 +151,53 @@ export const signOutOtherDevices = action({
   },
 });
 
-// Settings → Delete account: removes the user, their sign-in accounts, sessions and
-// feedback. (Jobs, reviews and payments will need their own retention rules once they
-// live in Convex — escrow records in particular can't simply be dropped.)
+// Settings → Delete account, with retention rules:
+//   • Blocked while the account has open jobs or money in escrow — finish or cancel them
+//     first, so nobody is left with an unfinished job or unsettled payment.
+//   • Removed: sign-in accounts + codes (so the email can sign up again), sessions,
+//     notifications, feedback, and every personal field on the profile.
+//   • Kept, de-identified: the users row itself as a tombstone (deletedAt), so jobs,
+//     chat history, reviews and payments that reference it stay intact for the other
+//     party. The UI shows "Deleted user" / "Former customer" in its place.
+//   • Kept unchanged: payments — financial records for accounting and disputes.
+//   • A vendor's services are archived (hidden from customers, kept for past jobs).
 export const deleteAccount = action({
   args: { confirm: v.string() },
   handler: async (ctx, { confirm }) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new ConvexError(SIGNED_OUT);
     if (confirm !== "DELETE") throw new ConvexError("Type DELETE to confirm.");
+    await ctx.runMutation(internal.users._retireUser, { userId });
     await invalidateSessions(ctx, { userId });
-    await ctx.runMutation(internal.users._deleteUser, { userId });
   },
 });
 
-export const _deleteUser = internalMutation({
+const OPEN_STATUSES = ["pending", "quoted", "in_progress", "marked_completed"];
+
+export const _retireUser = internalMutation({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    if (!user || user.deletedAt) return;
+
+    const jobs = [
+      ...(await ctx.db.query("jobs").withIndex("by_customer", (q) => q.eq("customerId", userId)).collect()),
+      ...(await ctx.db.query("jobs").withIndex("by_vendor", (q) => q.eq("vendorId", userId)).collect()),
+    ];
+    const open = jobs.filter((j) => OPEN_STATUSES.includes(j.status)).length;
+    if (open) {
+      throw new ConvexError(
+        `You have ${open} open job${open === 1 ? "" : "s"}. Finish or cancel ${open === 1 ? "it" : "them"} before deleting your account.`,
+      );
+    }
+    const payments = [
+      ...(await ctx.db.query("payments").withIndex("by_customer", (q) => q.eq("customerId", userId)).collect()),
+      ...(await ctx.db.query("payments").withIndex("by_vendor", (q) => q.eq("vendorId", userId)).collect()),
+    ];
+    if (payments.some((p) => p.status === "held")) {
+      throw new ConvexError("You have money held in escrow. Contact support so it can be settled before you leave.");
+    }
+
     const accounts = await ctx.db
       .query("authAccounts")
       .withIndex("userIdAndProvider", (q) => q.eq("userId", userId))
@@ -176,11 +210,35 @@ export const _deleteUser = internalMutation({
       for (const code of codes) await ctx.db.delete(code._id);
       await ctx.db.delete(account._id);
     }
-    const feedback = await ctx.db
-      .query("feedback")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .collect();
-    for (const f of feedback) await ctx.db.delete(f._id);
-    await ctx.db.delete(userId);
+    for (const n of await ctx.db.query("notifications").withIndex("by_user", (q) => q.eq("userId", userId)).collect()) {
+      await ctx.db.delete(n._id);
+    }
+    for (const f of await ctx.db.query("feedback").withIndex("by_user", (q) => q.eq("userId", userId)).collect()) {
+      await ctx.db.delete(f._id);
+    }
+    const now = Date.now();
+    for (const s of await ctx.db.query("services").withIndex("by_vendor", (q) => q.eq("vendorId", userId)).collect()) {
+      if (!s.archivedAt) await ctx.db.patch(s._id, { archivedAt: now });
+    }
+    // Tombstone: keep the row (and role), clear everything personal.
+    await ctx.db.patch(userId, {
+      deletedAt: now,
+      name: undefined,
+      fullName: undefined,
+      email: undefined,
+      image: undefined,
+      phone: undefined,
+      countryCode: undefined,
+      state: undefined,
+      area: undefined,
+      address: undefined,
+      service: undefined,
+      yearsOfExperience: undefined,
+      businessBio: undefined,
+      governmentIdNumber: undefined,
+      notificationPrefs: undefined,
+      emailVerificationTime: undefined,
+      phoneVerificationTime: undefined,
+    });
   },
 });

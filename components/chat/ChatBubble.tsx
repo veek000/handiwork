@@ -49,7 +49,10 @@ export function ChatBubble({
           <p className="hw-quote__amount">
             {formatNaira(message.quote.amount)}
           </p>
-          {viewerRole === "customer" && message.quote.status === "pending" ? (
+          {message.quote.superseded ? (
+            <p className="hw-bubble__text">Replaced by a newer quote</p>
+          ) : null}
+          {!message.quote.superseded && viewerRole === "customer" && message.quote.status === "pending" ? (
             <Button
               variant="secondary"
               block
@@ -59,7 +62,8 @@ export function ChatBubble({
               Review Quote
             </Button>
           ) : null}
-          {viewerRole === "vendor" &&
+          {!message.quote.superseded &&
+          viewerRole === "vendor" &&
           (message.quote.status === "pending" ||
             message.quote.status === "countered") ? (
             <Button
@@ -71,7 +75,8 @@ export function ChatBubble({
               Edit Quote
             </Button>
           ) : null}
-          {message.quote.status === "countered" &&
+          {!message.quote.superseded &&
+          message.quote.status === "countered" &&
           message.quote.counterAmount != null ? (
             <p className="hw-bubble__text">
               Counter offer: {formatNaira(message.quote.counterAmount)}
