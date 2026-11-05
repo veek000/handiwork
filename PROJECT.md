@@ -854,6 +854,25 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   header/drawer show the real account's name, email, photo and area/state (rest of the data is still mock).
   `NEXT_PUBLIC_DEV_SKIP_AUTH=1` skips the guard locally (ignored in production builds). Still open: the Resend sender
   is `onboarding@resend.dev`, which only delivers to the Resend account owner — verify a domain before launch.
+- **Profile menu, Settings, Feedback, Help & Support, error pages (2026-11-04)** — No Figma for these; built from
+  the dashboard's own parts (notification-panel pointer, signup fields, SidePanel, square white cards). `ProfileMenu`
+  replaces the desktop header user block: Settings / Feedback / Help & Support / Log Out in a floating panel with a
+  pointer to the avatar (menu keyboard pattern, Escape returns focus). Mobile reaches Settings + Feedback from new
+  drawer-only nav items, and the drawer profile chevron opens Settings. `/{role}/settings` (`?tab=` deep link):
+  Profile (name, read-only email, phone, state/area, address; field validation), Business (vendors: service,
+  experience, bio with counter, ID status), Notifications (per-topic + email switches, save on toggle, revert on
+  failure), Security (sign-in method, change password, sign out other devices, delete account behind a type-DELETE
+  panel). `/{role}/feedback`: topic, optional stars, message (10–2,000), contact opt-in, thank-you state.
+  `/{role}/support`: searchable, topic-filtered FAQ accordion (role-specific questions; answers from `public/faq.html`,
+  in `data/faqs.ts`) + email / phone / feedback cards. Convex (pushed to dev): `users.updateProfile`,
+  `updateNotificationPrefs`, `signInMethods`, `changePassword` (checks the current password, signs out other
+  sessions), `signOutOtherDevices`, `deleteAccount`; `feedback.submit` (validated, 1/min) into a new `feedback` table;
+  `users.notificationPrefs`. All resolve the caller from the session. Errors: `ConvexError` messages are user-facing
+  (`lib/convexApi.errorMessage`, offline-aware); `FormStatus` shows results; `.hw-input[aria-invalid]` error border
+  added to input.css. Route errors: `error.tsx` + `not-found.tsx` per role (inside the shell, Try Again / Home), root
+  `error.tsx`, `not-found.tsx` (standalone 404) and `global-error.tsx`. Styles in new `settings.css`. Checked at
+  1440 / 393 with the dev bypass (signed out, so saves show the signed-out error); a real signed-in save, password
+  change and delete are not yet exercised. `tsc` + `next build` pass.
 
 ## Locked decisions for future phases (not yet built)
 

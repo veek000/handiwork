@@ -11,8 +11,9 @@
    Notes:
    - No hover state by design — Input/* has no hover token; focus-visible is the
      interaction feedback for this field (accepted pattern, not a gap).
-   - No error state yet — no confirmed Figma Input/error token; deferred until a
-     screen needs it (will be cited from that screen's tokens).
+   - Error state: [aria-invalid="true"] borders in --hw-feedback-error-border (the
+     semantic feedback token; no Figma Input/error token exists). First used by
+     Settings / Feedback; the error text sits under the field.
    - Input/bg 2 (Semantic__Color): Light == Input/bg (#FFFFFF), diverges in Dark
      (#001A13). Purpose UNRESOLVED (TOKEN-GOVERNANCE §3) — intentionally NOT
      referenced here. Do not wire it in until its use is confirmed in Figma.
@@ -64,3 +65,7 @@ textarea.hw-input { min-height: 140px; resize: vertical; }
 }
 .hw-input:disabled::placeholder,
 .hw-input.is-disabled::placeholder { color: var(--hw-text-disabled); }
+
+/* Error state — set aria-invalid="true" on the field (see notes above). */
+.hw-input[aria-invalid="true"] { border-color: var(--hw-feedback-error-border); }
+.hw-input[aria-invalid="true"]:focus-visible { outline-color: var(--hw-feedback-error-text); }

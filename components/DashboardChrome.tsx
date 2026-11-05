@@ -94,6 +94,7 @@ export function DashboardChrome({
 
       <div className="hw-dash__col">
         <DashboardHeader
+          role={role}
           user={user}
           notifications={notifications}
           notificationsHref={`/${role}/notifications`}

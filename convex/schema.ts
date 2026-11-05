@@ -37,5 +37,28 @@ export default defineSchema({
     yearsOfExperience: v.optional(v.string()),
     businessBio: v.optional(v.string()),
     governmentIdNumber: v.optional(v.string()),
+    // --- Settings ---
+    // Notification preferences (Settings > Notifications). Missing = all on.
+    notificationPrefs: v.optional(
+      v.object({
+        jobUpdates: v.boolean(),
+        messages: v.boolean(),
+        payments: v.boolean(),
+        reviews: v.boolean(),
+        tips: v.boolean(),
+        email: v.boolean(),
+      }),
+    ),
   }).index("email", ["email"]),
+
+  // Product feedback sent from the dashboard Feedback screen.
+  feedback: defineTable({
+    userId: v.id("users"),
+    role: v.optional(v.union(v.literal("customer"), v.literal("vendor"))),
+    kind: v.union(v.literal("suggestion"), v.literal("problem"), v.literal("compliment"), v.literal("other")),
+    rating: v.optional(v.number()),
+    message: v.string(),
+    canContact: v.boolean(),
+    page: v.optional(v.string()),
+  }).index("by_user", ["userId"]),
 });

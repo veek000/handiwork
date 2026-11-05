@@ -14,11 +14,20 @@ export function PhoneInput({
   onCodeChange,
   phone,
   onPhoneChange,
+  id,
+  invalid,
+  describedBy,
 }: {
   code: string;
   onCodeChange: (code: string) => void;
   phone: string;
   onPhoneChange: (phone: string) => void;
+  /** id for the number field, so a <label htmlFor> can point at it */
+  id?: string;
+  /** marks the number field invalid (aria-invalid + error styling) */
+  invalid?: boolean;
+  /** id of the field's error message */
+  describedBy?: string;
 }) {
   return (
     <div className="hw-phone">
@@ -30,6 +39,9 @@ export function PhoneInput({
         options={DIALLING_CODES}
       />
       <Input
+        id={id}
+        aria-invalid={invalid || undefined}
+        aria-describedby={describedBy}
         type="tel"
         inputMode="tel"
         autoComplete="tel-national"

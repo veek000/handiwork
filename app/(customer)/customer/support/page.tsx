@@ -1,5 +1,5 @@
-import { Placeholder } from "@/components/Placeholder";
+import { HelpScreen } from "@/components/HelpScreen";
 
-export default function Page() {
-  return <Placeholder role="Customer" title="Help & Support" />;
+export default function CustomerSupportPage() {
+  return <HelpScreen role="customer" />;
 }

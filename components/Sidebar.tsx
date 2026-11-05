@@ -13,8 +13,14 @@ import { LogoutButton } from "@/components/LogoutButton";
  * Styling: sidebar.css (base) + dashboard.css (responsive drawer).
  */
 // `mobileHidden` items are dropped from the mobile drawer (Messages becomes the
-// envelope shortcut in the mobile location row instead).
-type NavItem = { label: string; icon: string; href: string; mobileHidden?: boolean };
+// envelope shortcut in the mobile location row instead). `desktopHidden` items only
+// show in the mobile drawer (desktop reaches them from the header ProfileMenu).
+type NavItem = { label: string; icon: string; href: string; mobileHidden?: boolean; desktopHidden?: boolean };
+
+const ACCOUNT_NAV = (role: "customer" | "vendor"): NavItem[] => [
+  { label: "Settings", icon: "cog", href: `/${role}/settings`, desktopHidden: true },
+  { label: "Feedback", icon: "comment", href: `/${role}/feedback`, desktopHidden: true },
+];
 
 const CUSTOMER_NAV: NavItem[] = [
   { label: "Home", icon: "home", href: "/customer" },
@@ -45,7 +51,7 @@ export function Sidebar({
   onClose?: () => void;
 }) {
   const pathname = usePathname();
-  const items = role === "customer" ? CUSTOMER_NAV : VENDOR_NAV;
+  const items = [...(role === "customer" ? CUSTOMER_NAV : VENDOR_NAV), ...ACCOUNT_NAV(role)];
   // Most specific section wins, so inner screens keep their section lit: /customer/search
   // → Home, /customer/jobs/123 → My Jobs.
   const activeHref = items
@@ -71,9 +77,9 @@ export function Sidebar({
               <p className="hw-profile__name">{user.fullName}</p>
               <p className="hw-profile__email">{user.email}</p>
             </div>
-            <button type="button" className="hw-profile__chevron" aria-label="View profile">
+            <Link href={`/${role}/settings`} className="hw-profile__chevron" aria-label="Profile settings" onClick={onClose}>
               <hw-icon suppressHydrationWarning name="angle-right" variant="hollow" size="20"></hw-icon>
-            </button>
+            </Link>
           </div>
           <hr className="hw-sidebar__divider" />
         </div>
@@ -97,7 +103,8 @@ export function Sidebar({
               className={
                 "hw-nav-item" +
                 (active ? " is-active" : "") +
-                (it.mobileHidden ? " hw-nav-item--mobile-hidden" : "")
+                (it.mobileHidden ? " hw-nav-item--mobile-hidden" : "") +
+                (it.desktopHidden ? " hw-nav-item--desktop-hidden" : "")
               }
               aria-current={active ? "page" : undefined}
             >

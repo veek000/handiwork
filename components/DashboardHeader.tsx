@@ -2,7 +2,7 @@
 
 import type { User } from "@/types";
 import type { Notification } from "@/types";
-import { Avatar } from "@/components/Avatar";
+import { ProfileMenu } from "@/components/ProfileMenu";
 import { LocationTag } from "@/components/LocationTag";
 import { NotificationBell } from "@/components/Notification/NotificationBell";
 
@@ -10,14 +10,17 @@ import { NotificationBell } from "@/components/Notification/NotificationBell";
  * DashboardHeader — the shared top bar for every dashboard screen (both roles).
  * Desktop: location (left), bell + user (right). Mobile: hamburger + centred logo +
  * bell (the location moves to a row below the header — rendered by DashboardChrome —
- * and the user block lives in the drawer). Styling: .hw-dash-header*.
+ * and the user block lives in the drawer). The desktop user block is the ProfileMenu
+ * (Settings / Feedback / Help & Support / Log Out). Styling: .hw-dash-header*.
  */
 export function DashboardHeader({
+  role,
   user,
   notifications,
   notificationsHref,
   onMenu,
 }: {
+  role: "customer" | "vendor";
   user: User;
   notifications: Notification[];
   notificationsHref: string;
@@ -40,14 +43,7 @@ export function DashboardHeader({
       <div className="hw-dash-header__right">
         <NotificationBell notifications={notifications} href={notificationsHref} />
 
-        <div className="hw-dash-header__user">
-          <Avatar name={user.fullName} size={40} />
-          <span className="hw-dash-header__user-info">
-            <span className="hw-dash-header__user-name">{user.fullName}</span>
-            <span className="hw-dash-header__user-email">{user.email}</span>
-          </span>
-          <hw-icon suppressHydrationWarning name="angle-down" variant="hollow" size="14"></hw-icon>
-        </div>
+        <ProfileMenu role={role} user={user} />
       </div>
     </header>
   );
