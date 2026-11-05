@@ -16,6 +16,7 @@ import { Password } from "@convex-dev/auth/providers/Password";
 import { convexAuth } from "@convex-dev/auth/server";
 import { DataModel } from "./_generated/dataModel";
 import { ResendOTP } from "./ResendOTP";
+import { ResendPasswordReset } from "./ResendPasswordReset";
 
 // Password provider carrying the extra signup fields into the user document. The
 // fields arrive from the client's FormData as `params`; only email/password are
@@ -43,6 +44,8 @@ const HandiworkPassword = Password<DataModel>({
     };
   },
   verify: ResendOTP,
+  // Forgot password: emailed magic link (see ResendPasswordReset.ts).
+  reset: ResendPasswordReset,
 });
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({

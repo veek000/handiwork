@@ -14,16 +14,17 @@ import { makeFunctionReference } from "convex/server";
 
 export const viewerRef = makeFunctionReference<"query">("users:viewer");
 
-export function useRoleRedirect() {
+/** `enabled` = false holds the redirect (e.g. the reset page until the password is saved). */
+export function useRoleRedirect(enabled = true) {
   const router = useRouter();
   const { isAuthenticated } = useConvexAuth();
   // undefined while loading, null if unauthenticated, the user doc once signed in.
   const viewer = useQuery(viewerRef) as { role?: "customer" | "vendor" } | null | undefined;
 
   useEffect(() => {
-    if (isAuthenticated && viewer) {
+    if (enabled && isAuthenticated && viewer) {
       // OAuth accounts have no role yet (no toggle in that flow) — default to customer.
       router.replace(viewer.role === "vendor" ? "/vendor" : "/customer");
     }
-  }, [isAuthenticated, viewer, router]);
+  }, [enabled, isAuthenticated, viewer, router]);
 }

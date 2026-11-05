@@ -901,6 +901,19 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   chatted, accepted and paid the quote, confirmed and reviewed; vendor saw balance, notifications, analytics, replied
   to the review, and deleted their account. Test accounts and data were removed afterwards. `tsc` (app + convex) and
   `next build` pass.
+- **Forgot password by magic link (2026-11-05)** — Login "Forgot password ?" → `/forgot-password` (email → Convex Auth
+  Password `reset` via new `convex/ResendPasswordReset.ts`: 256-bit token, 15-minute expiry, text + HTML email with
+  "we'll never ask for this link" warning). The confirmation is identical whether or not the email has an account,
+  so the page can't be used to discover who is registered. The link opens `/reset-password?email=…&token=…` (new
+  password + confirm, 8+ characters, also enforced on the server); on save Convex Auth sets the password, signs this
+  browser in and every other session out, then the user lands on their dashboard. Used, expired or broken links
+  show "Link expired" with "Send a New Link". The link uses `token`, not `code`: ConvexAuthProvider treats any
+  `?code=` as an OAuth callback and consumed the token on page load (found in testing). `useRoleRedirect(enabled)`
+  so the reset page only redirects after saving. Settings → Security links "Forgot it? Reset it by email". Tested
+  on dev with a temporary test account (removed): neutral confirmation, the email step reached Resend (refused
+  because the test sender only delivers to the Resend owner — the known domain blocker), valid link → new password
+  works and old one fails, reused and expired links refused. A real inbox test needs either a verified domain or
+  the Resend owner's own address.
 
 ## What's left before launch (audit 2026-11-05)
 
@@ -909,7 +922,6 @@ From a full read of the code and docs after the Convex data move. Grouped by pri
 **Launch blockers**
 - **Real payments.** Connect Flutterwave escrow: checkout, webhook verification, refunds and payouts. Production
   currently refuses payment with a clear message. Withdraw and Transaction History are disabled until then.
-- **Forgot password.** The link is `href="#"`; the Password provider has no `reset`. Decided approach: a magic link.
 - **Vendors can't sign up with Google.** OAuth sign-up passes no role, so those accounts become customers, and
   there's no screen to choose a role afterwards.
 - **Vendor verification.** The signup ID document is never uploaded and there's no review step or admin tool.

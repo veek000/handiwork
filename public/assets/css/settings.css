@@ -535,3 +535,4 @@
 .hw-modal__fees > div { display: flex; justify-content: space-between; gap: var(--hw-space-m); }
 .hw-modal__fees dt, .hw-modal__fees dd { margin: 0; }
 .hw-modal__fees-total { padding-top: var(--hw-space-xs); border-top: 1px solid var(--hw-border-divider); font-weight: var(--hw-weight-bold); color: var(--hw-text-primary); }
+.hw-auth__inline-btn { border: none; background: none; padding: 0; font: inherit; cursor: pointer; }

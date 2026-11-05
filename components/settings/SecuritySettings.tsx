@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAction, useQuery } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
@@ -48,6 +49,9 @@ function ChangePassword() {
         <label htmlFor="pw-current">Current Password</label>
         <PasswordInput id="pw-current" autoComplete="current-password" placeholder="Enter current password"
           value={form.current} onChange={(e) => set("current")(e.target.value)} />
+        <p className="hw-settings__hint">
+          Forgot it? <Link href="/forgot-password" className="hw-link">Reset it by email</Link> instead.
+        </p>
       </div>
       <div className="hw-field-row">
         <div className="hw-field">

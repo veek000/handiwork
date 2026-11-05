@@ -89,7 +89,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <Link href="#" className="hw-link hw-auth__forgot">Forgot password ?</Link>
+            <Link href="/forgot-password" className="hw-link hw-auth__forgot">Forgot password ?</Link>
           </div>
 
           {error ? <p className="hw-auth__error" role="alert">{error}</p> : null}
