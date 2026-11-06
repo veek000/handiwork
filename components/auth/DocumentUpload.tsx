@@ -18,13 +18,19 @@ export function DocumentUpload({
   fileName,
   onFile,
   title = "Upload Document",
-  hint = "JPG, PNG, or GIF (max 10MB)",
+  hint,
+  allowPdf = false,
 }: {
   fileName?: string;
   onFile?: (name: string | undefined, file?: File) => void;
   title?: string;
   hint?: string;
+  /** also accept PDF scans (ID documents) */
+  allowPdf?: boolean;
 }) {
+  const types = allowPdf ? /^(image\/(jpeg|png|gif)|application\/pdf)$/ : /^image\/(jpeg|png|gif)$/;
+  const label = allowPdf ? "JPG, PNG or PDF" : "JPG, PNG or GIF";
+  hint = hint ?? `${label} (max 10MB)`;
   const inputRef = useRef<HTMLInputElement>(null);
   const [localName, setLocalName] = useState<string | undefined>();
   const [problem, setProblem] = useState<string | null>(null);
@@ -32,8 +38,8 @@ export function DocumentUpload({
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (file && (!/^image\/(jpeg|png|gif)$/.test(file.type) || file.size > 10 * 1024 * 1024)) {
-      setProblem("Use a JPG, PNG or GIF under 10MB.");
+    if (file && (!types.test(file.type) || file.size > 10 * 1024 * 1024)) {
+      setProblem(`Use a ${label} under 10MB.`);
       e.target.value = "";
       return;
     }
@@ -47,7 +53,7 @@ export function DocumentUpload({
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/gif"
+        accept={allowPdf ? "image/jpeg,image/png,image/gif,application/pdf" : "image/jpeg,image/png,image/gif"}
         className="hw-uploader__input"
         onChange={handleChange}
       />

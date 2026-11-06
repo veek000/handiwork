@@ -39,6 +39,11 @@ export type ViewerDoc = {
   yearsOfExperience?: string;
   businessBio?: string;
   hasGovernmentId?: boolean;
+  hasIdDocument?: boolean;
+  verificationStatus?: "pending" | "verified" | "rejected";
+  verificationNote?: string;
+  isAdmin?: boolean;
+  suspendedAt?: number;
   notificationPrefs?: NotificationPrefs;
 };
 
@@ -53,6 +58,22 @@ export const api = {
   changePassword: makeFunctionReference<"action", { current: string; next: string }>("users:changePassword"),
   signOutOtherDevices: makeFunctionReference<"action", Record<string, never>>("users:signOutOtherDevices"),
   deleteAccount: makeFunctionReference<"action", { confirm: string }>("users:deleteAccount"),
+  chooseRole: makeFunctionReference<
+    "mutation",
+    {
+      role: "customer" | "vendor";
+      fullName: string;
+      countryCode?: string;
+      phone?: string;
+      state?: string;
+      area?: string;
+      address?: string;
+      service?: string;
+      yearsOfExperience?: string;
+      businessBio?: string;
+    }
+  >("users:chooseRole"),
+  submitVerification: makeFunctionReference<"mutation", { idNumber: string; documentStorageId: string }>("users:submitVerification"),
   submitFeedback: makeFunctionReference<
     "mutation",
     { kind: FeedbackKind; rating?: number; message: string; canContact: boolean; page?: string }
@@ -138,3 +159,154 @@ export function errorMessage(err: unknown, fallback = "Something went wrong. Ple
   if (typeof navigator !== "undefined" && !navigator.onLine) return "You're offline. Check your connection and try again.";
   return fallback;
 }
+
+// ---------------------------------------------------------------- admin (/admin)
+// Row shapes returned by convex/admin.ts.
+export type AdminUserRow = {
+  id: string;
+  name: string;
+  email: string;
+  role: "customer" | "vendor" | null;
+  location: string;
+  isAdmin: boolean;
+  demo: boolean;
+  suspended: boolean;
+  deleted: boolean;
+  verificationStatus: "pending" | "verified" | "rejected" | null;
+  createdAt: string;
+};
+export type AdminUserDetail = AdminUserRow & {
+  phone: string;
+  address: string;
+  service: string;
+  yearsOfExperience: string;
+  bio: string;
+  signInMethods: string[];
+  suspendedReason: string;
+  verificationNote: string;
+  jobs: { asCustomer: number; asVendor: number; open: number };
+  services: number;
+  paidTotal: number;
+  earnedTotal: number;
+};
+export type AdminVerification = AdminUserRow & {
+  service: string;
+  yearsOfExperience: string;
+  idNumber: string;
+  documentUrl: string | null;
+  documentType: string | null;
+  submittedAt: string | null;
+};
+export type AdminJobRow = {
+  id: string;
+  title: string;
+  status: Job["status"];
+  customer: string;
+  vendor: string;
+  createdAt: string;
+  amount: number | null;
+  paymentStatus: PaymentInfo["status"] | null;
+};
+export type AdminJobDetail = {
+  id: string;
+  title: string;
+  description: string;
+  status: Job["status"];
+  cancelledBy: string | null;
+  preferred: string;
+  createdAt: string;
+  customer: { id: string; name: string };
+  vendor: { id: string; name: string };
+  messages: { id: string; kind: string; from: string; body: string; at: string }[];
+  quotes: { amount: number; counterAmount: number | null; status: string }[];
+  payments: {
+    id: string;
+    status: PaymentInfo["status"];
+    provider: string;
+    amount: number;
+    serviceFee: number;
+    processingFee: number;
+    total: number;
+    refundAmount: number | null;
+    retainedFee: number | null;
+  }[];
+};
+export type AdminOverview = {
+  users: { customers: number; vendors: number; demo: number; noRole: number; suspended: number; verifiedVendors: number; pendingVerification: number };
+  jobs: { total: number; open: number; byStatus: Record<string, number> };
+  money: { heldInEscrow: number; releasedToVendors: number; refundedToCustomers: number; platformFees: number };
+  services: { active: number; archived: number };
+  feedback: { open: number; total: number };
+};
+
+export const adminApi = {
+  me: q<NoArgs, { id: string; name: string; email: string } | null>("admin:me"),
+  overview: q<NoArgs, AdminOverview>("admin:overview"),
+  users: q<{ search?: string; filter?: string }, AdminUserRow[]>("admin:users"),
+  userDetail: q<{ id: string }, AdminUserDetail | null>("admin:userDetail"),
+  verificationQueue: q<NoArgs, AdminVerification[]>("admin:verificationQueue"),
+  jobs: q<{ status?: string; disputesOnly?: boolean }, AdminJobRow[]>("admin:jobs"),
+  jobDetail: q<{ id: string }, AdminJobDetail | null>("admin:jobDetail"),
+  payments: q<
+    { status?: string },
+    {
+      id: string;
+      jobId: string;
+      job: string;
+      customer: string;
+      vendor: string;
+      status: PaymentInfo["status"];
+      provider: string;
+      amount: number;
+      fees: number;
+      total: number;
+      refundAmount: number | null;
+      createdAt: string;
+    }[]
+  >("admin:payments"),
+  services: q<
+    { search?: string },
+    {
+      id: string;
+      title: string;
+      category: string;
+      price: number;
+      priceUnit: string;
+      vendor: string;
+      vendorId: string;
+      reviewCount: number;
+      rating: number;
+      archived: boolean;
+      createdAt: string;
+    }[]
+  >("admin:services"),
+  reviews: q<
+    NoArgs,
+    { id: string; rating: number; body: string; response: string | null; author: string; vendor: string; service: string; hidden: boolean; createdAt: string }[]
+  >("admin:reviews"),
+  feedback: q<
+    { showResolved?: boolean },
+    {
+      id: string;
+      kind: string;
+      rating: number | null;
+      message: string;
+      from: string;
+      email: string;
+      role: string | null;
+      page: string | null;
+      resolved: boolean;
+      createdAt: string;
+    }[]
+  >("admin:feedback"),
+  auditLog: q<NoArgs, { id: string; admin: string; action: string; targetType: string; targetId: string; note: string | null; at: string }[]>(
+    "admin:auditLog",
+  ),
+
+  decideVerification: m<{ userId: string; decision: "verified" | "rejected"; note?: string }>("admin:decideVerification"),
+  setSuspended: m<{ userId: string; suspended: boolean; reason?: string }>("admin:setSuspended"),
+  resolveJob: m<{ jobId: string; outcome: "refund_customer" | "release_vendor"; note: string }>("admin:resolveJob"),
+  setServiceArchived: m<{ serviceId: string; archived: boolean; note?: string }>("admin:setServiceArchived"),
+  setReviewHidden: m<{ reviewId: string; hidden: boolean; note?: string }>("admin:setReviewHidden"),
+  setFeedbackResolved: m<{ feedbackId: string; resolved: boolean }>("admin:setFeedbackResolved"),
+};

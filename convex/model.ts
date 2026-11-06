@@ -18,16 +18,40 @@ export async function viewerOrNull(ctx: QueryCtx): Promise<Doc<"users"> | null> 
   return user && !user.deletedAt ? user : null;
 }
 
+export const SUSPENDED = "Your account is suspended. Contact support if you think this is a mistake.";
+
 export async function requireViewer(ctx: QueryCtx, role?: "customer" | "vendor"): Promise<Doc<"users">> {
   const user = await viewerOrNull(ctx);
   if (!user) throw new ConvexError(SIGNED_OUT);
-  if (role && roleOf(user) !== role) {
+  if (user.suspendedAt) throw new ConvexError(SUSPENDED);
+  if (role && !user.role) throw new ConvexError("Finish setting up your account first.");
+  if (role && user.role !== role) {
     throw new ConvexError(role === "vendor" ? "Only service providers can do that." : "Only customers can do that.");
   }
   return user;
 }
 
-/** Accounts without a role (OAuth sign-ups) are customers, as in the client guard. */
+/** Admins only (users.isAdmin, granted from the CLI). Suspension applies to admins too. */
+export async function requireAdmin(ctx: QueryCtx): Promise<Doc<"users">> {
+  const user = await viewerOrNull(ctx);
+  if (!user?.isAdmin || user.suspendedAt) throw new ConvexError("Admins only.");
+  return user;
+}
+
+/** Records an admin action (auditLog). */
+export async function audit(
+  ctx: MutationCtx,
+  admin: Doc<"users">,
+  action: string,
+  targetType: string,
+  targetId: string,
+  note?: string,
+) {
+  await ctx.db.insert("auditLog", { adminId: admin._id, action, targetType, targetId, note: note?.slice(0, 500) });
+}
+
+/** For display/mapping only. Accounts still choosing a role (new Google/Facebook
+ *  sign-ups) read as customers; anything role-restricted checks `user.role` itself. */
 export const roleOf = (u: Doc<"users">) => u.role ?? "customer";
 
 // ---------------------------------------------------------------- mapping to types/
@@ -71,7 +95,9 @@ export function toUser(u: Doc<"users">) {
 
 /** VendorUser with aggregates computed from reviews + completed jobs. */
 export async function toVendor(ctx: QueryCtx, u: Doc<"users">) {
-  const reviews = await ctx.db.query("reviews").withIndex("by_vendor", (q) => q.eq("vendorId", u._id)).collect();
+  const reviews = (await ctx.db.query("reviews").withIndex("by_vendor", (q) => q.eq("vendorId", u._id)).collect()).filter(
+    (r) => !r.hiddenAt,
+  );
   const jobs = await ctx.db.query("jobs").withIndex("by_vendor", (q) => q.eq("vendorId", u._id)).collect();
   const sum = reviews.reduce((n, r) => n + r.rating, 0);
   return {
@@ -83,8 +109,8 @@ export async function toVendor(ctx: QueryCtx, u: Doc<"users">) {
     ratingAverage: reviews.length ? Math.round((sum / reviews.length) * 10) / 10 : 0,
     reviewCount: reviews.length,
     availability: "available" as const,
-    // No ID check exists yet, so nobody is shown as verified (see PROJECT.md Trust & Safety).
-    verified: false,
+    // Only after an admin has checked their ID document (admin.decideVerification).
+    verified: u.verificationStatus === "verified",
   };
 }
 
@@ -167,6 +193,7 @@ const PREF_FOR: Record<NotificationType, keyof NonNullable<Doc<"users">["notific
   new_review: "reviews",
   payment_received: null, // payment notices are always sent (Settings says so)
   payment_released: null,
+  account_update: null, // verification decisions: always sent
 };
 
 /** In-app notification, honouring the recipient's Settings → Notifications choices. */

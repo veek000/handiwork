@@ -17,6 +17,18 @@ export const generateUploadUrl = mutation({
   },
 });
 
+const DOCUMENT_TYPES = [...IMAGE_TYPES, "application/pdf"];
+
+/** Validates an uploaded ID document (image or PDF, 10MB); deletes it if invalid. */
+export async function checkDocument(ctx: MutationCtx, storageId: Id<"_storage">) {
+  const meta = await ctx.db.system.get(storageId);
+  if (!meta) throw new ConvexError("That upload didn't finish. Please try again.");
+  if (!meta.contentType || !DOCUMENT_TYPES.includes(meta.contentType) || meta.size > MAX_BYTES) {
+    await ctx.storage.delete(storageId);
+    throw new ConvexError("Use a JPG, PNG or PDF under 10MB.");
+  }
+}
+
 /** Validates an uploaded image and returns its public URL (deletes it if invalid). */
 export async function checkImage(ctx: MutationCtx, storageId: Id<"_storage">): Promise<string> {
   const meta = await ctx.db.system.get(storageId);

@@ -27,6 +27,7 @@ const DESIGN_SYSTEM_CSS = [
   "/assets/css/service.css",
   "/assets/css/jobs.css",
   "/assets/css/settings.css",
+  "/assets/css/admin.css",
 ];
 
 export default function RootLayout({ children }: { children: ReactNode }) {

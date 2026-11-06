@@ -16,12 +16,14 @@ import { NotificationBell } from "@/components/Notification/NotificationBell";
 export function DashboardHeader({
   role,
   user,
+  isAdmin = false,
   notifications,
   notificationsHref,
   onMenu,
 }: {
   role: "customer" | "vendor";
   user: User;
+  isAdmin?: boolean;
   notifications: Notification[];
   notificationsHref: string;
   onMenu: () => void;
@@ -43,7 +45,7 @@ export function DashboardHeader({
       <div className="hw-dash-header__right">
         <NotificationBell notifications={notifications} href={notificationsHref} role={role} />
 
-        <ProfileMenu role={role} user={user} />
+        <ProfileMenu role={role} user={user} isAdmin={isAdmin} />
       </div>
     </header>
   );

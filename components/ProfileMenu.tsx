@@ -15,7 +15,7 @@ import { Avatar } from "@/components/Avatar";
  * Escape closes back to the button, Tab closes. Also closes on outside click and on
  * navigation. Mobile reaches the same pages from the drawer. Styling: .hw-pmenu*.
  */
-export function ProfileMenu({ role, user }: { role: "customer" | "vendor"; user: User }) {
+export function ProfileMenu({ role, user, isAdmin = false }: { role: "customer" | "vendor"; user: User; isAdmin?: boolean }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -29,6 +29,7 @@ export function ProfileMenu({ role, user }: { role: "customer" | "vendor"; user:
     { label: "Settings", icon: "cog", href: `/${role}/settings` },
     { label: "Feedback", icon: "comment", href: `/${role}/feedback` },
     { label: "Help & Support", icon: "headphones", href: `/${role}/support` },
+    ...(isAdmin ? [{ label: "Admin", icon: "shield-check", href: "/admin" }] : []),
   ];
 
   useEffect(() => setOpen(false), [pathname]);

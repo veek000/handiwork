@@ -301,7 +301,8 @@
 /* ----- Social buttons ---------------------------------------------------- */
 .hw-social {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-auto-flow: column; /* one equal column per provider shown (Apple is commented out) */
+  grid-auto-columns: 1fr;
   gap: var(--hw-space-s);
 }
 

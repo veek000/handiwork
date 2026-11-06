@@ -6,7 +6,7 @@ import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 import { nameOf, notify, requireViewer, toReview, toVendor, viewerOrNull } from "./model";
 
-async function adjustService(ctx: MutationCtx, serviceId: Doc<"reviews">["serviceId"], ratingDelta: number, countDelta: number) {
+export async function adjustService(ctx: MutationCtx, serviceId: Doc<"reviews">["serviceId"], ratingDelta: number, countDelta: number) {
   const s = await ctx.db.get(serviceId);
   if (!s) return;
   await ctx.db.patch(serviceId, {
@@ -21,7 +21,9 @@ export const mine = query({
   handler: async (ctx) => {
     const me = await viewerOrNull(ctx);
     if (!me) return null;
-    const reviews = await ctx.db.query("reviews").withIndex("by_vendor", (q) => q.eq("vendorId", me._id)).order("desc").collect();
+    const reviews = (await ctx.db.query("reviews").withIndex("by_vendor", (q) => q.eq("vendorId", me._id)).order("desc").collect()).filter(
+      (r) => !r.hiddenAt,
+    );
     return { vendor: await toVendor(ctx, me), reviews: await Promise.all(reviews.map((r) => toReview(ctx, r))) };
   },
 });
@@ -41,6 +43,7 @@ export const upsert = mutation({
 
     const existing = await ctx.db.query("reviews").withIndex("by_job", (q) => q.eq("jobId", job._id)).unique();
     if (existing) {
+      if (existing.hiddenAt) throw new ConvexError("This review was removed by Handiwork and can't be edited.");
       await ctx.db.patch(existing._id, { rating, body: text });
       await adjustService(ctx, existing.serviceId, rating - existing.rating, 0);
       return;
@@ -64,7 +67,7 @@ export const remove = mutation({
     const r = id ? await ctx.db.query("reviews").withIndex("by_job", (q) => q.eq("jobId", id)).unique() : null;
     if (!r || r.customerId !== me._id) throw new ConvexError("That review no longer exists.");
     await ctx.db.delete(r._id);
-    await adjustService(ctx, r.serviceId, -r.rating, -1);
+    if (!r.hiddenAt) await adjustService(ctx, r.serviceId, -r.rating, -1);
   },
 });
 

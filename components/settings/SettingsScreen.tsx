@@ -9,6 +9,7 @@ import { ProfileSettings } from "./ProfileSettings";
 import { BusinessSettings } from "./BusinessSettings";
 import { NotificationSettings } from "./NotificationSettings";
 import { SecuritySettings } from "./SecuritySettings";
+import { VerificationForm } from "./VerificationForm";
 
 export type SettingsTab = "profile" | "business" | "notifications" | "security";
 
@@ -122,7 +123,10 @@ export function SettingsScreen({
               avatarUrl={v?.image} roleLabel={role === "vendor" ? "Service Provider" : "Customer"} />
           ) : null}
           {active.value === "business" ? (
-            <BusinessSettings key={source} initial={business} serviceOptions={serviceOptions} idSubmitted={!!v?.hasGovernmentId} />
+            <>
+              <BusinessSettings key={source} initial={business} serviceOptions={serviceOptions} />
+              <VerificationForm status={v?.verificationStatus} note={v?.verificationNote} />
+            </>
           ) : null}
           {active.value === "notifications" ? (
             <NotificationSettings key={source} role={role} initial={v?.notificationPrefs ?? DEFAULT_NOTIFICATION_PREFS} />

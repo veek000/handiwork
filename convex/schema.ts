@@ -47,7 +47,9 @@ export const notificationTypeV = v.union(
   v.literal("job_update"),
   v.literal("job_cancelled"),
   v.literal("new_review"),
+  v.literal("account_update"), // verification decisions, suspension
 );
+export const verificationStatusV = v.union(v.literal("pending"), v.literal("verified"), v.literal("rejected"));
 
 export default defineSchema({
   ...authTables,
@@ -84,10 +86,23 @@ export default defineSchema({
         email: v.boolean(),
       }),
     ),
+    // --- Vendor ID verification (Settings → Business / signup Verification step) ---
+    // The document lives in Convex storage and is only ever shown to admins.
+    idDocumentStorageId: v.optional(v.id("_storage")),
+    verificationStatus: v.optional(verificationStatusV),
+    verificationSubmittedAt: v.optional(v.number()),
+    verifiedAt: v.optional(v.number()),
+    verificationNote: v.optional(v.string()), // why it was rejected (shown to the vendor)
+    // --- Platform control ---
+    isAdmin: v.optional(v.boolean()), // granted only from the CLI: npx convex run admin:grantAdmin
+    suspendedAt: v.optional(v.number()),
+    suspendedReason: v.optional(v.string()),
     // --- Lifecycle ---
     demo: v.optional(v.boolean()), // seeded showcase account (no sign-in); see seed.ts
     deletedAt: v.optional(v.number()), // tombstone: account deleted, record kept for history
-  }).index("email", ["email"]),
+  })
+    .index("email", ["email"])
+    .index("by_verification", ["verificationStatus"]),
 
   services: defineTable({
     vendorId: v.id("users"),
@@ -114,7 +129,7 @@ export default defineSchema({
     preferredDate: v.string(), // YYYY-MM-DD
     preferredTime: v.string(), // HH:MM
     images: v.array(v.string()),
-    cancelledBy: v.optional(roleV),
+    cancelledBy: v.optional(v.union(v.literal("customer"), v.literal("vendor"), v.literal("admin"))),
     closedAt: v.optional(v.number()), // completed / cancelled / rejected
   })
     .index("by_customer", ["customerId"])
@@ -173,6 +188,7 @@ export default defineSchema({
     rating: v.number(), // 1–5
     body: v.string(),
     response: v.optional(v.string()),
+    hiddenAt: v.optional(v.number()), // removed by an admin (moderation); excluded from ratings
   })
     .index("by_vendor", ["vendorId"])
     .index("by_service", ["serviceId"])
@@ -197,5 +213,15 @@ export default defineSchema({
     message: v.string(),
     canContact: v.boolean(),
     page: v.optional(v.string()),
+    resolvedAt: v.optional(v.number()),
   }).index("by_user", ["userId"]),
+
+  // Every admin action, for accountability. Never edited or deleted.
+  auditLog: defineTable({
+    adminId: v.id("users"),
+    action: v.string(), // e.g. "verify_vendor", "suspend_user", "refund_job"
+    targetType: v.string(), // "user" | "job" | "service" | "review" | "feedback"
+    targetId: v.string(),
+    note: v.optional(v.string()),
+  }),
 });

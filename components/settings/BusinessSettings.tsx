@@ -14,17 +14,15 @@ const BIO_MAX = 600;
 
 /**
  * Settings → Business (vendors): the signup Business Information fields — service,
- * years of experience, bio (with a character count) — plus the ID verification state.
+ * years of experience, bio (with a character count). ID verification is VerificationForm.
  * Styling: .hw-settings*.
  */
 export function BusinessSettings({
   initial,
   serviceOptions,
-  idSubmitted,
 }: {
   initial: BusinessFields;
   serviceOptions: string[];
-  idSubmitted: boolean;
 }) {
   const [base, setBase] = useState(initial);
   const [form, setForm] = useState(initial);
@@ -77,23 +75,6 @@ export function BusinessSettings({
         <p id="set-bio-count" className={"hw-settings__hint hw-settings__count" + (bioOver ? " is-over" : "")}>
           {form.businessBio.length} / {BIO_MAX}
         </p>
-      </div>
-
-      <div className="hw-settings__row">
-        <span className="hw-settings__row-icon" aria-hidden="true">
-          <hw-icon suppressHydrationWarning name="shield-check" variant="hollow" size="20"></hw-icon>
-        </span>
-        <div className="hw-settings__row-text">
-          <p className="hw-settings__row-title">Identity verification</p>
-          <p className="hw-settings__row-desc">
-            {idSubmitted
-              ? "Your government ID has been submitted. Verified pros get a badge on their profile."
-              : "Add your government ID to get the verified badge. Contact support to submit it."}
-          </p>
-        </div>
-        <span className={"hw-settings__pill" + (idSubmitted ? " hw-settings__pill--ok" : "")}>
-          {idSubmitted ? "Submitted" : "Not submitted"}
-        </span>
       </div>
 
       <div className="hw-settings__actions">

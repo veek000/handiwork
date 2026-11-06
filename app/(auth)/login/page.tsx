@@ -110,8 +110,8 @@ export default function LoginPage() {
                 title={FACEBOOK_LOGIN_ENABLED ? undefined : "Facebook sign-in coming soon"}
               />
             <SocialButton provider="google" onClick={() => handleOAuth("google")} />
-            {/* Apple deferred (paid Apple Developer account) — disabled for now. */}
-            <SocialButton provider="apple" disabled title="Apple sign-in coming soon" />
+            {/* Apple sign-in is commented out for now (needs a paid Apple Developer account).
+                <SocialButton provider="apple" onClick={() => handleOAuth("apple")} /> */}
           </div>
 
           <p className="hw-auth__signup">

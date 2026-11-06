@@ -25,7 +25,7 @@ export const customerJobs = query({
     return {
       customer: toUser(me),
       jobs: jobs.map(toJob),
-      reviews: await Promise.all(reviews.filter((r) => r.jobId).map((r) => toReview(ctx, r))),
+      reviews: await Promise.all(reviews.filter((r) => r.jobId && !r.hiddenAt).map((r) => toReview(ctx, r))),
       vendors: vendors.map((u) => ({ ...toUser(u), role: "vendor" as const })),
     };
   },

@@ -9,6 +9,7 @@ import { useNotifications, useUnreadMessages } from "@/hooks";
 import { Sidebar } from "@/components/Sidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { LocationTag } from "@/components/LocationTag";
+import { SuspendedNotice } from "@/components/SuspendedNotice";
 
 /**
  * DashboardChrome — client wrapper that owns the mobile-drawer open state and lays out
@@ -16,9 +17,10 @@ import { LocationTag } from "@/components/LocationTag";
  * over the scrolling main. The hamburger in the header opens the drawer; the scrim,
  * close button, and nav-item clicks close it. Styling: .hw-dash*.
  *
- * It is also the dashboards' route guard: signed-out visitors go to /login, and a signed-in
- * account on the other role's dashboard goes to its own (OAuth accounts without a role
- * count as customers, as in useRoleRedirect). Nothing renders until that is settled. The
+ * It is also the dashboards' route guard: signed-out visitors go to /login, accounts that
+ * haven't chosen a role yet (new Google / Facebook sign-ups) go to /onboarding, and a
+ * signed-in account on the other role's dashboard goes to its own. Nothing renders until
+ * that is settled. A suspended account sees SuspendedNotice instead of the dashboard. The
  * header / drawer show the real account; notifications and the unread-messages badge
  * are live Convex subscriptions.
  *
@@ -35,6 +37,9 @@ type Viewer = {
   image?: string;
   state?: string;
   area?: string;
+  suspendedAt?: number;
+  suspendedReason?: string;
+  isAdmin?: boolean;
 };
 // Shown in the chrome only under the local dev bypass, when nobody is signed in.
 const GUEST: User = {
@@ -56,13 +61,14 @@ export function DashboardChrome({ role, children }: { role: "customer" | "vendor
   const { isLoading, isAuthenticated } = useConvexAuth();
   // undefined while loading, null when signed out, the account once signed in.
   const viewer = useQuery(viewerRef, SKIP_AUTH ? "skip" : {}) as Viewer | null | undefined;
-  const viewerRole = viewer ? (viewer.role ?? "customer") : undefined;
+  const viewerRole = viewer?.role;
   const notifications = useNotifications() ?? [];
   const messagesCount = useUnreadMessages() ?? 0;
 
   useEffect(() => {
     if (SKIP_AUTH || isLoading) return;
     if (!isAuthenticated || viewer === null) router.replace("/login");
+    else if (viewer && !viewerRole) router.replace("/onboarding");
     else if (viewerRole && viewerRole !== role) router.replace(`/${viewerRole}`);
   }, [isLoading, isAuthenticated, viewer, viewerRole, role, router]);
 
@@ -78,6 +84,7 @@ export function DashboardChrome({ role, children }: { role: "customer" | "vendor
       </div>
     );
   }
+  if (viewer?.suspendedAt) return <SuspendedNotice reason={viewer.suspendedReason} />;
 
   let user = { ...GUEST, role } as User;
   if (viewer) {
@@ -100,6 +107,7 @@ export function DashboardChrome({ role, children }: { role: "customer" | "vendor
         <DashboardHeader
           role={role}
           user={user}
+          isAdmin={Boolean(viewer?.isAdmin)}
           notifications={notifications}
           notificationsHref={`/${role}/notifications`}
           onMenu={() => setNavOpen(true)}

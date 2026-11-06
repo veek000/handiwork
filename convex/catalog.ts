@@ -14,7 +14,7 @@ async function liveServices(ctx: QueryCtx) {
   }
   return active.filter((s) => {
     const v = vendors.get(s.vendorId);
-    return v && !v.deletedAt;
+    return v && !v.deletedAt && !v.suspendedAt;
   });
 }
 
@@ -35,10 +35,12 @@ export const serviceDetail = query({
     const service = await ctx.db.get(serviceId);
     if (!service || service.archivedAt) return null;
     const vendorDoc = await ctx.db.get(service.vendorId);
-    if (!vendorDoc || vendorDoc.deletedAt) return null;
+    if (!vendorDoc || vendorDoc.deletedAt || vendorDoc.suspendedAt) return null;
 
     const all = await liveServices(ctx);
-    const reviews = await ctx.db.query("reviews").withIndex("by_service", (q) => q.eq("serviceId", serviceId)).collect();
+    const reviews = (await ctx.db.query("reviews").withIndex("by_service", (q) => q.eq("serviceId", serviceId)).collect()).filter(
+      (r) => !r.hiddenAt,
+    );
     const recommended = all
       .filter((s) => s._id !== serviceId)
       .sort((a, b) => Number(b.category === service.category) - Number(a.category === service.category) || b.reviewCount - a.reviewCount)
@@ -59,11 +61,13 @@ export const vendorProfile = query({
     const vendorId = ctx.db.normalizeId("users", id);
     if (!vendorId) return null;
     const vendorDoc = await ctx.db.get(vendorId);
-    if (!vendorDoc || vendorDoc.deletedAt || vendorDoc.role !== "vendor") return null;
+    if (!vendorDoc || vendorDoc.deletedAt || vendorDoc.suspendedAt || vendorDoc.role !== "vendor") return null;
     const services = (await ctx.db.query("services").withIndex("by_vendor", (q) => q.eq("vendorId", vendorId)).collect()).filter(
       (s) => !s.archivedAt,
     );
-    const reviews = await ctx.db.query("reviews").withIndex("by_vendor", (q) => q.eq("vendorId", vendorId)).collect();
+    const reviews = (await ctx.db.query("reviews").withIndex("by_vendor", (q) => q.eq("vendorId", vendorId)).collect()).filter(
+      (r) => !r.hiddenAt,
+    );
     const fromService = services.find((s) => s._id === from);
     return {
       vendor: await toVendor(ctx, vendorDoc),

@@ -5,6 +5,8 @@ import { ConvexError, v } from "convex/values";
 import { action, internalMutation, internalQuery, mutation, query, type QueryCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
+import { SUSPENDED, viewerOrNull } from "./model";
+import { checkDocument } from "./files";
 import {
   getAuthSessionId,
   getAuthUserId,
@@ -33,8 +35,89 @@ export const viewer = query({
     if (userId === null) return null;
     const user = await ctx.db.get(userId);
     if (!user || user.deletedAt) return null;
-    const { governmentIdNumber, ...safe } = user;
-    return { ...safe, hasGovernmentId: Boolean(governmentIdNumber) };
+    // The ID number and document stay server-side (admins see them in the admin area).
+    const { governmentIdNumber, idDocumentStorageId, ...safe } = user;
+    return { ...safe, hasGovernmentId: Boolean(governmentIdNumber), hasIdDocument: Boolean(idDocumentStorageId) };
+  },
+});
+
+const roleArg = v.union(v.literal("customer"), v.literal("vendor"));
+
+/**
+ * First-time setup for accounts created with Google / Facebook (they arrive with no
+ * role): pick customer or service provider and fill the same profile fields as the
+ * signup wizard. Only works once — the role can't be changed afterwards.
+ */
+export const chooseRole = mutation({
+  args: {
+    role: roleArg,
+    fullName: v.string(),
+    countryCode: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    state: v.optional(v.string()),
+    area: v.optional(v.string()),
+    address: v.optional(v.string()),
+    service: v.optional(v.string()),
+    yearsOfExperience: v.optional(v.string()),
+    businessBio: v.optional(v.string()),
+  },
+  handler: async (ctx, { role, ...f }) => {
+    const user = await viewerOrNull(ctx);
+    if (!user) throw new ConvexError(SIGNED_OUT);
+    if (user.suspendedAt) throw new ConvexError(SUSPENDED);
+    if (user.role) throw new ConvexError("Your account is already set up.");
+    const fullName = f.fullName.trim().slice(0, 80);
+    if (fullName.length < 2) throw new ConvexError("Enter your full name.");
+    const phone = clean(f.phone, 20)?.replace(/\s/g, "");
+    if (phone && !/^\d{7,15}$/.test(phone)) throw new ConvexError("Enter a valid phone number (digits only).");
+    if (role === "vendor" && !f.service?.trim()) throw new ConvexError("Choose the service you offer.");
+    await ctx.db.patch(user._id, {
+      role,
+      fullName,
+      name: fullName,
+      countryCode: clean(f.countryCode, 6) || "+234",
+      phone: phone || undefined,
+      state: clean(f.state, 60) || undefined,
+      area: clean(f.area, 60) || undefined,
+      address: clean(f.address, 160) || undefined,
+      ...(role === "vendor"
+        ? {
+            service: clean(f.service, 60),
+            yearsOfExperience: clean(f.yearsOfExperience, 30) || undefined,
+            businessBio: clean(f.businessBio, 600) || undefined,
+          }
+        : {}),
+    });
+  },
+});
+
+/**
+ * Vendor sends their ID for review (signup Verification step, Settings → Business):
+ * the ID number plus a photo/scan of the document, uploaded to storage first. Status
+ * becomes "pending" until an admin decides (admin.decideVerification). A verified vendor
+ * can't resubmit; a pending or rejected one can replace what they sent.
+ */
+export const submitVerification = mutation({
+  args: { idNumber: v.string(), documentStorageId: v.id("_storage") },
+  handler: async (ctx, { idNumber, documentStorageId }) => {
+    const user = await viewerOrNull(ctx);
+    if (!user) throw new ConvexError(SIGNED_OUT);
+    if (user.suspendedAt) throw new ConvexError(SUSPENDED);
+    if (user.role !== "vendor") throw new ConvexError("Only service providers verify their ID.");
+    if (user.verificationStatus === "verified") throw new ConvexError("You're already verified.");
+    const number = idNumber.trim().replace(/\s+/g, " ");
+    if (number.length < 5 || number.length > 30) throw new ConvexError("Enter the ID number as it appears on the document.");
+    await checkDocument(ctx, documentStorageId);
+    if (user.idDocumentStorageId && user.idDocumentStorageId !== documentStorageId) {
+      await ctx.storage.delete(user.idDocumentStorageId); // replaced
+    }
+    await ctx.db.patch(user._id, {
+      governmentIdNumber: number,
+      idDocumentStorageId: documentStorageId,
+      verificationStatus: "pending",
+      verificationSubmittedAt: Date.now(),
+      verificationNote: undefined,
+    });
   },
 });
 
@@ -220,6 +303,7 @@ export const _retireUser = internalMutation({
     for (const s of await ctx.db.query("services").withIndex("by_vendor", (q) => q.eq("vendorId", userId)).collect()) {
       if (!s.archivedAt) await ctx.db.patch(s._id, { archivedAt: now });
     }
+    if (user.idDocumentStorageId) await ctx.storage.delete(user.idDocumentStorageId);
     // Tombstone: keep the row (and role), clear everything personal.
     await ctx.db.patch(userId, {
       deletedAt: now,
@@ -236,6 +320,8 @@ export const _retireUser = internalMutation({
       yearsOfExperience: undefined,
       businessBio: undefined,
       governmentIdNumber: undefined,
+      idDocumentStorageId: undefined,
+      verificationNote: undefined,
       notificationPrefs: undefined,
       emailVerificationTime: undefined,
       phoneVerificationTime: undefined,

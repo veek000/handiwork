@@ -19,12 +19,15 @@ export function useRoleRedirect(enabled = true) {
   const router = useRouter();
   const { isAuthenticated } = useConvexAuth();
   // undefined while loading, null if unauthenticated, the user doc once signed in.
-  const viewer = useQuery(viewerRef) as { role?: "customer" | "vendor" } | null | undefined;
+  const viewer = useQuery(viewerRef) as { role?: "customer" | "vendor"; isAdmin?: boolean } | null | undefined;
 
   useEffect(() => {
     if (enabled && isAuthenticated && viewer) {
-      // OAuth accounts have no role yet (no toggle in that flow) — default to customer.
-      router.replace(viewer.role === "vendor" ? "/vendor" : "/customer");
+      // Google / Facebook accounts arrive without a role: they choose it on /onboarding.
+      // Staff land on /admin (their own dashboard is a click away in the profile menu).
+      if (!viewer.role) router.replace("/onboarding");
+      else if (viewer.isAdmin) router.replace("/admin");
+      else router.replace(`/${viewer.role}`);
     }
   }, [enabled, isAuthenticated, viewer, router]);
 }

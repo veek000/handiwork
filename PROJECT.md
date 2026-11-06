@@ -914,6 +914,52 @@ Reusable UI built on the tokens. Include the component's CSS + `hw-icons.js`.
   because the test sender only delivers to the Resend owner — the known domain blocker), valid link → new password
   works and old one fails, reused and expired links refused. A real inbox test needs either a verified domain or
   the Resend owner's own address.
+- **Google/Facebook role choice, vendor ID verification, admin area (2026-11-06)** —
+  **Onboarding:** accounts created with Google/Facebook arrive without a role; `useRoleRedirect` and `DashboardChrome`
+  now send them to `/onboarding` (role toggle preselected from the signup page via localStorage
+  `ONBOARDING_ROLE_KEY`, name prefilled from the provider, same profile fields as the wizard) → `users.chooseRole`
+  (only once; the role can't change later). Role-specific mutations now refuse accounts without a role.
+  **ID verification:** `users.submitVerification` (ID number + document — JPG/PNG/PDF ≤10MB in Convex storage,
+  `files.checkDocument`) sets `verificationStatus: "pending"`. Vendors submit from Settings → Business
+  (`VerificationForm`: Not submitted / Under review / Verified / Not approved + reason) or the signup Verification step
+  (the file is kept in memory and uploaded right after the email code confirms the account). The document and number
+  never reach the browser except in the admin area. The "Verified" badge shows only when an admin has approved.
+  **Admin (`/admin`, `convex/admin.ts`):** Overview (needs-attention list, users, job pipeline, escrow / released /
+  refunded / platform fees), Verifications (document preview, approve, or reject with a reason the vendor sees —
+  both notify), Users (search + filters, detail panel, suspend with reason / restore), Jobs & Disputes (full chat
+  and payment record; settle open jobs: refund the customer in full or release escrow to the provider, with a note
+  posted in the chat and both sides notified), Payments, Services (archive/restore), Reviews (hide/restore; hidden
+  reviews leave public pages and ratings), Feedback (reply link if allowed, resolve/reopen), Audit Log (every admin
+  action, immutable). Access: `users.isAdmin`, granted only from the CLI:
+  `npx convex run admin:grantAdmin '{"email":"you@example.com"}'` (add `--prod` for production; `"revoke":true` to
+  remove). Admins land on `/admin` after login and get an "Admin" link in the profile menu. **Suspension:** a suspended
+  account sees "Account suspended" (reason + support email + Log Out) instead of its dashboard, every action is
+  refused, and its services drop out of search. Apple sign-in is commented out on login/signup (the social row now
+  sizes to the buttons shown). Google sign-in checked on dev and production: Google accepts both apps and callbacks.
+  Tested on dev with temporary accounts (removed afterwards): role-less login → onboarding → vendor dashboard; ID
+  upload → pending; admin approve/reject validation, "You're Verified" notification and badge; suspend → notice and
+  refused actions; non-admin refused; dispute release and full refund with the decision in the chat and audit log.
+  `tsc` + `next build` pass.
+
+### Social sign-in setup
+
+- **Google** — working on dev and production (`AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` set on both Convex
+  deployments). Authorised redirect URIs in Google Cloud: `https://proper-wolf-657.convex.site/api/auth/callback/google`
+  and `https://effervescent-poodle-398.convex.site/api/auth/callback/google`. To do: OAuth consent screen app name +
+  logo, and publish the consent screen (out of "Testing") so any Google account can sign in.
+- **Facebook** — code ready (`convex/auth.ts` provider; the button is disabled until the flag below is set):
+  1. developers.facebook.com → Create app → "Authenticate and request data from users with Facebook Login".
+  2. Facebook Login → Settings → Valid OAuth Redirect URIs:
+     `https://proper-wolf-657.convex.site/api/auth/callback/facebook` and
+     `https://effervescent-poodle-398.convex.site/api/auth/callback/facebook`.
+  3. App settings → Basic: Privacy Policy URL (`/privacy`), Terms URL (`/terms`), a data-deletion instructions URL,
+     app icon, category; then switch the app to **Live**.
+  4. Copy App ID / App Secret: `npx convex env set AUTH_FACEBOOK_ID …` and `AUTH_FACEBOOK_SECRET …` (and again
+     with `--prod`).
+  5. Turn the button on: `NEXT_PUBLIC_AUTH_FACEBOOK=1` in `.env.local` and in Vercel's environment variables, then
+     redeploy.
+- **Apple** — commented out (needs a paid Apple Developer account); the provider import in `convex/auth.ts` and the
+  buttons on login/signup are left in comments to restore later.
 
 ## What's left before launch (audit 2026-11-05)
 
@@ -922,10 +968,6 @@ From a full read of the code and docs after the Convex data move. Grouped by pri
 **Launch blockers**
 - **Real payments.** Connect Flutterwave escrow: checkout, webhook verification, refunds and payouts. Production
   currently refuses payment with a clear message. Withdraw and Transaction History are disabled until then.
-- **Vendors can't sign up with Google.** OAuth sign-up passes no role, so those accounts become customers, and
-  there's no screen to choose a role afterwards.
-- **Vendor verification.** The signup ID document is never uploaded and there's no review step or admin tool.
-  The badge is hidden for everyone until this exists.
 - **Legal.** Placeholders remain in privacy-policy.html and terms-of-use.html (`[DATE]`, contact emails, fee
   schedule `[LINK]`, liability cap, dispute window). There's no fee schedule page and no "I agree" step at signup.
   The dispute process is still undecided.
@@ -935,12 +977,15 @@ From a full read of the code and docs after the Convex data move. Grouped by pri
 - **Production checks.** Nobody has signed up or logged in on production yet (runbook "STILL TODO"). Production
   has no services until vendors list them: decide whether to seed the showcase vendors there (they're fictional
   people).
-- **Admin tooling.** Nothing for disputes, refunds, verification, moderation or reading feedback (Convex dashboard
-  only).
+
+- **Facebook sign-in.** Code is ready; needs a Facebook app and keys (see "Social sign-in setup" below).
+- **Google consent screen branding.** Google shows "continue to proper-wolf-657.convex.site" (dev) /
+  "effervescent-poodle-398.convex.site" (prod). Set the app name and logo on the Google Cloud OAuth consent screen;
+  a Convex custom domain (paid plan) would replace the convex.site name.
 
 **Needed soon**
-- Uploads: profile photo (AvatarUpload is static), booking photos, chat attachments, ID document. Service photos
-  are done.
+- Uploads: profile photo (AvatarUpload is static), booking photos, chat attachments. Service photos and ID
+  documents are done.
 - Location "edit" pencil and the invite banner button do nothing.
 - Chat: typing indicator / last seen (planned via `@convex-dev/presence`).
 - Search filters every service in the browser — fine now; move to a Convex search index as listings grow.

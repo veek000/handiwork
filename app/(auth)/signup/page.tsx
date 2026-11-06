@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { useConvexAuth, useMutation } from "convex/react";
 import Link from "next/link";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { AuthShell } from "@/components/auth/AuthShell";
@@ -9,7 +10,7 @@ import { Input } from "@/components/Input";
 import { RoleToggle, type AuthRole } from "@/components/auth/RoleToggle";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import { SocialButton } from "@/components/auth/SocialButton";
-import { FACEBOOK_LOGIN_ENABLED } from "@/lib/authProviders";
+import { FACEBOOK_LOGIN_ENABLED, ONBOARDING_ROLE_KEY } from "@/lib/authProviders";
 import { Select } from "@/components/auth/Select";
 import { PhoneInput } from "@/components/auth/PhoneInput";
 import { OtpInput } from "@/components/auth/OtpInput";
@@ -22,6 +23,8 @@ import { NIGERIA_STATES, LAGOS_AREAS } from "@/data/locations";
 import { EXPERIENCE_OPTIONS } from "@/data/experience";
 import { useCategories } from "@/hooks";
 import { useRoleRedirect } from "../useRoleRedirect";
+import { api } from "@/lib/convexApi";
+import { useUpload } from "@/lib/useUpload";
 
 // Role-aware signup wizard. Both roles start on the account step (Sign Up), then run
 // their own onboarding sequence before Confirmation (OTP):
@@ -30,8 +33,10 @@ import { useRoleRedirect } from "../useRoleRedirect";
 // The account is created at the step immediately BEFORE Confirmation (so every profile
 // field is collected first) — signIn(flow:"signUp") with the full profile, which via
 // verify: ResendOTP emails the code; Confirmation submits it (flow:"email-verification")
-// and useRoleRedirect routes to the role dashboard. UI-only for the non-persisted bits
-// (avatar, ID document); the vendor text fields DO persist (schema + auth profile).
+// and useRoleRedirect routes to the role dashboard. A vendor's ID document is kept in
+// memory until the code confirms the account, then uploaded and sent for review
+// (users:submitVerification) before the redirect. The avatar is still UI-only.
+// Google / Facebook remember the chosen role (ONBOARDING_ROLE_KEY) for /onboarding.
 // The step indicator/stepper counts only the onboarding steps, never the account step.
 
 type StepName = "account" | "personal" | "business" | "verification" | "confirm";
@@ -56,7 +61,12 @@ const VENDOR_INTRO =
 
 export default function SignupPage() {
   const { signIn } = useAuthActions();
-  useRoleRedirect(); // routes once the account is created + verified (authenticated)
+  const { isAuthenticated } = useConvexAuth();
+  // Set while a vendor's ID uploads right after sign-up; holds the dashboard redirect.
+  const [finishing, setFinishing] = useState(false);
+  useRoleRedirect(!finishing); // routes once the account is created + verified (authenticated)
+  const upload = useUpload();
+  const submitVerification = useMutation(api.submitVerification);
   const categories = useCategories();
   const serviceOptions = categories.map((c) => c.name);
 
@@ -78,7 +88,8 @@ export default function SignupPage() {
     businessBio: "",
     governmentIdNumber: "",
   });
-  const [idFileName, setIdFileName] = useState<string | undefined>(); // UI only (no upload)
+  const [idFileName, setIdFileName] = useState<string | undefined>();
+  const [idFile, setIdFile] = useState<File | undefined>();
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -157,13 +168,36 @@ export default function SignupPage() {
     event.preventDefault();
     setError(null);
     setSubmitting(true);
+    const sendId = role === "vendor" && idFile && form.governmentIdNumber.trim().length >= 5;
+    if (sendId) setFinishing(true);
     try {
       await signIn("password", { email: form.email, code: otp, flow: "email-verification" });
     } catch {
       setError("That code isn't right or has expired. Please try again.");
       setSubmitting(false);
+      setFinishing(false);
     }
   }
+
+  // Once signed in, send the vendor's ID for review, then let the redirect happen. If the
+  // upload fails the account still works; Settings → Business offers the upload again.
+  useEffect(() => {
+    if (!finishing || !isAuthenticated || !idFile) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const documentStorageId = await upload(idFile);
+        await submitVerification({ idNumber: form.governmentIdNumber, documentStorageId });
+      } catch {
+        /* retried from Settings → Business */
+      } finally {
+        if (!cancelled) setFinishing(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [finishing, isAuthenticated, idFile, upload, submitVerification, form.governmentIdNumber]);
 
   async function resend() {
     setError(null);
@@ -176,6 +210,12 @@ export default function SignupPage() {
 
   async function handleOAuth(provider: "google" | "facebook") {
     setError(null);
+    // Remembered across the provider redirect so /onboarding can preselect the role.
+    try {
+      localStorage.setItem(ONBOARDING_ROLE_KEY, role);
+    } catch {
+      /* private mode: /onboarding just asks */
+    }
     try {
       await signIn(provider);
     } catch {
@@ -270,8 +310,8 @@ export default function SignupPage() {
                 title={FACEBOOK_LOGIN_ENABLED ? undefined : "Facebook sign-in coming soon"}
               />
                 <SocialButton provider="google" onClick={() => handleOAuth("google")} />
-                {/* Apple deferred (paid Apple Developer account) — disabled for now. */}
-                <SocialButton provider="apple" disabled title="Apple sign-in coming soon" />
+                {/* Apple sign-in is commented out for now (needs a paid Apple Developer account).
+                    <SocialButton provider="apple" onClick={() => handleOAuth("apple")} /> */}
               </div>
 
               {loginLink}
@@ -401,7 +441,7 @@ export default function SignupPage() {
                 <p className="hw-auth__subtitle">{subtitle}</p>
               </header>
 
-              <DocumentUpload fileName={idFileName} onFile={setIdFileName} />
+              <DocumentUpload allowPdf fileName={idFileName} onFile={(n, f) => { setIdFileName(n); setIdFile(f); }} />
 
               <div className="hw-field">
                 <label htmlFor="ve-id">Government ID Number</label>
